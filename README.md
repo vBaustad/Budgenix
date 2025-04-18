@@ -41,61 +41,44 @@ Budgenix/
 
 ---
 
-## 🛠️ Getting Started
+## 🌐 API Endpoints – ExpensesController
 
-### Backend
-
-1. Navigate to the backend project:
-   ```
-   cd backend/Budgenix.API
-   ```
-2. Run the API:
-   ```
-   dotnet run
-   ```
-
-### Frontend
-
-1. Navigate to the frontend folder:
-   ```
-   cd frontend
-   ```
-2. Install dependencies:
-   ```
-   npm install
-   ```
-3. Start the dev server:
-   ```
-   npm run dev
-   ```
-
-Frontend runs on `http://localhost:5173` by default.
+| Method | Route                                 | Description                                  |
+|--------|----------------------------------------|----------------------------------------------|
+| GET    | `/api/expenses`                        | Get all expenses (optionally filtered)       |
+| GET    | `/api/expenses?from&to&category&sort&skip&take` | Filter, sort, and paginate         |
+| GET    | `/api/expenses/total`                 | Get total amount of expenses                 |
+| GET    | `/api/expenses/recurring-upcoming`    | Get upcoming recurring expenses              |
+| GET    | `/api/expenses/categories`            | Get unique category names                    |
+| GET    | `/api/expenses/search?query=rent`     | Search by name or description                |
+| GET    | `/api/expenses/{id}`                  | Get a single expense by ID                   |
+| POST   | `/api/expenses`                       | Create a new expense                         |
+| PUT    | `/api/expenses/{id}`                  | Update an existing expense                   |
+| DELETE | `/api/expenses/{id}`                  | Delete an expense                            |
 
 ---
 
-## 📦 Features (Planned & In Progress)
+## ✅ Implemented Features
 
-- [x] Add/edit/delete expenses & income
-- [x] Grouping by categories
-- [ ] Recurring expenses
-- [ ] Budget tracking per category
-- [ ] Monthly summaries
-- [ ] Excel import/export
-- [ ] Savings goals & wishlists
-- [ ] Upcoming expense reminders
-
----
-
-## 🧠 Future Roadmap
-
-- EF Core + SQL database migration
-- User authentication (optional)
-- Responsive/mobile-friendly UI
-- GitHub Actions for CI/CD
-- Deployment to Render / Azure / Vercel
+- [x] Expense CRUD operations
+- [x] Recurring expense support
+- [x] Sorting (date, amount, name)
+- [x] Filtering (date, category)
+- [x] Pagination (skip & take)
+- [x] Unique ID with `Guid.NewGuid()`
+- [x] JSON-based storage for portability
 
 ---
 
-## 📄 License
+## 🔜 Next Steps
 
-MIT – free for personal and commercial use.
+- [ ] Build `IncomesController` with same structure
+- [ ] Start React frontend for expenses
+- [ ] Add monthly and category-based summaries
+- [ ] Add basic auth layer (optional)
+- [ ] Move storage to SQLite or EF Core
+- [ ] UI components for sorting, pagination, search
+
+---
+
+This file will be updated as we progress. 🚀---
