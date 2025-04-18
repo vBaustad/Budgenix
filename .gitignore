@@ -73,3 +73,4 @@ build/
 Thumbs.db
 ehthumbs.db
 *.swp
+/.vs
