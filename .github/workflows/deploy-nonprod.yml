@@ -1,0 +1,19 @@
+name: Deploy to Non-Production
+
+on:
+  push:
+    branches:
+      - nonprod
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # Add your build steps here (e.g., build frontend/backend)
+
+    - name: Placeholder - Deploy to Non-Production
+      run: echo "Deploying to non-production environment..."
