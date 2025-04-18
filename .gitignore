@@ -1,0 +1,75 @@
+# --- .NET / Visual Studio ---
+## Build results
+bin/
+obj/
+[Ll]og/
+*.log
+
+## VS Code / VS / JetBrains IDE settings
+.vscode/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Dotnet-specific
+project.lock.json
+project.fragment.lock.json
+artifacts/
+*.vspscc
+*.vssscc
+*.ncrunch*
+*.DotSettings.user
+_ReSharper*/
+*.tmproj
+*.pidb
+*.svclog
+TestResults/
+*.coverage
+*.coveragexml
+*.dbmdl
+*.bak
+*.orig
+*.rej
+*.sdf
+*.cache
+*.pdb
+*.mdb
+
+# .NET Core
+**/bin/
+**/obj/
+*.deps.json
+*.runtimeconfig.json
+
+# Entity Framework
+*.sqlite
+*.db
+*.mdf
+*.ldf
+
+# --- Node / React / Vite ---
+## dependencies
+node_modules/
+.npm/
+.pnpm-debug.log*
+yarn-error.log
+package-lock.json
+
+## production
+dist/
+build/
+.vite/
+
+## misc
+.env*
+*.local
+*.log
+*.tsbuildinfo
+
+# Mac / Windows / Linux system files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+*.swp
