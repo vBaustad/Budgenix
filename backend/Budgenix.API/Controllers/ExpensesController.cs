@@ -1,6 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Budgenix.Services;
+using Budgenix.Dtos;
 using Budgenix.Models;
 using Budgenix.Data;
+using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace Budgenix.API.Controllers
 {
@@ -10,103 +14,106 @@ namespace Budgenix.API.Controllers
     [Route("api/[controller]")]
     public class ExpensesController : ControllerBase
     {
-        private AppData _appData = DataStore.Load();
-        private static int _nextId = 1;
+        private readonly BudgenixDbContext _context;
+
+        public ExpensesController(BudgenixDbContext context)
+        {
+            _context = context;
+        }
+
 
 
         // Get all expenses (optionally filter by date or category)
         [HttpGet]
-        public ActionResult<IEnumerable<Expense>> GetExpenses(
+        public async Task<ActionResult<IEnumerable<Expense>>> GetExpenses(
             DateTime? from = null,
             DateTime? to = null,
             string? category = null,
-            string? sort = null,
+            string sort = "date_desc",
+            string? groupBy = null,
             int skip = 0,
             int take = 100
             )
         {
-            var result = _appData.Expenses.AsEnumerable();
+            var expenses = _context.Expenses.AsQueryable();
 
             // Filter: date range
             if (from.HasValue)
-                result = result.Where(e => e.Date >= from.Value);
+                expenses = expenses.Where(e => e.Date >= from.Value);
             if (to.HasValue)
-                result = result.Where(e => e.Date <= to.Value);
+                expenses = expenses.Where(e => e.Date <= to.Value);
 
             // Filter: category
             if (!string.IsNullOrWhiteSpace(category))
-                result = result.Where(e => e.Category?.Name?.Equals(category, StringComparison.OrdinalIgnoreCase) == true);
+                expenses = expenses.Where(e => string.Equals(e.Category.Name, category, StringComparison.OrdinalIgnoreCase)
+            );
 
-            // Sort
-            if (!string.IsNullOrEmpty(sort))
+            // Sort            
+            expenses = sort.ToLower() switch
             {
-                result = sort.ToLower() switch
-                {
-                    "date_asc" => result.OrderBy(e => e.Date),
-                    "date_desc" => result.OrderByDescending(e => e.Date),
-                    "amount_asc" => result.OrderBy(e => e.Amount),
-                    "amount_desc" => result.OrderByDescending(e => e.Amount),
-                    "name_asc" => result.OrderBy(e => e.Name),
-                    "name_desc" => result.OrderByDescending(e => e.Name),
-                    _ => result
-                };
-            }
+                "date_asc" => expenses.OrderBy(e => e.Date),
+                "date_desc" => expenses.OrderByDescending(e => e.Date),
+                "amount_asc" => expenses.OrderBy(e => e.Amount),
+                "amount_desc" => expenses.OrderByDescending(e => e.Amount),
+                "name_asc" => expenses.OrderBy(e => e.Name),
+                "name_desc" => expenses.OrderByDescending(e => e.Name),
+                _ => expenses.OrderByDescending(i => i.Date),
+            };
 
             // Pagination
-            result = result.Skip(skip).Take(take);
-
-
-            return Ok(result);
+            var results = await expenses.Skip(skip).Take(take).ToListAsync();
+            return Ok(results);
         }
 
         [HttpGet("search")]
-        public ActionResult<IEnumerable<Expense>> SearchExpenses(string query)
+        public async Task<ActionResult<IEnumerable<Expense>>> SearchExpenses(string query)
         {
             if (string.IsNullOrWhiteSpace(query))
-                return Ok(_appData.Expenses);
+                return Ok(await _context.Expenses.ToListAsync());
 
-            var matches = _appData.Expenses
-                .Where(e => (!string.IsNullOrEmpty(e.Name) && e.Name.Contains(query, StringComparison.OrdinalIgnoreCase)) ||
-                (!string.IsNullOrEmpty(e.Description) && e.Description.Contains(query, StringComparison.OrdinalIgnoreCase)))
-                .ToList();
+            var matches = await _context.Expenses
+                .Where(e =>
+                    (!string.IsNullOrEmpty(e.Name) && e.Name.Contains(query, StringComparison.OrdinalIgnoreCase)) ||
+                    (!string.IsNullOrEmpty(e.Description) && e.Description.Contains(query, StringComparison.OrdinalIgnoreCase)))
+                .ToListAsync();
 
             return Ok(matches);
         }
 
         [HttpGet("total")]
-        public ActionResult<decimal> GetTotalAmount()
+        public async Task<ActionResult<decimal>> GetTotalAmount()
         {
-            var total = _appData.Expenses.Sum(e => e.Amount);
+            var total = await _context.Expenses.SumAsync(e => e.Amount);
             return Ok(total);
         }
 
         [HttpGet("recurring-upcoming")]
-        public ActionResult<IEnumerable<Expense>> GetUpcomingRecurringExpenses(int daysAhead = 30)
+        public async Task<ActionResult<IEnumerable<Expense>>> GetUpcomingRecurringExpenses(int daysAhead = 30)
         {
-            var upcoming = _appData.Expenses
+            var upcoming = await _context.Expenses
                 .Where(e => e.IsRecurring && e.Date >= DateTime.Today && e.Date <= DateTime.Today.AddDays(daysAhead))
-                .ToList();
+                .ToListAsync();
             return Ok(upcoming);
         }
 
         [HttpGet("categories")]
-        public ActionResult<IEnumerable<string>> GetUsedExpenseCategories()
+        public async Task<ActionResult<IEnumerable<string>>> GetUsedExpenseCategories()
         {
-            var categories = _appData.Expenses
+            var categories = await _context.Expenses
                 .Where(e => e.Category != null)
                 .Select(e => e.Category.Name)
                 .Distinct()
                 .OrderBy(name => name)
-                .ToList();
+                .ToListAsync();
 
             return Ok(categories);
         }
 
         // Get a single expense by ID
         [HttpGet("{id}")]
-        public ActionResult<Expense> GetExpenseById(Guid id)
+        public async Task<ActionResult<Expense>> GetExpenseById(Guid id)
         {
-            var expense = _appData.Expenses.FirstOrDefault(e => e.Id == id);
+            var expense = await _context.Expenses.FirstOrDefaultAsync(e => e.Id == id);
             if (expense == null)
                 return NotFound();
             return Ok(expense);           
@@ -116,13 +123,13 @@ namespace Budgenix.API.Controllers
 
         // Create a new expense and return it with a new ID
         [HttpPost]
-        public ActionResult AddExpense(Expense expense)
+        public async Task<ActionResult> AddExpense(Expense expense)
         {
             expense.Id = Guid.NewGuid();
-            _appData.Expenses.Add(expense);
-            DataStore.Save(_appData);
+            _context.Expenses.Add(expense);
+            await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetExpenses), new { id = expense.Id }, expense);
+            return CreatedAtAction(nameof(GetExpenseById), new { id = expense.Id }, expense);
         }
 
 
@@ -132,9 +139,9 @@ namespace Budgenix.API.Controllers
 
         // Update an existing expense by ID
         [HttpPut("{id}")]
-        public IActionResult UpdateExpense(Guid id, Expense updated) 
+        public async Task<IActionResult> UpdateExpense(Guid id, Expense updated) 
         {
-            var existing = _appData.Expenses.FirstOrDefault(e =>e.Id == id);
+            var existing = await _context.Expenses.FirstOrDefaultAsync(e =>e.Id == id);
             if(existing == null)
                 return NotFound();
 
@@ -148,7 +155,7 @@ namespace Budgenix.API.Controllers
             existing.RecurrenceFrequency = updated.RecurrenceFrequency;
             existing.Notes = updated.Notes;
 
-            DataStore.Save(_appData);
+            await _context.SaveChangesAsync();
 
             return NoContent();
         }
@@ -157,19 +164,18 @@ namespace Budgenix.API.Controllers
 
 
 
-
-
         // Delete an expense by ID
         [HttpDelete("{id}")]
-        public IActionResult DeleteExpense(Guid id) 
+        public async Task<IActionResult> DeleteExpense(Guid id) 
         {
-            var expense = _appData.Expenses.FirstOrDefault(e => e.Id == id);
+            var expense = await _context.Expenses.FirstOrDefaultAsync(e => e.Id == id);
 
             if (expense == null) 
                 return NotFound();
 
-            _appData.Expenses.Remove(expense);
-            DataStore.Save(_appData);
+            _context.Expenses.Remove(expense);
+
+            await _context.SaveChangesAsync();
 
             return NoContent();
         }
