@@ -71,7 +71,7 @@ namespace Budgenix.API.Controllers
 
         // Get a single income by ID
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetIncomesById(Guid id)
+        public async Task<IActionResult> GetIncomeById(Guid id)
         {
             var result = await _context.Incomes.FirstOrDefaultAsync(e => e.Id == id);
             if (result == null) return NotFound();
@@ -111,13 +111,29 @@ namespace Budgenix.API.Controllers
 
         // Create a new income and return it with a new ID
         [HttpPost]
-        public async Task<ActionResult> addIncome(Income income)
+        public async Task<ActionResult> AddIncome(CreateIncomeDto dto)
         {
-            income.Id = Guid.NewGuid();
+            var category = await _context.Categories.FindAsync(dto.CategoryId);
+            if (category == null)
+                return BadRequest("Invalid category ID.");
+
+            var income = new Income
+            {
+                Id = Guid.NewGuid(),
+                Name = dto.Name,
+                Description = dto.Description,
+                Amount = dto.Amount,
+                Date = dto.Date,
+                Category = category,
+                IsRecurring = dto.IsRecurring,
+                RecurrenceFrequency = dto.RecurrenceFrequency,
+                Notes = dto.Notes,
+            };
+
             _context.Incomes.Add(income);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetIncomes), new { id = income.Id }, income);
+            return CreatedAtAction(nameof(GetIncomeById), new { id = income.Id }, income);
         }
 
         // Update an existing income by ID

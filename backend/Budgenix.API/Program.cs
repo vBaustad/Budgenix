@@ -16,6 +16,13 @@ builder.Services.AddDbContext<BudgenixDbContext>(options =>
 
 var app = builder.Build();
 
+// Seed DB with default categories
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<BudgenixDbContext>();
+    SeedData.Initialize(context);
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

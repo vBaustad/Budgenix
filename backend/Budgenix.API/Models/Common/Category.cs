@@ -4,7 +4,7 @@ namespace Budgenix.Models
 {
     public class Category
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         [Required, StringLength(100)]
         public required string Name { get; set; }
