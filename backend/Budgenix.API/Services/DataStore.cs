@@ -7,7 +7,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Budgenix.Models;
 
-namespace Budgenix.Data
+namespace Budgenix.Services
 {
     public class DataStore
     {
