@@ -19,25 +19,7 @@
 
 ## 📁 Project Structure
 
-```
-Budgenix/
-├── frontend/             # React + Vite app
-│   ├── src/
-│   ├── public/
-│   ├── package.json
-│   └── vite.config.ts
-│
-├── backend/
-│   └── Budgenix.API/     # ASP.NET Core Web API project
-│       ├── Controllers/
-│       ├── Models/
-│       ├── Data/
-│       └── Program.cs
-│
-├── .gitignore
-├── README.md
-└── Budgenix.sln (optional)
-```
+📦 [View the full project structure philosophy](./PROJECT_STRUCTURE.md)
 
 ---
 
