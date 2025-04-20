@@ -1,6 +1,6 @@
 ﻿using Budgenix.Models;
 
-namespace Budgenix.Dtos
+namespace Budgenix.Dtos.Incomes
 {
     public class IncomeGroupDto
     {

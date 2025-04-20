@@ -1,4 +1,6 @@
-﻿using Budgenix.Models;
+﻿using Budgenix.Models.Budgeting;
+using Budgenix.Models.Categories;
+using Budgenix.Models.Transactions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Budgenix.Data
@@ -13,5 +15,6 @@ namespace Budgenix.Data
         public DbSet<Income> Incomes { get; set; }
         public DbSet<Expense> Expenses { get; set; }
         public DbSet<Budget> Budgets { get; set; }
+        public DbSet<Category> Categories { get; set; }
     }
 }

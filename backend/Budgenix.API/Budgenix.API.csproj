@@ -17,4 +17,9 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Dtos\Budgeting\" />
+    <Folder Include="Dtos\Expenses\" />
+  </ItemGroup>
+
 </Project>
