@@ -5,6 +5,7 @@ using Budgenix.Models;
 using Budgenix.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
+using Budgenix.API.Models.Transactions;
 
 namespace Budgenix.API.Controllers
 {

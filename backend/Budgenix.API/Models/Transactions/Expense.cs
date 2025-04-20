@@ -1,10 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Budgenix.Models.Shared;
+using Budgenix.Models.Categories;
+using System.ComponentModel.DataAnnotations;
 
-namespace Budgenix.Models
+namespace Budgenix.Models.Transactions
 {
-    public class Income
+    public class Expense
     {
-        public Guid Id { get; set; } // Unique identifier for the Income
+        public Guid Id { get; set; } // Unique identifier for the expense
 
         [Required, StringLength(100)]
         public required string Name { get; set; }
@@ -20,7 +22,7 @@ namespace Budgenix.Models
         [Required]
         public required Category Category { get; set; }
         public bool IsRecurring { get; set; }
-        public RecurrenceType RecurrenceFrequency { get; set; }
+        public RecurrenceTypeEnum RecurrenceFrequency { get; set; }
         [StringLength(500)]
         public string? Notes { get; set; }
     }

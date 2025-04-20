@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Budgenix.Models;
 
-namespace Budgenix.Dtos
+namespace Budgenix.Dtos.Incomes
 {
     public class CreateIncomeDto
     {

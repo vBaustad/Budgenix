@@ -1,4 +1,6 @@
-﻿using Budgenix.Models;
+﻿using Budgenix.Models.Budgeting;
+using Budgenix.Models.Categories;
+using Budgenix.Models.Transactions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Budgenix.Data

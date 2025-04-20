@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Budgenix.Services;
-using Budgenix.Dtos;
+using Budgenix.Models.Shared;
 using Budgenix.Helpers.Query;
 using Budgenix.Models;
 using Budgenix.Data;
 using Microsoft.EntityFrameworkCore;
+using Budgenix.Dtos.Incomes;
+using Budgenix.Models.Transactions;
 
 namespace Budgenix.API.Controllers
 {
@@ -18,7 +19,6 @@ namespace Budgenix.API.Controllers
         {
             _context = context;
         }
-
 
 
         [HttpGet]
@@ -57,7 +57,7 @@ namespace Budgenix.API.Controllers
         }
 
         [HttpGet("search")]
-        public async Task<ActionResult<IEnumerable<Expense>>> SearchIncomes(string query)
+        public async Task<ActionResult<IEnumerable<Income>>> SearchIncomes(string query)
         {
             if (string.IsNullOrWhiteSpace(query))
                 return Ok(_context.Incomes);

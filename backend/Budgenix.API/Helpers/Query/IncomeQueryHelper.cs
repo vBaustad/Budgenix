@@ -1,5 +1,5 @@
-﻿using Budgenix.Models;
-using Budgenix.Dtos;
+﻿using Budgenix.Dtos.Incomes;
+using Budgenix.Models.Transactions;
 
 namespace Budgenix.Helpers.Query
 {
