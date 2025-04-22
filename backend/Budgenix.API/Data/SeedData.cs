@@ -1,4 +1,4 @@
-﻿using Budgenix.Models;
+﻿using Budgenix.Models.Categories;
 
 namespace Budgenix.Data
 {

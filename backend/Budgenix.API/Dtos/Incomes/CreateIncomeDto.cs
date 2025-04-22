@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Budgenix.Models;
+using Budgenix.Models.Shared;
 
 namespace Budgenix.Dtos.Incomes
 {
@@ -20,7 +21,7 @@ namespace Budgenix.Dtos.Incomes
         public Guid CategoryId { get; set; }
         
         public bool IsRecurring { get; set; } = false;
-        public RecurrenceType RecurrenceFrequency { get; set; } = RecurrenceType.None;
+        public RecurrenceTypeEnum RecurrenceFrequency { get; set; } = RecurrenceTypeEnum.None;
         [StringLength(500)]
         public string? Notes { get; set; }
     }

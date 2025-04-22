@@ -8,6 +8,9 @@ namespace Budgenix.Models.Budgeting
     public class Budget
     {
         public Guid Id { get; set; }
+        [Required]
+        [StringLength(100)]
+        public string Name { get; set; } = null!;
 
         [Required]
         public required string Category { get; set; }

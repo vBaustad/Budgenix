@@ -1,28 +1,32 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Budgenix.Services;
+using Budgenix.Models.Shared;
 using Budgenix.Dtos;
 using Budgenix.Models;
 using Budgenix.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
-using Budgenix.API.Models.Transactions;
+using Budgenix.Models.Transactions;
+using Microsoft.AspNetCore.Authorization;
+using Budgenix.Models.Users;
+using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
 
 namespace Budgenix.API.Controllers
 {
 
-
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    public class ExpensesController : ControllerBase
+    public class ExpensesController : BaseController
     {
         private readonly BudgenixDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public ExpensesController(BudgenixDbContext context)
+        public ExpensesController(BudgenixDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
-
-
 
         // Get all expenses (optionally filter by date or category)
         [HttpGet]
@@ -36,7 +40,10 @@ namespace Budgenix.API.Controllers
             int take = 100
             )
         {
-            var expenses = _context.Expenses.AsQueryable();
+
+            var userId = GetUserId();
+            var expenses = _context.Expenses
+                .Where(e => e.UserId == userId);
 
             // Filter: date range
             if (from.HasValue)

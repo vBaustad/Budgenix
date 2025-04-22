@@ -1,4 +1,5 @@
 ﻿using Budgenix.Models;
+using Budgenix.Models.Transactions;
 
 namespace Budgenix.Dtos.Incomes
 {
