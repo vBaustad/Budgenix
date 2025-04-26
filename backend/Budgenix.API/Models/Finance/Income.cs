@@ -1,8 +1,10 @@
 ﻿using Budgenix.Models.Shared;
 using Budgenix.Models.Categories;
 using System.ComponentModel.DataAnnotations;
+using Budgenix.Models.Users;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Budgenix.Models.Transactions
+namespace Budgenix.Models.Finance
 {
     public class Income
     {
@@ -25,5 +27,8 @@ namespace Budgenix.Models.Transactions
         public RecurrenceTypeEnum RecurrenceFrequency { get; set; }
         [StringLength(500)]
         public string? Notes { get; set; }
+        public string? UserId { get; set; }
+        [ForeignKey("UserId")]
+        public ApplicationUser? User { get; set; }
     }
 }

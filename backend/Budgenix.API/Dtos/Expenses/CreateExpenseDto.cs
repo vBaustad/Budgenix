@@ -2,11 +2,10 @@
 using Budgenix.Models;
 using Budgenix.Models.Shared;
 
-namespace Budgenix.Dtos.Incomes
+namespace Budgenix.Dtos.Expenses
 {
-    public class CreateIncomeDto
+    public class CreateExpenseDto
     {
-
         [Required(ErrorMessage = "Name is required")]
         [StringLength(100, ErrorMessage = "Name can't be longer than 100 characters")]
         public string Name { get; set; } = null!;

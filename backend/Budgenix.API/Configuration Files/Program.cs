@@ -1,6 +1,8 @@
 using Budgenix.Data;
 using Budgenix.Helpers;
+using Budgenix.Mapping;
 using Budgenix.Models.Users;
+using Budgenix.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
@@ -25,7 +27,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddAuthorization();
-
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 // Add DbContext
 builder.Services.AddDbContext<BudgenixDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));

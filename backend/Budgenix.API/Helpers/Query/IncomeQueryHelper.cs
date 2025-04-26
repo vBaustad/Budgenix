@@ -1,5 +1,6 @@
-﻿using Budgenix.Dtos.Incomes;
-using Budgenix.Models.Transactions;
+﻿using AutoMapper;
+using Budgenix.Dtos.Incomes;
+using Budgenix.Models.Finance;
 
 namespace Budgenix.Helpers.Query
 {
@@ -36,7 +37,7 @@ namespace Budgenix.Helpers.Query
             };
         }
 
-        public static IEnumerable<IncomeGroupDto> ApplyGrouping(IEnumerable<Income> incomes, string groupBy)
+        public static IEnumerable<IncomeGroupDto> ApplyGrouping(IEnumerable<Income> incomes, string groupBy, IMapper mapper)
         {
             return groupBy.ToLower() switch
             {
@@ -44,27 +45,27 @@ namespace Budgenix.Helpers.Query
                 .GroupBy(i => $"{i.Date:yyyy-MM}")
                 .Select(g => new IncomeGroupDto
                 {
-                    GroupKey = g.Key,
-                    Total = g.Sum(i => i.Amount),
-                    Items = g.ToList()
+                    GroupName = g.Key,
+                    TotalAmount = g.Sum(i => i.Amount),
+                    Incomes = mapper.Map<List<IncomeDto>>(g.ToList())
                 }),
 
                 "year" => incomes
                 .GroupBy(i => i.Date.Year.ToString())
                 .Select(g => new IncomeGroupDto
                 {
-                    GroupKey = g.Key,
-                    Total = g.Sum(i => i.Amount),
-                    Items = g.ToList()
+                    GroupName = g.Key,
+                    TotalAmount = g.Sum(i => i.Amount),
+                    Incomes = mapper.Map<List<IncomeDto>>(g.ToList())
                 }),
 
                 "category" => incomes
                 .GroupBy(i => i.Category?.Name ?? "Uncategorized")
                 .Select(g => new IncomeGroupDto
                 {
-                    GroupKey = g.Key,
-                    Total = g.Sum(i => i.Amount),
-                    Items = g.ToList()
+                    GroupName = g.Key,
+                    TotalAmount = g.Sum(i => i.Amount),
+                    Incomes = mapper.Map<List<IncomeDto>>(g.ToList())
                 }),
 
                 _ => throw new InvalidOperationException("Should never reach here.")

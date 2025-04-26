@@ -1,9 +1,10 @@
-﻿using Budgenix.Models.Shared;
-using Budgenix.Models.Transactions;
+﻿using Budgenix.Models.Categories;
+using Budgenix.Models.Shared;
+using Budgenix.Models.Users;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Budgenix.Models.Budgeting
+namespace Budgenix.Models.Finance
 {
     public class Budget
     {
@@ -13,7 +14,10 @@ namespace Budgenix.Models.Budgeting
         public string Name { get; set; } = null!;
 
         [Required]
-        public required string Category { get; set; }
+        public Guid CategoryId { get; set; }
+
+        [Required]
+        public Category Category { get; set; } = null!;
 
         [Range(0.01, double.MaxValue, ErrorMessage = "Amount must be greater than 0")]
         public decimal AllocatedAmount { get; set; }
@@ -29,6 +33,11 @@ namespace Budgenix.Models.Budgeting
 
         [StringLength(500)]
         public string? Notes { get; set; }
+
+        [Required]
+        public string UserId { get; set; } = null!;
+        [ForeignKey("UserId")]
+        public ApplicationUser? User { get; set; }
 
         public ICollection<Expense> Expenses { get; set; } = new List<Expense>();
     }

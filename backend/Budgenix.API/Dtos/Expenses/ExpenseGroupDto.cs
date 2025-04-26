@@ -1,11 +1,11 @@
 ﻿using Budgenix.Models;
 
-namespace Budgenix.Dtos.Incomes
+namespace Budgenix.Dtos.Expenses
 {
-    public class IncomeGroupDto
+    public class ExpenseGroupDto
     {
         public string GroupName { get; set; } = "";
         public decimal TotalAmount { get; set; }
-        public List<IncomeDto> Incomes { get; set; } = new();
+        public List<ExpenseDto> Expenses { get; set; } = new();
     }
 }

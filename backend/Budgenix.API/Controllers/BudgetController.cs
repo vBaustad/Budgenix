@@ -1,84 +1,85 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Budgenix.Models.Shared;
-using Budgenix.Dtos;
 using Budgenix.Data;
 using Microsoft.EntityFrameworkCore;
-using System;
-using Budgenix.Models.Budgeting;
-using Budgenix.Models.Transactions;
+using Budgenix.Models.Finance;
+using Budgenix.Dtos.Budgets;
+using Budgenix.Services;
+using AutoMapper;
 
 namespace Budgenix.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class BudgetController : Controller
+    public class BudgetController : ControllerBase
     {
         private readonly BudgenixDbContext _context;
+        private readonly IUserService _userService;
+        private readonly IMapper _mapper;
 
-        public BudgetController(BudgenixDbContext context)
+        public BudgetController(BudgenixDbContext context, IUserService userService, IMapper mapper)
         {
             _context = context;
+            _userService = userService;
+            _mapper = mapper;
         }
-
-        //[HttpGet]
-        //public async Task<ActionResult> GetBudgets(
-        //    DateTime? from = null,
-        //    DateTime? to = null,
-        //    string? category = null,
-        //    string sort = "date_desc",
-        //    string? groupBy = null,
-        //    int skip = 0,
-        //    int take = 100)
-        //{
-        //    var budgets = _context.Budgets.AsQueryable();
-
-
-        //    if (from.HasValue)
-        //        budgets = budgets.Where(b => b.Da)
-
-        //}
 
         // Get a single expense by ID
         [HttpGet("{id}")]
-        public async Task<ActionResult<Budget>> GetBudgetById(Guid id)
+        public async Task<ActionResult<BudgetDto>> GetBudgetById(Guid id)
         {
-            var budget = await _context.Budgets.FirstOrDefaultAsync(b => b.Id == id);
+            var userId = _userService.GetUserId();
+
+            var budget = await _context.Budgets
+                .Include(b => b.Category)
+                .FirstOrDefaultAsync(b => b.Id == id && b.UserId == userId);
+
             if (budget == null)
                 return NotFound();
-            return Ok(budget);
+
+            var budgetDto = _mapper.Map<BudgetDto>(budget);
+            return Ok(budgetDto);
         }
 
         [HttpPost]
-        public async Task<ActionResult> AddBudget(Budget budget)
+        public async Task<ActionResult> AddBudget(CreateBudgetDto dto)
         {
-            var nameConflict = _context.Budgets.Any(b => 
-                b.Id != budget.Id &&
-                b.Name.ToLower() == budget.Name.ToLower());
+            var userId = _userService.GetUserId();
 
-            if (nameConflict)
+            var category = await _context.Categories.FindAsync(dto.CategoryId);
+            if (category == null)
+                return BadRequest("Invalid category ID");
+
+            // Duplicate detection logic
+            const decimal allowedAmountDifferencePercentage = 0.01m; // 1%
+            var similarBudgetExists = await _context.Budgets
+                .AsNoTracking()
+                .AnyAsync(b =>
+                    b.UserId == userId &&
+                    b.CategoryId == dto.CategoryId &&
+                    string.Equals(b.Name, dto.Name, StringComparison.OrdinalIgnoreCase) &&
+                    (
+                        (!b.EndDate.HasValue || !dto.EndDate.HasValue) ||
+                        (b.StartDate <= dto.EndDate && (b.EndDate ?? DateTime.MaxValue) >= dto.StartDate)
+                    ) &&
+                    Math.Abs(b.AllocatedAmount - dto.AllocatedAmount) <= dto.AllocatedAmount * allowedAmountDifferencePercentage
+                );
+
+            if (similarBudgetExists)
             {
-                // You could log this, or return a 200/201 with a warning payload
-                Console.WriteLine($"Warning: Another budget exists with the name '{budget.Name}'");
+                return BadRequest("A similar budget already exists for this category, name, date range, and amount.");
             }
 
-            var ruleConflict = _context.Budgets.Any(existing => 
-               existing.Id != budget.Id &&
-               existing.Category.ToLower() == budget.Category.ToLower() &&
-               existing.Type == budget.Type &&
-               existing.Recurrence == budget.Recurrence &&
-               (existing.EndDate == null || budget.StartDate <= existing.EndDate) &&
-               (existing.EndDate == null || budget.EndDate >= existing.StartDate)
-            );
-
-            if (ruleConflict)
-            {
-                return BadRequest("A conflicting budget rule already exists for this category, type, and time period.");
-            }            
+            var budget = _mapper.Map<Budget>(dto);
+            budget.Id = Guid.NewGuid();
+            budget.Category = category;
+            budget.UserId = userId;
 
             _context.Budgets.Add(budget);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetBudgetById), new { id = budget.Id }, budget);
+            var budgetDto = _mapper.Map<BudgetDto>(budget);
+
+            return CreatedAtAction(nameof(GetBudgetById), new { id = budget.Id }, budgetDto);
         }
 
 
@@ -86,13 +87,14 @@ namespace Budgenix.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBudget(Guid id)
         {
-            var budget = await _context.Budgets.FirstOrDefaultAsync(b => b.Id == id);
+            var userId = _userService.GetUserId();
+
+            var budget = await _context.Budgets.FirstOrDefaultAsync(b => b.Id == id && b.UserId == userId);
 
             if (budget == null)
                 return NotFound();
 
             _context.Budgets.Remove(budget);
-
             await _context.SaveChangesAsync();
 
             return NoContent();

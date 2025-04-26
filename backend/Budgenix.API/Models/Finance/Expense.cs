@@ -2,8 +2,9 @@
 using Budgenix.Models.Categories;
 using System.ComponentModel.DataAnnotations;
 using Budgenix.Models.Users;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Budgenix.Models.Transactions
+namespace Budgenix.Models.Finance
 {
     public class Expense
     {
@@ -28,6 +29,7 @@ namespace Budgenix.Models.Transactions
         public string? Notes { get; set; }
 
         public string? UserId { get; set; }
+        [ForeignKey("UserId")]
         public ApplicationUser? User { get; set; }  
     }
 }

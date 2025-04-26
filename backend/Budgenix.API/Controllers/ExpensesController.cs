@@ -1,15 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Budgenix.Models.Shared;
-using Budgenix.Dtos;
-using Budgenix.Models;
 using Budgenix.Data;
 using Microsoft.EntityFrameworkCore;
-using System;
-using Budgenix.Models.Transactions;
 using Microsoft.AspNetCore.Authorization;
-using Budgenix.Models.Users;
-using Microsoft.AspNetCore.Identity;
-using System.Security.Claims;
+using Budgenix.Services;
+using AutoMapper;
+using Budgenix.Helpers.Query;
+using Budgenix.Dtos.Expenses;
+using Budgenix.Models.Finance;
 
 namespace Budgenix.API.Controllers
 {
@@ -17,15 +14,17 @@ namespace Budgenix.API.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    public class ExpensesController : BaseController
+    public class ExpensesController : ControllerBase
     {
         private readonly BudgenixDbContext _context;
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IUserService _userService;
+        private readonly IMapper _mapper;
 
-        public ExpensesController(BudgenixDbContext context, UserManager<ApplicationUser> userManager)
+        public ExpensesController(IUserService userService, BudgenixDbContext context, IMapper mapper)
         {
             _context = context;
-            _userManager = userManager;
+            _userService = userService;
+            _mapper = mapper;
         }
 
         // Get all expenses (optionally filter by date or category)
@@ -37,79 +36,95 @@ namespace Budgenix.API.Controllers
             string sort = "date_desc",
             string? groupBy = null,
             int skip = 0,
-            int take = 100
-            )
+            int take = 100)
         {
 
-            var userId = GetUserId();
+            var userId = _userService.GetUserId();
+
             var expenses = _context.Expenses
-                .Where(e => e.UserId == userId);
+                .Include(e => e.Category)
+                .Where(e => e.UserId == userId)
+                .AsQueryable();
+            //Apply filters and sorting
+            expenses = ExpenseQueryHelper.ApplyFilters(expenses, from, to, category);
+            expenses = ExpenseQueryHelper.ApplySorting(expenses, sort);
 
-            // Filter: date range
-            if (from.HasValue)
-                expenses = expenses.Where(e => e.Date >= from.Value);
-            if (to.HasValue)
-                expenses = expenses.Where(e => e.Date <= to.Value);
-
-            // Filter: category
-            if (!string.IsNullOrWhiteSpace(category))
-                expenses = expenses.Where(e => string.Equals(e.Category.Name, category, StringComparison.OrdinalIgnoreCase)
-            );
-
-            // Sort            
-            expenses = sort.ToLower() switch
+            //Apply grouping
+            if (!string.IsNullOrWhiteSpace(groupBy))
             {
-                "date_asc" => expenses.OrderBy(e => e.Date),
-                "date_desc" => expenses.OrderByDescending(e => e.Date),
-                "amount_asc" => expenses.OrderBy(e => e.Amount),
-                "amount_desc" => expenses.OrderByDescending(e => e.Amount),
-                "name_asc" => expenses.OrderBy(e => e.Name),
-                "name_desc" => expenses.OrderByDescending(e => e.Name),
-                _ => expenses.OrderByDescending(i => i.Date),
-            };
+                var groupByKey = groupBy.ToLower();
+
+                if (groupByKey != "month" && groupByKey != "category" && groupByKey != "year")
+                    return BadRequest("Invalid groupBy value. Use 'month', 'category', or 'year'.");
+
+                var groupedEntities = await expenses.ToListAsync();
+                var grouped = ExpenseQueryHelper.ApplyGrouping(groupedEntities, groupByKey, _mapper);
+                return Ok(grouped.ToList());
+            }
 
             // Pagination
             var results = await expenses.Skip(skip).Take(take).ToListAsync();
-            return Ok(results);
+
+            var expenseDto = _mapper.Map<List<ExpenseDto>>(results);
+
+            return Ok(expenseDto);
         }
 
         [HttpGet("search")]
         public async Task<ActionResult<IEnumerable<Expense>>> SearchExpenses(string query)
         {
+            var userId = _userService.GetUserId();
+
             if (string.IsNullOrWhiteSpace(query))
-                return Ok(await _context.Expenses.ToListAsync());
+                return BadRequest("Search query cannot be empty.");
 
             var matches = await _context.Expenses
-                .Where(e =>
-                    (!string.IsNullOrEmpty(e.Name) && e.Name.Contains(query, StringComparison.OrdinalIgnoreCase)) ||
-                    (!string.IsNullOrEmpty(e.Description) && e.Description.Contains(query, StringComparison.OrdinalIgnoreCase)))
+                .Include(i => i.Category)
+                .Where(i => i.UserId == userId &&
+                       (!string.IsNullOrEmpty(i.Name) && i.Name.Contains(query, StringComparison.OrdinalIgnoreCase)) ||
+                       (!string.IsNullOrEmpty(i.Description) && i.Description.Contains(query, StringComparison.OrdinalIgnoreCase)))
                 .ToListAsync();
 
-            return Ok(matches);
+            var expenseDto = _mapper.Map<List<ExpenseDto>>(matches);
+
+            return Ok(expenseDto);
         }
 
         [HttpGet("total")]
         public async Task<ActionResult<decimal>> GetTotalAmount()
         {
-            var total = await _context.Expenses.SumAsync(e => e.Amount);
+            var userId = _userService.GetUserId();
+
+            var total = await _context.Expenses
+                .Where(i => i.UserId == userId)
+                .SumAsync(i => i.Amount);
+
             return Ok(total);
         }
 
         [HttpGet("recurring-upcoming")]
-        public async Task<ActionResult<IEnumerable<Expense>>> GetUpcomingRecurringExpenses(int daysAhead = 30)
+        public async Task<ActionResult<IEnumerable<ExpenseDto>>> GetUpcomingRecurringExpenses(int daysAhead = 30)
         {
+            var userId = _userService.GetUserId();
+
             var upcoming = await _context.Expenses
-                .Where(e => e.IsRecurring && e.Date >= DateTime.Today && e.Date <= DateTime.Today.AddDays(daysAhead))
+                .Include(i => i.Category)
+                .Where(i => i.UserId == userId && i.IsRecurring && i.Date >= DateTime.Today && i.Date <= DateTime.Today.AddDays(daysAhead))
                 .ToListAsync();
-            return Ok(upcoming);
+
+            var expenseDto = _mapper.Map<List<ExpenseDto>>(upcoming);
+
+            return Ok(expenseDto);
         }
 
         [HttpGet("categories")]
         public async Task<ActionResult<IEnumerable<string>>> GetUsedExpenseCategories()
         {
+            var userId = _userService.GetUserId();
+
             var categories = await _context.Expenses
-                .Where(e => e.Category != null)
-                .Select(e => e.Category.Name)
+                .Where(i => i.UserId == userId && i.Category != null)
+                .Select(i => i.Category.Name)
                 .Distinct()
                 .OrderBy(name => name)
                 .ToListAsync();
@@ -121,70 +136,76 @@ namespace Budgenix.API.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Expense>> GetExpenseById(Guid id)
         {
-            var expense = await _context.Expenses.FirstOrDefaultAsync(e => e.Id == id);
-            if (expense == null)
-                return NotFound();
-            return Ok(expense);           
+            var userId = _userService.GetUserId();
+
+            var expense = await _context.Expenses
+                .Include(i => i.Category)
+                .FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId);
+
+            if (expense == null) return NotFound();
+
+            var dto = _mapper.Map<ExpenseDto>(expense);
+
+            return Ok(dto);
         }
-
-
 
         // Create a new expense and return it with a new ID
         [HttpPost]
-        public async Task<ActionResult> AddExpense(Expense expense)
+        public async Task<ActionResult> AddExpense(CreateExpenseDto dto)
         {
-            expense.Id = Guid.NewGuid();
+            var userId = _userService.GetUserId();
+            var category = await _context.Categories.FindAsync(dto.CategoryId);
+
+            if (category == null)
+                return BadRequest("Invalid category ID.");
+
+            var expense = _mapper.Map<Expense>(dto);
+            expense.Id = Guid.NewGuid(); // Set ID manually
+            expense.Category = category; // Set Category
+            expense.UserId = userId;     // Set ownership
+
             _context.Expenses.Add(expense);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetExpenseById), new { id = expense.Id }, expense);
+            var expenseDto = _mapper.Map<ExpenseDto>(expense);
+
+            return CreatedAtAction(nameof(GetExpenseById), new { id = expense.Id }, expenseDto);
         }
-
-
-
-
-
 
         // Update an existing expense by ID
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateExpense(Guid id, Expense updated) 
+        public async Task<IActionResult> UpdateExpense(Guid id, UpdateExpenseDto dto) 
         {
-            var existing = await _context.Expenses.FirstOrDefaultAsync(e =>e.Id == id);
-            if(existing == null)
-                return NotFound();
+            var userId = _userService.GetUserId();
 
-            //Update Fields
-            existing.Name = updated.Name;
-            existing.Description = updated.Description;
-            existing.Amount = updated.Amount;
-            existing.Category = updated.Category;
-            existing.Date = updated.Date;
-            existing.IsRecurring = updated.IsRecurring;
-            existing.RecurrenceFrequency = updated.RecurrenceFrequency;
-            existing.Notes = updated.Notes;
+            var existing = await _context.Expenses.Include(i => i.Category)
+                .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+
+            if (existing == null) return NotFound();
+
+            var category = await _context.Categories.FindAsync(dto.CategoryId);
+            if (category == null) return BadRequest("Invalid category ID.");
+
+            _mapper.Map(dto, existing);
+            existing.Category = category;
 
             await _context.SaveChangesAsync();
-
             return NoContent();
         }
-
-
-
-
 
         // Delete an expense by ID
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteExpense(Guid id) 
         {
-            var expense = await _context.Expenses.FirstOrDefaultAsync(e => e.Id == id);
+            var userId = _userService.GetUserId();
 
-            if (expense == null) 
-                return NotFound();
+            var expense = await _context.Expenses
+                            .FirstOrDefaultAsync(i => i.Id == id && i.UserId == userId);
+
+            if (expense == null) return NotFound();
 
             _context.Expenses.Remove(expense);
-
             await _context.SaveChangesAsync();
-
             return NoContent();
         }
     }

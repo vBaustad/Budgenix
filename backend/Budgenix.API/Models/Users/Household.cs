@@ -1,4 +1,4 @@
-﻿namespace Budgenix.API.Models.Users
+﻿namespace Budgenix.Models.Users
 {
     public class Household
     {

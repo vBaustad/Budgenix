@@ -1,5 +1,4 @@
-﻿using Budgenix.Models.Budgeting;
-using Budgenix.Models.Transactions;
+﻿using Budgenix.Models.Finance;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
@@ -15,7 +14,7 @@ namespace Budgenix.Models.Users
         //Four household/group sharing (optional)
         public Guid? HouseholdId { get; set; }
 
-        public virtual ICollection<Income> Incomes { get; set; } = new List<Income>();
+        public virtual ICollection<Expense> Incomes { get; set; } = new List<Expense>();
         public virtual ICollection<Expense> Expenses { get; set; } = new List<Expense>();
         public virtual ICollection<Budget> Budgets { get; set; } = new List<Budget>();
 

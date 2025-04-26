@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.15" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.15" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.15" />
@@ -20,8 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Dtos\Budgeting\" />
-    <Folder Include="Dtos\Expenses\" />
     <Folder Include="Migrations\" />
   </ItemGroup>
 
