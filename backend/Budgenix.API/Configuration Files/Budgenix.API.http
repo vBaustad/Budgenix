@@ -1,6 +1,17 @@
-@Budgenix.API_HostAddress = http://localhost:5035
+POST http://localhost:5035/api/account/register
+Content-Type: application/json
 
-GET {{Budgenix.API_HostAddress}}/weatherforecast/
-Accept: application/json
+{
+  "userName": "testuser",
+  "email": "testuser@example.com",
+  "password": "Test1234"
+}
 
-###
+
+POST http://localhost:5035/api/account/login
+Content-Type: application/json
+
+{
+  "email": "testuser@example.com",
+  "password": "Test1234"
+}

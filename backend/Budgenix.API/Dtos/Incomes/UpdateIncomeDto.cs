@@ -1,11 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Budgenix.Models;
+﻿using Budgenix.Models;
 using Budgenix.Models.Shared;
+using System.ComponentModel.DataAnnotations;
 
 namespace Budgenix.Dtos.Incomes
 {
-    public class CreateIncomeDto
+    public class UpdateIncomeDto
     {
+        public Guid Id { get; set; }
 
         [Required(ErrorMessage = "Name is required")]
         [StringLength(100, ErrorMessage = "Name can't be longer than 100 characters")]
