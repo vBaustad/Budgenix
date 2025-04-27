@@ -26,6 +26,9 @@ namespace Budgenix.API.Controllers
             _mapper = mapper;
         }
 
+        // =======================================
+        // ==========      GET APIs      =========
+        // =======================================
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<object>>> GetIncomes(
@@ -150,6 +153,10 @@ namespace Budgenix.API.Controllers
             return Ok(categories);
         }
 
+        // =======================================
+        // ==========     POST APIs      =========
+        // =======================================
+
         // Create a new income and return it with a new ID
         [HttpPost]
         public async Task<ActionResult> AddIncome(CreateIncomeDto dto)
@@ -174,6 +181,10 @@ namespace Budgenix.API.Controllers
             return CreatedAtAction(nameof(GetIncomeById), new { id = income.Id }, incomeDto);
         }
 
+        // =======================================
+        // ==========     PUT APIs       =========
+        // =======================================
+
         // Update an existing income by ID
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateIncome(Guid id, UpdateIncomeDto dto)
@@ -194,6 +205,10 @@ namespace Budgenix.API.Controllers
             await _context.SaveChangesAsync();
             return NoContent();
         }
+
+        // =======================================
+        // ==========    DELETE APIs     =========
+        // =======================================
 
         // Delete an income by ID
         [HttpDelete("{id}")]

@@ -27,6 +27,10 @@ namespace Budgenix.API.Controllers
             _mapper = mapper;
         }
 
+        // =======================================
+        // ==========      GET APIs      =========
+        // =======================================
+
         // Get all expenses (optionally filter by date or category)
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Expense>>> GetExpenses(
@@ -149,6 +153,10 @@ namespace Budgenix.API.Controllers
             return Ok(dto);
         }
 
+        // =======================================
+        // ==========     POST APIs      =========
+        // =======================================
+
         // Create a new expense and return it with a new ID
         [HttpPost]
         public async Task<ActionResult> AddExpense(CreateExpenseDto dto)
@@ -172,6 +180,10 @@ namespace Budgenix.API.Controllers
             return CreatedAtAction(nameof(GetExpenseById), new { id = expense.Id }, expenseDto);
         }
 
+        // =======================================
+        // ==========     PUT APIs       =========
+        // =======================================
+
         // Update an existing expense by ID
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateExpense(Guid id, UpdateExpenseDto dto) 
@@ -192,6 +204,10 @@ namespace Budgenix.API.Controllers
             await _context.SaveChangesAsync();
             return NoContent();
         }
+
+        // =======================================
+        // ==========    DELETE APIs     =========
+        // =======================================
 
         // Delete an expense by ID
         [HttpDelete("{id}")]
