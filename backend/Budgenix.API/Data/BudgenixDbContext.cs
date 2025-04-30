@@ -17,6 +17,7 @@ namespace Budgenix.Data
         public DbSet<Expense> Expenses { get; set; }
         public DbSet<Budget> Budgets { get; set; }
         public DbSet<Category> Categories { get; set; }
+        public DbSet<RecurringItem> RecurringItems { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -25,23 +26,30 @@ namespace Budgenix.Data
             // Configure Expense → User
             builder.Entity<Expense>()
                 .HasOne(e => e.User)
-                .WithMany()
+                .WithMany(u => u.Expenses)
                 .HasForeignKey(e => e.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // Configure Income → User
             builder.Entity<Income>()
                 .HasOne(i => i.User)
-                .WithMany()
+                .WithMany(u => u.Incomes)
                 .HasForeignKey(i => i.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // Configure Budget → User
             builder.Entity<Budget>()
                 .HasOne(b => b.User)
-                .WithMany()
+                .WithMany(u => u.Budgets)
                 .HasForeignKey(b => b.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<RecurringItem>()
+                .HasOne(r => r.User)
+                .WithMany(u => u.RecurringItems)
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
         }
     }
 }

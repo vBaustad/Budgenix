@@ -7,9 +7,11 @@ using Budgenix.Services;
 using AutoMapper;
 using Budgenix.Dtos.Expenses;
 using Budgenix.Helpers.Query;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Budgenix.API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class BudgetController : ControllerBase

@@ -22,7 +22,7 @@ namespace Budgenix.Models.Finance
         [Required]
         public Guid CategoryId { get; set; }
         [Required]
-        public required Category Category { get; set; }
+        public Category? Category { get; set; }
         public bool IsRecurring { get; set; }
         public RecurrenceTypeEnum RecurrenceFrequency { get; set; }
         [StringLength(500)]
