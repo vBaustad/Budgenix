@@ -3,6 +3,8 @@ using Budgenix.Dtos.Incomes;
 using Budgenix.Dtos.Expenses;
 using Budgenix.Models.Finance;
 using Budgenix.Dtos.Budgets;
+using Budgenix.Models.Categories;
+using Budgenix.Dtos.Categories;
 
 namespace Budgenix.Mapping
 {
@@ -25,12 +27,15 @@ namespace Budgenix.Mapping
             CreateMap<CreateExpenseDto, Expense>();
             CreateMap<UpdateExpenseDto, Expense>();
 
-            //Budget mappigns
+            //Budget mappings
             CreateMap<Budget, BudgetDto>()
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name));
 
             CreateMap<CreateBudgetDto, Budget>();
             CreateMap<UpdateBudgetDto, Budget>();
+
+            //Category mapping
+            CreateMap<Category, CategoryDto>();
         }
     }
 }

@@ -8,7 +8,7 @@ namespace Budgenix.Dtos.Budgets
     {
         [Required(ErrorMessage = "Name is required")]
         [StringLength(100, ErrorMessage = "Name can't be longer than 100 characters")]
-        public string Name { get; set; } = null!;
+        public required string Name { get; set; }
 
         [Required(ErrorMessage = "CategoryId is required")]
         public Guid CategoryId { get; set; }

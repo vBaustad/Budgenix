@@ -10,11 +10,11 @@ namespace Budgenix.Dtos.Incomes
 
         [Required(ErrorMessage = "Name is required")]
         [StringLength(100, ErrorMessage = "Name can't be longer than 100 characters")]
-        public string Name { get; set; } = null!;
+        public required string Name { get; set; }
 
         [Required(ErrorMessage = "Description is required")]
         [StringLength(250, ErrorMessage = "Description can't be longer than 250 characters")]
-        public string Description { get; set; } = null!;
+        public required string Description { get; set; }
 
         [Required(ErrorMessage = "Amount is required")]
         [Range(0.01, double.MaxValue, ErrorMessage = "Amount must be greater than 0")]

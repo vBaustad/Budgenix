@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Budgenix.API.Migrations
 {
     [DbContext(typeof(BudgenixDbContext))]
-    [Migration("20250426124622_FinalizeBudgetFix")]
-    partial class FinalizeBudgetFix
+    [Migration("20250430110635_AddRecurringItemsToUser")]
+    partial class AddRecurringItemsToUser
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -58,9 +58,6 @@ namespace Budgenix.API.Migrations
                     b.Property<decimal>("AllocatedAmount")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("ApplicationUserId")
-                        .HasColumnType("TEXT");
-
                     b.Property<Guid>("CategoryId")
                         .HasColumnType("TEXT");
 
@@ -91,8 +88,6 @@ namespace Budgenix.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApplicationUserId");
-
                     b.HasIndex("CategoryId");
 
                     b.HasIndex("UserId");
@@ -107,12 +102,6 @@ namespace Budgenix.API.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<decimal>("Amount")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ApplicationUserId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ApplicationUserId1")
                         .HasColumnType("TEXT");
 
                     b.Property<Guid?>("BudgetId")
@@ -148,10 +137,6 @@ namespace Budgenix.API.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ApplicationUserId");
-
-                    b.HasIndex("ApplicationUserId1");
 
                     b.HasIndex("BudgetId");
 
@@ -207,6 +192,54 @@ namespace Budgenix.API.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Incomes");
+                });
+
+            modelBuilder.Entity("Budgenix.Models.Finance.RecurringItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("CategoryId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Frequency")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RecurringItems");
                 });
 
             modelBuilder.Entity("Budgenix.Models.Users.ApplicationUser", b =>
@@ -409,10 +442,6 @@ namespace Budgenix.API.Migrations
 
             modelBuilder.Entity("Budgenix.Models.Finance.Budget", b =>
                 {
-                    b.HasOne("Budgenix.Models.Users.ApplicationUser", null)
-                        .WithMany("Budgets")
-                        .HasForeignKey("ApplicationUserId");
-
                     b.HasOne("Budgenix.Models.Categories.Category", "Category")
                         .WithMany()
                         .HasForeignKey("CategoryId")
@@ -420,7 +449,7 @@ namespace Budgenix.API.Migrations
                         .IsRequired();
 
                     b.HasOne("Budgenix.Models.Users.ApplicationUser", "User")
-                        .WithMany()
+                        .WithMany("Budgets")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -432,14 +461,6 @@ namespace Budgenix.API.Migrations
 
             modelBuilder.Entity("Budgenix.Models.Finance.Expense", b =>
                 {
-                    b.HasOne("Budgenix.Models.Users.ApplicationUser", null)
-                        .WithMany("Expenses")
-                        .HasForeignKey("ApplicationUserId");
-
-                    b.HasOne("Budgenix.Models.Users.ApplicationUser", null)
-                        .WithMany("Incomes")
-                        .HasForeignKey("ApplicationUserId1");
-
                     b.HasOne("Budgenix.Models.Finance.Budget", null)
                         .WithMany("Expenses")
                         .HasForeignKey("BudgetId");
@@ -451,7 +472,7 @@ namespace Budgenix.API.Migrations
                         .IsRequired();
 
                     b.HasOne("Budgenix.Models.Users.ApplicationUser", "User")
-                        .WithMany()
+                        .WithMany("Expenses")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
 
@@ -469,11 +490,21 @@ namespace Budgenix.API.Migrations
                         .IsRequired();
 
                     b.HasOne("Budgenix.Models.Users.ApplicationUser", "User")
-                        .WithMany()
+                        .WithMany("Incomes")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Category");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Budgenix.Models.Finance.RecurringItem", b =>
+                {
+                    b.HasOne("Budgenix.Models.Users.ApplicationUser", "User")
+                        .WithMany("RecurringItems")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("User");
                 });
@@ -541,6 +572,8 @@ namespace Budgenix.API.Migrations
                     b.Navigation("Expenses");
 
                     b.Navigation("Incomes");
+
+                    b.Navigation("RecurringItems");
                 });
 #pragma warning restore 612, 618
         }

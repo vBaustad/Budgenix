@@ -8,9 +8,11 @@ using Budgenix.Dtos.Incomes;
 using Budgenix.Services;
 using AutoMapper;
 using Budgenix.Models.Finance;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Budgenix.API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class IncomesController : ControllerBase

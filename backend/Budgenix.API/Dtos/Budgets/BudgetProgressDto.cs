@@ -1,9 +1,14 @@
-﻿namespace Budgenix.Dtos.Budgets
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Budgenix.Dtos.Budgets
 {
     public class BudgetProgressDto
     {
-        public Guid Id { get; set; }  // <- Consistent with your other DTOs
-        public string Name { get; set; } = string.Empty;
+        public Guid Id { get; set; }
+
+        [Required]
+        [MaxLength(100)]
+        public required string Name { get; set; }
         public decimal AllocatedAmount { get; set; }
         public decimal TotalSpent { get; set; }
         public decimal RemainingAmount => AllocatedAmount - TotalSpent;

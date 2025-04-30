@@ -1,9 +1,14 @@
-﻿namespace Budgenix.Dtos.Users
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Budgenix.Dtos.Users
 {
     public class RegisterDto
     {
-        public string UserName { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
+        [Required]
+        public required string UserName { get; set; }
+        [Required]
+        public required string Email { get; set; }
+        [Required]
+        public required string Password { get; set; }
     }
 }
