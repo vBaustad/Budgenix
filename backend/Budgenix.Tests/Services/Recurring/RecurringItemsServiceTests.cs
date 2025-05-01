@@ -1,8 +1,9 @@
-﻿using Budgenix.Models.Finance;
+﻿using Budgenix.Models.Categories;
+using Budgenix.Models.Finance;
 using Budgenix.Models.Shared;
 using Budgenix.Services.Recurring;
 
-namespace Budgenix.Tests.Services
+namespace Budgenix.Tests.Services.Recurring
 {
     public class RecurringItemServiceTests
     {
@@ -101,6 +102,118 @@ namespace Budgenix.Tests.Services
 
             Assert.True(expectedCount == result.Count, $"Expected {expectedCount} matches on {todayDate:d}, but got {result.Count}");
 
+        }
+
+        [Fact]
+        public void CreateExpenseFromRecurringItem_MapsFieldsCorrectly()
+        {
+            //Arrange 
+            var categoryId = Guid.NewGuid();
+
+            var recurring = new RecurringItem
+            {
+                Name = "Netflix Subscription",
+                Description = "Monthly Netflix bill",
+                Type = "Expense",
+                IsActive = true,
+                StartDate = DateTime.Today.AddMonths(-3),
+                Frequency = RecurrenceTypeEnum.Monthly,
+                Amount = 15.99m,
+                CategoryId = categoryId
+            };            
+
+            //Act
+            var expense = _service.CreateExpenseFromRecurringItem(recurring);
+
+            // Assert
+            Assert.Equal(recurring.Name, expense.Name);
+            Assert.Equal(recurring.Description, expense.Description);
+            Assert.Equal(recurring.Amount, expense.Amount);
+            Assert.Equal(DateTime.Today, expense.Date);
+            Assert.Equal(categoryId, expense.CategoryId);
+            Assert.True(expense.IsRecurring);
+            Assert.Equal(recurring.Frequency, expense.RecurrenceFrequency);
+            Assert.Contains("Auto-generated from recurring item", expense.Notes);
+        }
+
+        [Fact]
+        public void CreateExpenseFromRecurringItem_ThrowsIfCategoryIdIsNull()
+        {            
+
+            var recurring = new RecurringItem
+            {
+                Name = "Netflix Subscription",
+                Description = "Monthly Netflix bill",
+                Type = "Expense",
+                IsActive = true,
+                StartDate = DateTime.Today.AddMonths(-3),
+                Frequency = RecurrenceTypeEnum.Monthly,
+                Amount = 15.99m,
+                CategoryId = null //Missing category ID
+            };
+
+            // Act & Assert
+            var exception = Assert.Throws<InvalidOperationException>(() =>
+                _service.CreateExpenseFromRecurringItem(recurring)
+            );
+
+            Assert.Equal("Recurring item must have a CategoryId.", exception.Message);
+        }
+
+        [Fact]
+        public void CreateIncomeFromRecurringItem_MapsFieldsCorrectly()
+        {
+            // Arrange
+            var categoryId = Guid.NewGuid();
+
+            var recurring = new RecurringItem
+            {
+                Name = "Salary",
+                Description = "Monthly paycheck",
+                Type = "Income",
+                IsActive = true,
+                StartDate = DateTime.Today.AddMonths(-12),
+                Frequency = RecurrenceTypeEnum.Monthly,
+                Amount = 3000m,
+                CategoryId = categoryId
+            };
+
+            // Act
+            var income = _service.CreateIncomeFromRecurringItem(recurring);
+
+            // Assert
+            Assert.Equal(recurring.Name, income.Name);
+            Assert.Equal(recurring.Description, income.Description);
+            Assert.Equal(recurring.Amount, income.Amount);
+            Assert.Equal(DateTime.Today, income.Date);
+            Assert.Equal(categoryId, income.CategoryId);
+            Assert.True(income.IsRecurring);
+            Assert.Equal(recurring.Frequency, income.RecurrenceFrequency);
+            Assert.Contains("Auto-generated from recurring item", income.Notes);
+        }
+
+        [Fact]
+        public void CreateIncomeFromRecurringItem_ThrowsIfCategoryIdIsNull()
+        {
+
+            var recurring = new RecurringItem
+            {
+                Name = "Salary",
+                Description = "Monthly paycheck",
+                Type = "Income",
+                IsActive = true,
+                StartDate = DateTime.Today.AddMonths(-12),
+                Frequency = RecurrenceTypeEnum.Monthly,
+                Amount = 3000m,
+                CategoryId = null
+            };
+
+            // Act & Assert
+            var exception = Assert.Throws<InvalidOperationException>(() =>
+                _service.CreateIncomeFromRecurringItem(recurring)
+            );
+
+            Assert.Equal("Recurring item must have a CategoryId.", exception.Message);
         }
     }
 }
