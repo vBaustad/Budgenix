@@ -1,0 +1,16 @@
+@import "tailwindcss/preflight";
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-white text-gray-900;
+  }
+
+  h1 {
+    @apply text-5xl font-bold;
+  }
+
+  button {
+    @apply bg-blue-600 text-white px-6 py-3 rounded-lg text-lg hover:bg-blue-700 transition;
+  }
+}
