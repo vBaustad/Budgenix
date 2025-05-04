@@ -8,6 +8,8 @@ import LandingPage from './pages/public/LandingPage';
 import LoginPage from './pages/public/LoginPage';
 import BaseLayout from './components/public/BaseLayout'
 import RegisterPage from './pages/public/RegisterPage';
+import PrivateRoute from './components/app/PrivateRoute';
+import AppLayout from './components/app/AppLayout';
 
 function App() {
   const [isLoggedIn] = useState(false);
@@ -19,7 +21,7 @@ function App() {
           <Route path="/" element={<BaseLayout><LandingPage /></BaseLayout>} />
           <Route path="/login" element={<BaseLayout><LoginPage/></BaseLayout>} />
           <Route path="/register" element={<BaseLayout><RegisterPage/></BaseLayout>} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard" element={<PrivateRoute><AppLayout><Dashboard /></AppLayout></PrivateRoute>} />
         </Routes>
       </Router>
     </AuthProvider>
