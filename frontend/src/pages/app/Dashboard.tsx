@@ -1,12 +1,8 @@
-import React from 'react';
-
-const Dashboard: React.FC = () => {
+export default function Dashboard() {
     return (
         <div>
-            <h1 className="text-3xl font-bold text-blue-500">Dashboard</h1>
-            <p>Welcome to your budgenix Dashboard</p>
+            <h2 className="text-2xl font-bold mb-4">Welcome to your Dashboard 👋</h2>
+            <p>Here you'll see your budget, expenses, and more.</p>
         </div>
     );
-};
-
-export default Dashboard;
+}

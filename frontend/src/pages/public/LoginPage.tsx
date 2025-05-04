@@ -1,22 +1,30 @@
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 
 export default function LoginPage() {
   const { login, isLoggedIn } = useAuth();
   const navigate = useNavigate();
   
  
-  if (isLoggedIn) {
-    navigate('/dashboard');
-    return null;
-  }
+    // 🚨 Use useEffect to redirect if already logged in
+    useEffect(() => {
+        if (isLoggedIn) {
+            navigate('/dashboard', { replace: true });
+        }
+    }, [isLoggedIn, navigate]);
 
-  const handleLogin = (e: React.FormEvent) => {
-      e.preventDefault();
-      // Do validation here...
-      login();
-      navigate('/dashboard');  
-    };  
+    const handleLogin = (e: React.FormEvent) => {
+        e.preventDefault();
+        // Do validation here...
+        login();
+        navigate('/dashboard');
+    };
+
+   
+    if (isLoggedIn) {
+        return null; // or a small loading spinner if you want
+    }
 
   return (
     <>
