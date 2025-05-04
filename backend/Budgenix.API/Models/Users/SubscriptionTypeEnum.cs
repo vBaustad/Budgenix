@@ -3,8 +3,8 @@
     public enum SubscriptionTypeEnum
     {
         Free,
-        Plus,
+        Hobby,
         Pro,
-        Elite
+        ProPlus
     }
 }
