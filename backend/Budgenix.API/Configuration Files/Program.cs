@@ -26,7 +26,6 @@ Console.WriteLine("Connection String (Forced Load): " + builder.Configuration.Ge
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddAutoMapper(typeof(MappingProfile));
@@ -50,7 +49,12 @@ builder.Services.Configure<IdentityOptions>(options =>
 });
 
 // Add Authentication
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+})
 .AddJwtBearer(options =>
 {
     var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!);
@@ -77,6 +81,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     };
 });
 
+
+builder.Services.AddAuthorization();
 builder.Services.AddScoped<JwtTokenService>();
 
 var app = builder.Build();
@@ -93,8 +99,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.UseAuthentication();
+
 app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 

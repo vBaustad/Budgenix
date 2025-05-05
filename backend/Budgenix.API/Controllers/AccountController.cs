@@ -20,7 +20,7 @@ namespace Budgenix.API.Controllers
             _jwtTokenService = jwtTokenService;
         }
 
-        //[Authorize]
+        [Authorize]
         [HttpGet("protected")]        
         public IActionResult GetProtected()
         {
