@@ -1,10 +1,11 @@
 import React from 'react';
+import BudgenixLogo from '../../assets/Logo/BudgenixLogo.png';
 
 const currentYear = new Date().getFullYear();
 
 export default function Footer() {
   return (
-    <div className="relative bg-gray-900">
+    <div className="relative bg-base-100">
       <div
         aria-hidden="true"
         className="absolute inset-x-0 h-95 z-10 transform-gpu overflow-hidden blur-3xl"
@@ -19,18 +20,13 @@ export default function Footer() {
     </div>
     <footer >
     
-      <div className="mx-auto max-w-7xl px-6 pt-16 pb-8 sm:pt-24 lg:px-8 lg:pt-32 text-center">
-        <img
-          alt="Budgenix"
-          src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500"
-          className="mx-auto h-9"
-        />
-        <p className="mt-4 max-w-xl mx-auto text-sm text-gray-400">
+      <div className="mx-auto max-w-7xl px-6 pt-16 pb-8 sm:pt-24 lg:px-8 lg:pt-32 text-center">       
+        <img src={BudgenixLogo} alt="Budgenix" className="mx-auto h-9" />
+        <p className="mt-4 max-w-xl mx-auto text-sm text-base-content/70">
           Budgenix helps you manage your personal finances with ease and clarity. Built for simplicity and control.
         </p>
-
-        <div className="mt-16 border-t border-white/10 pt-8 sm:mt-20 lg:mt-24">
-          <p className="text-sm/6 text-gray-400">
+        <div className="mt-16 border-t border-base-content/10 pt-8 sm:mt-20 lg:mt-24">
+          <p className="text-sm/6 text-base-content/70">
             &copy; 2025 - {currentYear} Budgenix. All rights reserved.
           </p>
         </div>

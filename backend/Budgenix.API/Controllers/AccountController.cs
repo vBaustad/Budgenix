@@ -1,6 +1,8 @@
-﻿using Budgenix.Dtos.Users;
+﻿using Budgenix.API.Models.Users;
+using Budgenix.Dtos.Users;
 using Budgenix.Helpers;
 using Budgenix.Models.Users;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,12 +22,51 @@ namespace Budgenix.API.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(RegisterDto dto)
+        public async Task<IActionResult> Register([FromBody] RegisterDto dto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var isFreeTier = dto.SubscriptionTier == SubscriptionTypeEnum.Free;
+
+            DateTime? subscriptionStartDate = isFreeTier ? null : DateTime.UtcNow;
+            DateTime? subscriptionEndDate = isFreeTier
+                ? null
+                : dto.BillingCycle == BillingCycleEnum.Monthly
+                    ? DateTime.UtcNow.AddMonths(1)
+                    : DateTime.UtcNow.AddYears(1);
+
             var user = new ApplicationUser
             {
                 UserName = dto.UserName,
                 Email = dto.Email,
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
+
+                // Address fields (optional)
+                AddressLine1 = dto.AddressLine1,
+                AddressLine2 = dto.AddressLine2,
+                City = dto.City,
+                StateOrProvince = dto.StateOrProvince,
+                ZipOrPostalCode = dto.ZipOrPostalCode,
+                Country = dto.Country,
+
+                // Subscription details
+                SubscriptionTier = dto.SubscriptionTier,
+                SubscriptionIsActive = true,
+                SubscriptionStartDate = subscriptionStartDate,
+                SubscriptionEndDate = subscriptionEndDate,
+                BillingCycle = dto.BillingCycle,
+
+                //Referral
+                ReferralCode = $"{dto.UserName}-{Guid.NewGuid().ToString().Substring(0, 6)}",
+
+
+                // Payment IDs (optional)
+                StripeCustomerId = dto.StripeCustomerId,
+                PayPalSubscriptionId = dto.PayPalSubscriptionId
             };
 
             var result = await _userManager.CreateAsync(user, dto.Password);
@@ -35,8 +76,56 @@ namespace Budgenix.API.Controllers
                 return BadRequest(result.Errors);
             }
 
-            var token = _jwtTokenService.CreateToken(user);
-            return Ok(new {Token = token });
+            // generate confirmation token
+            var emailToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+
+            // create confirmation link (you’d replace localhost in prod)
+            var confirmationLink = Url.Action(nameof(ConfirmEmail), "Account",
+                new { userId = user.Id, emailToken }, Request.Scheme);
+
+            // TODO: send confirmationLink via email
+            Console.WriteLine($"Confirmation link: {confirmationLink}");
+
+
+
+            return Ok(new
+            {
+                message = "Registration successful! Please check your email to confirm your account.",
+                confirmationLink // return it for testing; remove in prod
+            });
+        }
+
+        [HttpGet("confirm-email")]
+        public async Task<IActionResult> ConfirmEmail(string userId, string token)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return NotFound();
+
+            token = Uri.UnescapeDataString(token);
+
+
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+            if (!result.Succeeded) return BadRequest("Email confirmation failed.");
+
+            // activate subscription only after email confirmed
+            user.SubscriptionIsActive = true;
+            user.SubscriptionStartDate ??= DateTime.UtcNow;
+
+            await _userManager.UpdateAsync(user);
+
+
+            var jwtToken = _jwtTokenService.CreateToken(user);
+
+            // Set token in HttpOnly cookie
+            Response.Cookies.Append("authToken", jwtToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true, // Set to true if using HTTPS
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTimeOffset.UtcNow.AddDays(7)
+            });
+
+            return Ok("Email confirmed! You can now log in.");
         }
 
         [HttpPost("login")]
@@ -48,8 +137,74 @@ namespace Budgenix.API.Controllers
                 return Unauthorized("Invalid email or password");
             }
 
+            if (!user.EmailConfirmed)
+            {
+                return Unauthorized("Please confirm your email before logging in.");
+            }
+
             var token = _jwtTokenService?.CreateToken(user);
-            return Ok(new {Token = token});
+
+            // Set token in HttpOnly cookie
+            Response.Cookies.Append("authToken", token, new CookieOptions
+            {
+                HttpOnly = true,
+                //Secure = true, // Set to true if using HTTPS
+                Secure=false,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTimeOffset.UtcNow.AddDays(7)
+            });
+
+            return Ok(new
+            {
+                message = "Login successful",
+                user = new
+                {
+                    user.Id,
+                    user.UserName,
+                    user.Email
+                }
+            });
         }
+
+        [HttpPost("logout")]
+        public IActionResult Logout()
+        {
+            // Remove the auth token cookie
+            Response.Cookies.Delete("authToken");
+
+            return Ok(new { message = "Logged out successfully" });
+        }
+
+        [Authorize]
+        [HttpGet("protected")]
+        public IActionResult GetProtected()
+        {
+            return Ok(new { message = "You have accessed a protected route!" });
+        }
+
+        [Authorize]
+        [HttpGet("me")]
+        public async Task<IActionResult> GetCurrentUser()
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null) return Unauthorized();
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return NotFound();
+
+            return Ok(new
+            {
+                user.Id,
+                user.UserName,
+                user.Email,
+                user.SubscriptionTier,
+                user.SubscriptionIsActive,
+                user.SubscriptionStartDate,
+                user.SubscriptionEndDate,
+                user.BillingCycle,
+                user.ReferralCode
+            });
+        }
+
     }
 }

@@ -6,7 +6,7 @@ type BaseLayoutProps = {
 
 export default function BackgroundWrapper({ children }: BaseLayoutProps) {
     return (
-        <div className="bg-gray-900 relative">
+        <div className="bg-base-100 relative">
             {/* Top gradient */}
             <div
                 aria-hidden="true"
@@ -20,7 +20,6 @@ export default function BackgroundWrapper({ children }: BaseLayoutProps) {
                     className="relative left-[calc(50%-11rem)] aspect-1155/678 w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-20 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]"
                 />
             </div>
-
             {children}
         </div>
     );
