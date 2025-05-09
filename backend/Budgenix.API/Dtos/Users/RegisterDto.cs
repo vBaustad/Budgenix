@@ -8,23 +8,23 @@ namespace Budgenix.Dtos.Users
     {
         [Required]
         [MinLength(3)]
-        public string UserName { get; set; } = null!;
+        public required string UserName { get; set; }
 
         [Required]
         [EmailAddress]
-        public string Email { get; set; } = null!;
+        public required string Email { get; set; }
 
         [Required]
         [MinLength(6)]
-        public string Password { get; set; } = null!;
+        public required string Password { get; set; }
 
         [Required]
         [MaxLength(100)]
-        public required string FirstName { get; set; }  // Required: first name
+        public required string FirstName { get; set; } 
 
         [Required]
         [MaxLength(100)]
-        public required string LastName { get; set; }   // Required: last name
+        public required string LastName { get; set; } 
 
         // Address info (optional)
         public string? AddressLine1 { get; set; }
@@ -37,10 +37,11 @@ namespace Budgenix.Dtos.Users
         // Subscription fields
         [Required]
         public SubscriptionTypeEnum SubscriptionTier { get; set; } = SubscriptionTypeEnum.Free;  // default to Free
-
-        public bool SubscriptionIsActive { get; set; } = false; // default false
-
         public BillingCycleEnum BillingCycle { get; set; } = BillingCycleEnum.Monthly; // default Monthly
+
+        // Referral input
+        [MaxLength(50)]
+        public string? ReferralCodeUsed { get; set; }
 
         // Stripe & PayPal (optional, set later or during registration)
         public string? StripeCustomerId { get; set; }

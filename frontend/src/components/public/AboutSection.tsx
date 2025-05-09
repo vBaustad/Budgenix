@@ -50,8 +50,8 @@ const stats = [
   ]
   export default function AboutSection() {
     return (
-        <div id="about">
-            <main className="relative isolate">
+        <div id="about" className="relative isolate bg-base-100">
+            {/* <main > */}
             {/* Background */}
             <div
             aria-hidden="true"
@@ -69,8 +69,8 @@ const stats = [
             {/* Header section */}
             <div className="px-6 pt-14 lg:px-8">
             <div className="mx-auto max-w-2xl pt-24 text-center sm:pt-40">
-                <h1 className="text-5xl font-semibold tracking-tight text-white sm:text-7xl">Budgeting Made Simple</h1>
-                <p className="mt-8 text-lg font-medium text-pretty text-gray-400 sm:text-xl/8">
+                <h1 className="text-5xl font-semibold tracking-tight text-base-content sm:text-7xl">Budgeting Made Simple</h1>
+                <p className="mt-8 text-lg font-medium text-pretty text-base-content/70 sm:text-xl/8">
                 Budgenix empowers individuals and households to take control of their finances with intuitive tools for tracking expenses, setting goals, and managing budgets effortlessly.
                 </p>
             </div>
@@ -79,7 +79,7 @@ const stats = [
             {/* Content section */}
             <div className="mx-auto mt-20 max-w-7xl px-6 lg:px-8">
             <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-none">
-                <div className="grid max-w-xl grid-cols-1 gap-8 text-base/7 text-gray-300 lg:max-w-none lg:grid-cols-2">
+                <div className="grid max-w-xl grid-cols-1 gap-8 text-base/7 text-base-content/80 lg:max-w-none lg:grid-cols-2">
                 <div>
                     <p>
                       Budgenix is built for real people who want a clear view of their personal finances. Whether you're saving for a dream vacation or simply want to know where your money goes each month, Budgenix makes it easy to stay on track.
@@ -99,9 +99,9 @@ const stats = [
                 </div>
                 <dl className="mt-16 grid grid-cols-1 gap-x-8 gap-y-12 sm:mt-20 sm:grid-cols-2 sm:gap-y-16 lg:mt-28 lg:grid-cols-4">
                 {stats.map((stat, statIdx) => (
-                    <div key={statIdx} className="flex flex-col-reverse gap-y-3 border-l border-white/20 pl-6">
-                    <dt className="text-base/7 text-gray-300">{stat.label}</dt>
-                    <dd className="text-3xl font-semibold tracking-tight text-white">{stat.value}</dd>
+                    <div key={statIdx} className="flex flex-col-reverse gap-y-3 border-l border-base-content/10 pl-6">
+                    <dt className="text-base/7 text-base-content/70">{stat.label}</dt>
+                    <dd className="text-3xl font-semibold tracking-tight text-base-content">{stat.value}</dd>
                     </div>
                 ))}
                 </dl>
@@ -120,16 +120,16 @@ const stats = [
             {/* Values section */}
             <div className="mx-auto mt-32 max-w-7xl px-6 sm:mt-40 lg:px-8">
             <div className="mx-auto max-w-2xl lg:mx-0">
-                <h2 className="text-4xl font-semibold tracking-tight text-pretty text-white sm:text-5xl">Our Mission & Values</h2>
-                <p className="mt-6 text-lg/8 text-gray-300">
+                <h2 className="text-4xl font-semibold tracking-tight text-pretty text-base-content sm:text-5xl">Our Mission & Values</h2>
+                <p className="mt-6 text-lg/8 text-base-content/70">
                   Budgenix is dedicated to helping people achieve financial clarity and freedom. Our core values guide everything we do.
                 </p>
             </div>
-            <dl className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-8 text-base/7 text-gray-300 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-3 lg:gap-x-16">
+            <dl className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-8 text-base/7 text-base-content/70 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-3 lg:gap-x-16">
                 {values.map((value) => (
                 <div key={value.name} className="relative pl-9">
-                    <dt className="inline font-semibold text-white">
-                    <value.icon aria-hidden="true" className="absolute top-1 left-1 size-5 text-indigo-500" />
+                    <dt className="inline font-semibold text-base-content">
+                    <value.icon aria-hidden="true" className="absolute top-1 left-1 size-5 text-primary" />
                     {value.name}
                     </dt>{' '}
                     <dd className="inline">{value.description}</dd>
@@ -137,7 +137,7 @@ const stats = [
                 ))}
             </dl>
             </div>
-        </main>
+        {/* </main> */}
         </div>
     )
 }

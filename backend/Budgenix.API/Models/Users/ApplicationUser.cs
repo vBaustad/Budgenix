@@ -54,6 +54,14 @@ namespace Budgenix.Models.Users
         [MaxLength(20)]
         public BillingCycleEnum BillingCycle { get; set; }   // e.g., "Monthly" / "Annually" - Optional
 
+        [MaxLength(50)]
+        public string? ReferralCodeUsed { get; set; }  // code the user entered
+
+        [MaxLength(50)]
+        public string? ReferralCode { get; set; }  // unique referral code for this user
+
+        public string? GrantedByUserId { get; set; }  // user ID of who granted tier manually
+
         // Optional: Stripe or PayPal identifiers (for billing links)
 
         [MaxLength(100)]
@@ -62,9 +70,18 @@ namespace Budgenix.Models.Users
         [MaxLength(100)]
         public string? PayPalSubscriptionId { get; set; }  // Optional
 
+
         // Household/group sharing (optional)
 
         public Guid? HouseholdId { get; set; }  // Optional
+
+        // Discount / Trial fields 
+
+        public bool IsTrial { get; set; } = false;
+        public DateTime? TrialEndDate { get; set; }
+        public decimal? DiscountPercent { get; set; }  // e.g. 20% off
+        public DateTime? DiscountEndDate { get; set; }
+
 
         // Related collections
 
