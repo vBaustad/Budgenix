@@ -11,12 +11,12 @@ type BaseLayoutProps = {
 export default function BaseLayout({ children }: BaseLayoutProps) {
     return (
         <>
-            <BackgroundWrapper>
-                <Navbar />
-                <ScrollToHash />
-                {children}
-            </BackgroundWrapper>
-            <Footer />
+        <BackgroundWrapper>
+            <Navbar />
+            <ScrollToHash />
+            {children}
+        </BackgroundWrapper>
+        <Footer />
         </>
     );
 }

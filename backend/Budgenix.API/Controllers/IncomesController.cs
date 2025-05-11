@@ -9,6 +9,7 @@ using Budgenix.Services;
 using AutoMapper;
 using Budgenix.Models.Finance;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Localization;
 
 namespace Budgenix.API.Controllers
 {
@@ -20,12 +21,14 @@ namespace Budgenix.API.Controllers
         private readonly BudgenixDbContext _context;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
+        private readonly IStringLocalizer<SharedResource> _localizer;
 
-        public IncomesController(IUserService userService, BudgenixDbContext context, IMapper mapper)
+        public IncomesController(IUserService userService, BudgenixDbContext context, IMapper mapper, IStringLocalizer<SharedResource> localizer)
         {
             _context = context;
             _userService = userService;
             _mapper = mapper;
+            _localizer = localizer;
         }
 
         // =======================================
@@ -60,7 +63,7 @@ namespace Budgenix.API.Controllers
                 var groupByKey = groupBy.ToLower();
 
                 if (groupByKey != "month" && groupByKey != "category" && groupByKey != "year")
-                    return BadRequest("Invalid groupBy value. Use 'month', 'category', or 'year'.");
+                    return BadRequest(_localizer["Shared_InvalidGroupByValue"]);
 
                 var groupedEntities = await incomes.ToListAsync();
                 var grouped = IncomeQueryHelper.ApplyGrouping(groupedEntities, groupByKey, _mapper);
@@ -82,7 +85,7 @@ namespace Budgenix.API.Controllers
             var userId = _userService.GetUserId();
 
             if (string.IsNullOrWhiteSpace(query))
-                return BadRequest("Search query cannot be empty.");
+                return BadRequest(_localizer["Shared_EmptySearchQuery"]);
 
             var matches = await _context.Incomes
                 .Include(i => i.Category)
@@ -167,7 +170,7 @@ namespace Budgenix.API.Controllers
             var category = await _context.Categories.FindAsync(dto.CategoryId);
 
             if (category == null)
-                return BadRequest("Invalid category ID.");
+                return BadRequest(_localizer["Shared_InvalidCategoryId"]);
 
            
             var income = _mapper.Map<Income>(dto);
@@ -199,7 +202,7 @@ namespace Budgenix.API.Controllers
             if (existing == null) return NotFound();
 
             var category = await _context.Categories.FindAsync(dto.CategoryId);
-            if (category == null) return BadRequest("Invalid category ID.");
+            if (category == null) return BadRequest(_localizer["Shared_InvalidCategoryId"]);
 
             _mapper.Map(dto, existing);
             existing.Category = category;

@@ -21,6 +21,7 @@ type User = {
 
 type AuthContextType = {
   isLoggedIn: boolean;
+  isLoading: boolean;
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -32,6 +33,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [theme, setThemeState] = useState<string>(() => {
     return localStorage.getItem("theme") ?? "halloween"; // default theme
@@ -41,9 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     async function checkAuth() {
       try {
-        const response = await fetch("/api/account/me", {
-          credentials: "include",
-        });
+        const response = await fetch("/api/account/me", { credentials: "include" });
         if (response.ok) {
           const userData = await response.json();
           setUser(userData);
@@ -56,9 +56,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.error("Auth check failed:", err);
         setUser(null);
         setIsLoggedIn(false);
+      }finally {
+        setIsLoading(false);
       }
     }
-
     checkAuth();
   }, []);
 
@@ -109,7 +110,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, user, login, logout, theme, setTheme: applyTheme }}>
+    <AuthContext.Provider value={{ isLoggedIn, isLoading, user, login, logout, theme, setTheme: applyTheme }}>
       {children}
     </AuthContext.Provider>
   );

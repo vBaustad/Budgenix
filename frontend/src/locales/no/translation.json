@@ -1,0 +1,193 @@
+{
+    "sidebar": {
+        "main": "Hovedmeny",
+        "dashboard": "Oversikt",
+        "budgets": "Budsjetter",
+        "expenses": "Utgifter",
+        "income": "Inntekt",
+        "planning": "Planlegging",
+        "goals": "Mål",
+        "vacation": "Feriemodus",
+        "reports": "Rapporter",
+        "system": "System",
+        "settings": "Innstillinger",
+        "logout": "Logg ut",
+        "profile": "Profil",
+        "openSidebar": "Åpne sidemeny",
+        "closeSidebar": "Lukk sidemeny"
+    },
+    "topbar": {
+        "dashboardTitle": "Dashbord",
+        "logout": "Logg ut"
+    },
+    "dashboard": {
+        "welcome": "Velkommen til dashbordet ditt 👋",
+        "description": "Her vil du se budsjettet ditt, utgifter og mer."
+    },
+    "navbar": {
+        "home": "Hjem",
+        "features": "Funksjoner",
+        "pricing": "Priser",
+        "signup": "Registrer deg",
+        "login": "Logg inn",
+        "openMenu": "Åpne meny",
+        "closeMenu": "Lukk meny",
+        "brandAlt": "Budgenix-logo"
+    },
+    "hero": {
+        "title": "Få kontroll over budsjettet ditt med Budgenix",
+        "description": "Budgenix hjelper deg med å holde oversikt over utgifter, sette mål og mestre personlig økonomi uten stress. Hold deg oppdatert på budsjettet ditt med kraftige verktøy og innsiktsfull analyse.",
+        "getStarted": "Kom i gang",
+        "learnMore": "Les mer"
+    },
+    "about": {
+        "title": "Budsjettering gjort enkelt",
+        "description": "Budgenix gir enkeltpersoner og husholdninger muligheten til å ta kontroll over økonomien med intuitive verktøy for utgiftssporing, målsetting og budsjettstyring.",
+        "paragraph1": "Budgenix er bygget for vanlige folk som ønsker oversikt over privatøkonomien. Enten du sparer til en drømmeferie eller bare vil vite hvor pengene dine tar veien, gjør Budgenix det enkelt å holde seg på sporet.",
+        "paragraph2": "Plattformen vår forenkler budsjettering med smarte kategorier, gjentakende utgifter og innsiktsfulle analyser – slik at du kan ta trygge økonomiske valg hver dag.",
+        "paragraph3": "Med Budgenix kan du sette opp budsjetter på få minutter, spore forbruk på tvers av kontoer og visualisere fremgangen mot dine økonomiske mål. Vi prioriterer enkelhet og åpenhet, slik at du alltid vet hvor du står.",
+        "paragraph4": "Enten du budsjetterer alene eller deler utgifter med familien, gir Budgenix deg verktøyene du trenger for å samarbeide, spare smartere og nå målene raskere.",
+        "stats": {
+        "founded": "Grunnlagt",
+        "users": "Brukere som budsjetterer med Budgenix",
+        "budgets": "Budsjetter opprettet",
+        "countries": "Land vi støtter"
+        },
+        "missionTitle": "Vår misjon og verdier",
+        "missionDescription": "Budgenix er dedikert til å hjelpe folk med å oppnå økonomisk klarhet og frihet. Våre kjerneverdier styrer alt vi gjør.",
+        "values": {
+        "transparency": {
+            "title": "Vær gjennomsiktig.",
+            "desc": "Vi tror på klarhet – ingen skjulte avgifter, ingen overraskelser. Dine økonomiske data tilhører deg, alltid."
+        },
+        "empowerment": {
+            "title": "Gi brukerne kontroll.",
+            "desc": "Våre verktøy er laget for å gi deg full kontroll over din økonomiske reise – uansett erfaringsnivå."
+        },
+        "privacy": {
+            "title": "Personvern først.",
+            "desc": "Sikkerhet og personvern står sentralt i Budgenix. Dine data er kryptert og beskyttet."
+        },
+        "improvement": {
+            "title": "Vi forbedrer oss stadig.",
+            "desc": "Vi forbedrer Budgenix kontinuerlig basert på tilbakemeldinger – slik at det utvikler seg med dine behov."
+        },
+        "collaboration": {
+            "title": "Samarbeid og vekst.",
+            "desc": "Budsjettering er ikke alltid en solojobb – vi muliggjør felles budsjettering for familier og husholdninger."
+        },
+        "simplicity": {
+            "title": "Hold det enkelt.",
+            "desc": "Vi kutter kompleksiteten slik at du kan fokusere på det som betyr noe: dine mål."
+        }
+        }
+    },
+    "footer": {
+        "description": "Budgenix hjelper deg med å håndtere din personlige økonomi med enkelhet og oversikt. Bygget for kontroll og brukervennlighet.",
+        "rightsReserved": "Alle rettigheter reservert."
+    },
+    "pricing": {
+        "title": "Enkel og oversiktlig prising",
+        "description": "Budgenix tilbyr fleksible planer for alle stadier i din økonomiske reise – fra nybegynner til full kontroll. Velg den planen som passer deg best, og oppgrader når som helst.",
+        "monthly": "Månedlig",
+        "annually": "Årlig",
+        "buyButton": "Kjøp plan",
+        "mostPopular": "Mest populær",
+        "tiers": {
+            "free": {
+            "name": "Gratis",
+            "description": "Grunnleggende budsjetteringsverktøy for å komme i gang.",
+            "features": {
+                "trackExpenses": "Spor utgifter",
+                "simpleBudgets": "Enkle budsjetter",
+                "basicReports": "Grunnleggende rapporter"
+            }
+            },
+            "hobby": {
+            "name": "Hobby",
+            "description": "Ekstra verktøy for entusiastiske privatøkonomer.",
+            "features": {
+                "recurringExpenses": "Gjentakende utgifter",
+                "categoryGrouping": "Kategorigruppering",
+                "exportCSV": "Eksporter til CSV",
+                "emailSupport": "E-postsupport"
+            }
+            },
+            "pro": {
+            "name": "Pro",
+            "description": "Avanserte verktøy for seriøse budsjetterere.",
+            "features": {
+                "allHobbyFeatures": "Alle Hobby-funksjoner",
+                "advancedAnalytics": "Avansert analyse",
+                "savingsGoals": "Sparemål",
+                "multiDeviceSync": "Synkronisering på tvers av enheter",
+                "prioritySupport": "Prioritert support"
+            }
+            },
+            "proplus": {
+            "name": "Pro+",
+            "description": "Full pakke, samarbeid og VIP-verktøy.",
+            "features": {
+                "allProFeatures": "Alle Pro-funksjoner",
+                "sharedBudgets": "Delte budsjetter (husholdning)",
+                "goalAutomation": "Automatisering av målfremdrift",
+                "investmentTracking": "Investeringsovervåking",
+                "vipSupport": "VIP-support"
+            }
+            }
+        }
+    },
+    "signup": {
+        "title": "Velg din plan",
+        "subtitle": "Enten du er nybegynner eller en budsjettproff, har vi en plan som passer deg.",
+        "selected": "Valgt",
+        "paymentFrequency": "Betalingsfrekvens",
+        "plan": "Plan",
+        "formTitle": "Opprett en konto",
+        "alreadyHaveAccount": "Har du allerede en konto?",
+        "loginLink": "Logg inn her"
+    },
+    "login": {
+        "title": "Logg inn på kontoen din",
+        "email": "E-postadresse",
+        "password": "Passord",
+        "forgotPassword": "Glemt passord?",
+        "signIn": "Logg inn",
+        "noAccount": "Ikke medlem?",
+        "register": "Registrer deg gratis",
+        "errorFallback": "Innlogging feilet"
+    },
+    "payment": {
+        "paypal": "PayPal",
+        "creditCard": "Kredittkort"
+    },
+    "register": {
+        "fields": {
+            "username": "Brukernavn",
+            "firstName": "Fornavn",
+            "lastName": "Etternavn",
+            "email": "E-post",
+            "password": "Passord",
+            "confirmPassword": "Bekreft passord",
+            "address": "Adresse",
+            "country": "Velg land"
+        },
+        "paymentMethodLabel": "Velg betalingsmetode:",
+        "stripePlaceholder": "Stripe kredittkortskjema her",
+        "submitFree": "Opprett gratis konto",
+        "submitPaid": "Fullfør registrering",
+        "success": "Registreringen var vellykket!",
+        "errors": {
+            "passwordMismatch": "Passordene samsvarer ikke!",
+            "addressRequired": "Adresse kreves for betalte planer!",
+            "paymentRequired": "Vennligst velg en betalingsmetode!",
+            "generic": "Registreringen feilet.",
+            "network": "Noe gikk galt. Vennligst prøv igjen."
+        }
+    }
+
+
+    
+
+  }
+  

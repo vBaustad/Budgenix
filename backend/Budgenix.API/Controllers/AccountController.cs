@@ -1,10 +1,12 @@
 ﻿using Budgenix.API.Models.Users;
 using Budgenix.Dtos.Users;
 using Budgenix.Helpers;
+using Budgenix.Models.Shared;
 using Budgenix.Models.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 
 namespace Budgenix.API.Controllers
 {
@@ -14,11 +16,13 @@ namespace Budgenix.API.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly JwtTokenService _jwtTokenService;
+        private readonly IStringLocalizer<SharedResource> _localizer;
 
-        public AccountController(UserManager<ApplicationUser> userManager, JwtTokenService jwtTokenService)
+        public AccountController(UserManager<ApplicationUser> userManager, JwtTokenService jwtTokenService, IStringLocalizer<SharedResource> localizer)
         {
             _userManager = userManager;
             _jwtTokenService = jwtTokenService;
+            _localizer = localizer;
         }
 
         [HttpPost("register")]
@@ -84,13 +88,13 @@ namespace Budgenix.API.Controllers
                 new { userId = user.Id, emailToken }, Request.Scheme);
 
             // TODO: send confirmationLink via email
-            Console.WriteLine($"Confirmation link: {confirmationLink}");
+            Console.WriteLine($"{_localizer["Auth_EmailConfirmationLink"]} {confirmationLink}");
 
 
 
             return Ok(new
             {
-                message = "Registration successful! Please check your email to confirm your account.",
+                message = _localizer["Auth_RegistrationSuccessful"],
                 confirmationLink // return it for testing; remove in prod
             });
         }
@@ -105,7 +109,7 @@ namespace Budgenix.API.Controllers
 
 
             var result = await _userManager.ConfirmEmailAsync(user, token);
-            if (!result.Succeeded) return BadRequest("Email confirmation failed.");
+            if (!result.Succeeded) return BadRequest(_localizer["Auth_EmailConfirmationFailed"]);
 
             // activate subscription only after email confirmed
             user.SubscriptionIsActive = true;
@@ -125,7 +129,7 @@ namespace Budgenix.API.Controllers
                 Expires = DateTimeOffset.UtcNow.AddDays(7)
             });
 
-            return Ok("Email confirmed! You can now log in.");
+            return Ok(_localizer["Auth_EmailConfirmed"]);
         }
 
         [HttpPost("login")]
@@ -134,12 +138,12 @@ namespace Budgenix.API.Controllers
             var user = await _userManager.FindByEmailAsync(dto.Email);
             if(user == null || !await _userManager.CheckPasswordAsync(user, dto.Password))
             {
-                return Unauthorized("Invalid email or password");
+                return Unauthorized(_localizer["Auth_InvalidEmailOrPw"]);
             }
 
             if (!user.EmailConfirmed)
             {
-                return Unauthorized("Please confirm your email before logging in.");
+                return Unauthorized(_localizer["Auth_ConfirmEmailBeforeLogin"]);
             }
 
             var token = _jwtTokenService?.CreateToken(user);
@@ -156,7 +160,7 @@ namespace Budgenix.API.Controllers
 
             return Ok(new
             {
-                message = "Login successful",
+                message = _localizer["Auth_LoginSuccessful"],
                 user = new
                 {
                     user.Id,
@@ -172,14 +176,14 @@ namespace Budgenix.API.Controllers
             // Remove the auth token cookie
             Response.Cookies.Delete("authToken");
 
-            return Ok(new { message = "Logged out successfully" });
+            return Ok(new { message = _localizer["Auth_LogoutSuccessful"] });
         }
 
         [Authorize]
         [HttpGet("protected")]
         public IActionResult GetProtected()
         {
-            return Ok(new { message = "You have accessed a protected route!" });
+            return Ok(new { message = _localizer["Auth_ProtectedRouteAccessed"] });
         }
 
         [Authorize]

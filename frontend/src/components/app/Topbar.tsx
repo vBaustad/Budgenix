@@ -1,16 +1,17 @@
-import { useAuth } from '../../context/AuthContext';
+// import { useAuth } from '../../context/AuthContext';
+import { useTranslation } from 'react-i18next';
+import { ThemeDropdown } from '../common/ThemeDropdown';
 
 export default function Topbar() {
-    const { logout } = useAuth();
+    const { t } = useTranslation();
+    // const { logout } = useAuth();
 
     return (
-        <div className="flex justify-between items-center bg-gray-800 p-4 border-b border-gray-700">
-            <h1 className="text-lg font-bold">Dashboard</h1>
-            <button
-                onClick={logout}
-                className="bg-indigo-500 hover:bg-indigo-400 px-3 py-1 rounded text-sm font-semibold">
-                Log Out
-            </button>
-        </div>
+        <>
+            <div className="h-14 flex shadow items-center justify-between px-6 bg-base-100">
+                <h1 className="text-xl font-bold">{t('topbar.dashboardTitle')}</h1>
+                <ThemeDropdown />  
+            </div>            
+        </>
     );
 }

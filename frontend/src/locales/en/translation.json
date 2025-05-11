@@ -1,0 +1,193 @@
+{
+    "sidebar": {
+        "main": "Main",
+        "dashboard": "Dashboard",
+        "budgets": "Budgets",
+        "expenses": "Expenses",
+        "income": "Income",
+        "planning": "Planning",
+        "goals": "Goals",
+        "vacation": "Vacation Mode",
+        "reports": "Reports",
+        "system": "System",
+        "settings": "Settings",
+        "profile": "Your profile",
+        "logout": "Log Out",
+        "openSidebar": "Open sidebar",
+        "closeSidebar": "Close sidebar"
+    },
+    "topbar": {
+        "dashboardTitle": "Dashboard",
+        "logout": "Log Out"
+    },
+    "dashboard": {
+        "welcome": "Welcome to your Dashboard 👋",
+        "description": "Here you'll see your budget, expenses, and more."
+    },
+    "navbar": {
+        "home": "Home",
+        "features": "Features",
+        "pricing": "Pricing",
+        "signup": "Sign Up",
+        "login": "Log in",
+        "openMenu": "Open main menu",
+        "closeMenu": "Close menu",
+        "brandAlt": "Budgenix Logo"
+    },
+    "hero": {
+        "title": "Take Control of Your Budget with Budgenix",
+        "description": "Budgenix helps you track expenses, set goals, and master your personal finances effortlessly. Stay on top of your budget with powerful tools and insightful analytics.",
+        "getStarted": "Get Started",
+        "learnMore": "Learn more"
+    },
+    "about": {
+        "title": "Budgeting Made Simple",
+        "description": "Budgenix empowers individuals and households to take control of their finances with intuitive tools for tracking expenses, setting goals, and managing budgets effortlessly.",
+        "paragraph1": "Budgenix is built for real people who want a clear view of their personal finances. Whether you're saving for a dream vacation or simply want to know where your money goes each month, Budgenix makes it easy to stay on track.",
+        "paragraph2": "Our platform simplifies the budgeting process with smart categories, recurring expense tracking, and insightful analytics—so you can make confident financial decisions every day.",
+        "paragraph3": "With Budgenix, you can set up budgets in minutes, track your spending across multiple accounts, and visualize your progress toward your financial goals. We prioritize simplicity and transparency, ensuring you always know where you stand.",
+        "paragraph4": "Whether you're budgeting solo or managing shared expenses with your household, Budgenix gives you the tools to collaborate, save smarter, and achieve your goals faster.",
+        "stats": {
+        "founded": "Founded",
+        "users": "Users budgeting with Budgenix",
+        "budgets": "Budgets created",
+        "countries": "Countries served"
+        },
+        "missionTitle": "Our Mission & Values",
+        "missionDescription": "Budgenix is dedicated to helping people achieve financial clarity and freedom. Our core values guide everything we do.",
+        "values": {
+        "transparency": {
+            "title": "Be Transparent.",
+            "desc": "We believe in clarity—no hidden fees, no surprises. Your financial data is yours, always."
+        },
+        "empowerment": {
+            "title": "Empower Users.",
+            "desc": "Our tools are designed to give you full control over your financial journey, no matter your experience level."
+        },
+        "privacy": {
+            "title": "Privacy First.",
+            "desc": "Security and privacy are at the heart of Budgenix. Your data is encrypted and protected."
+        },
+        "improvement": {
+            "title": "Always Improving.",
+            "desc": "We constantly refine Budgenix based on your feedback, ensuring it evolves with your needs."
+        },
+        "collaboration": {
+            "title": "Collaborate & Grow.",
+            "desc": "Budgeting isn’t always solo—we enable shared budgeting for families and households."
+        },
+        "simplicity": {
+            "title": "Keep It Simple.",
+            "desc": "We cut out complexity so you can focus on what matters: your goals."
+        }
+        }
+    },
+    "footer": {
+        "description": "Budgenix helps you manage your personal finances with ease and clarity. Built for simplicity and control.",
+        "rightsReserved": "All rights reserved."
+    },
+    "pricing": {
+        "title":"Simple, Transparent Pricing",
+        "description": "Budgenix offers flexible plans for every stage of your financial journey—from getting started to full financial mastery. Pick the plan that suits your needs and upgrade anytime.",
+        "monthly": "Monthly",
+        "annually": "Annually",
+        "buyButton": "Buy plan",
+        "mostPopular": "Most popular",
+        "tiers": {
+            "free": {
+            "name": "Free",
+            "description": "Basic budgeting features to get you started.",
+            "features": {
+                "trackExpenses": "Track expenses",
+                "simpleBudgets": "Simple budgets",
+                "basicReports": "Basic reports"
+            }
+            },
+            "hobby": {
+            "name": "Hobby",
+            "description": "Extra tools for personal finance enthusiasts.",
+            "features": {
+                "recurringExpenses": "Recurring expenses",
+                "categoryGrouping": "Category grouping",
+                "exportCSV": "Export to CSV",
+                "emailSupport": "Email support"
+            }
+            },
+            "pro": {
+            "name": "Pro",
+            "description": "Advanced tools for serious budgeters.",
+            "features": {
+                "allHobbyFeatures": "All Hobby features",
+                "advancedAnalytics": "Advanced analytics",
+                "savingsGoals": "Savings goals",
+                "multiDeviceSync": "Multi-device sync",
+                "prioritySupport": "Priority support"
+            }
+            },
+            "proplus": {
+            "name": "Pro+",
+            "description": "Full power, collaboration & VIP tools.",
+            "features": {
+                "allProFeatures": "All Pro features",
+                "sharedBudgets": "Shared budgets (households)",
+                "goalAutomation": "Goal tracking automation",
+                "investmentTracking": "Investment tracking",
+                "vipSupport": "VIP support"
+            }
+            }
+        }
+    },
+    "signup": {
+        "title": "Choose Your Plan",
+        "subtitle": "Whether you're just starting or you're a budgeting pro, we have a plan that fits your needs.",
+        "selected": "Selected",
+        "paymentFrequency": "Payment frequency",
+        "plan": "Plan",
+        "formTitle": "Create your account",
+        "alreadyHaveAccount": "Already have an account?",
+        "loginLink": "Log in here"
+    },
+    "login": {
+        "title": "Sign in to your account",
+        "email": "Email address",
+        "password": "Password",
+        "forgotPassword": "Forgot password?",
+        "signIn": "Sign in",
+        "noAccount": "Not a member?",
+        "register": "Register for free",
+        "errorFallback": "Login failed"
+    },
+    "payment": {
+        "paypal": "PayPal",
+        "creditCard": "Credit Card"
+    },
+    "register": {
+        "fields": {
+            "username": "Username",
+            "firstName": "First Name",
+            "lastName": "Last Name",
+            "email": "Email",
+            "password": "Password",
+            "confirmPassword": "Confirm Password",
+            "address": "Address",
+            "country": "Select country"
+        },
+        "paymentMethodLabel": "Choose Payment Method:",
+        "stripePlaceholder": "Stripe credit card form here",
+        "submitFree": "Create Free Account",
+        "submitPaid": "Complete Registration",
+        "success": "Registration successful!",
+        "errors": {
+            "passwordMismatch": "Passwords do not match!",
+            "addressRequired": "Address is required for paid plans!",
+            "paymentRequired": "Please select a payment method!",
+            "generic": "Registration failed.",
+            "network": "Something went wrong. Please try again."
+        }
+    }
+
+
+
+
+  }
+  

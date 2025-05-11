@@ -1,4 +1,4 @@
-import React, { useState }  from 'react';
+
 import './styles/app.css'
 import './styles/components.css';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
@@ -12,16 +12,28 @@ import PrivateRoute from './components/app/PrivateRoute';
 import AppLayout from './components/app/AppLayout';
 
 function App() {
-  const [isLoggedIn] = useState(false);
-  return (    
+  return ( 
     <AuthProvider>
       <Router>
-        {!isLoggedIn}
         <Routes>
+          {/* Landing page - before logging in */}
           <Route path="/" element={<BaseLayout><LandingPage /></BaseLayout>} />
           <Route path="/login" element={<BaseLayout><LoginPage/></BaseLayout>} />
           <Route path="/signup" element={<BaseLayout><SignUpPage/></BaseLayout>} />
-          <Route path="/dashboard" element={<PrivateRoute><AppLayout><Dashboard /></AppLayout></PrivateRoute>} />
+          {/* After logging in */}
+          <PrivateRoute>
+            <AppLayout>
+              <Route path="/dashboard" element={<Dashboard />} />
+              {/* <Route path="/budgets" element={<Budgets />} />
+              <Route path="/expenses" element={<Expenses />} />
+              <Route path="/income" element={<Income />} />
+              <Route path="/goals" element={<Goals />} />
+              <Route path="/vacation-mode" element={><VacationMode />} />
+              <Route path="/reports" element={<Reports />} /> */}
+              {/* User/Account settings */}
+              {/* <Route path="/settings" element={<Settings />} /> */}
+            </AppLayout>
+          </PrivateRoute>
         </Routes>
       </Router>
     </AuthProvider>

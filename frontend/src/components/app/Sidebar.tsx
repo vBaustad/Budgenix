@@ -1,216 +1,150 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useAuth } from '../../context/AuthContext'
+import { sidebarNav } from '../../constants/SidebarNav'
+import GradientSeparator from '../common/GradientSeparator'
+import BudgenixLogo from '../../assets/Logo/BudgenixLogo.png'
 import { Dialog, DialogBackdrop, DialogPanel, TransitionChild } from '@headlessui/react'
-import {
-  Bars3Icon,
-  CalendarIcon,
-  ChartPieIcon,
-  DocumentDuplicateIcon,
-  FolderIcon,
-  HomeIcon,
-  UsersIcon,
-  XMarkIcon,
-} from '@heroicons/react/24/outline'
-
-const navigation = [
-  { name: 'Dashboard', href: '#', icon: HomeIcon, current: true },
-  { name: 'Team', href: '#', icon: UsersIcon, current: false },
-  { name: 'Projects', href: '#', icon: FolderIcon, current: false },
-  { name: 'Calendar', href: '#', icon: CalendarIcon, current: false },
-  { name: 'Documents', href: '#', icon: DocumentDuplicateIcon, current: false },
-  { name: 'Reports', href: '#', icon: ChartPieIcon, current: false },
-]
-const teams = [
-  { id: 1, name: 'Heroicons', href: '#', initial: 'H', current: false },
-  { id: 2, name: 'Tailwind Labs', href: '#', initial: 'T', current: false },
-  { id: 3, name: 'Workcation', href: '#', initial: 'W', current: false },
-]
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 
 function classNames(...classes: (string | undefined | null | false)[]) {
-    return classes.filter(Boolean).join(' ');
+  return classes.filter(Boolean).join(' ')
 }
 
 export default function Sidebar() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const { t } = useTranslation()
+  const { logout } = useAuth()
 
   return (
     <>
-      <div>
-        <Dialog open={sidebarOpen} onClose={setSidebarOpen} className="relative z-50 lg:hidden">
-          <DialogBackdrop
-            transition
-            className="fixed inset-0 bg-gray-900/80 transition-opacity duration-300 ease-linear data-closed:opacity-0"
-          />
-
-          <div className="fixed inset-0 flex">
-            <DialogPanel
-              transition
-              className="relative mr-16 flex w-full max-w-xs flex-1 transform transition duration-300 ease-in-out data-closed:-translate-x-full"
-            >
-              <TransitionChild>
-                <div className="absolute top-0 left-full flex w-16 justify-center pt-5 duration-300 ease-in-out data-closed:opacity-0">
-                  <button type="button" onClick={() => setSidebarOpen(false)} className="-m-2.5 p-2.5">
-                    <span className="sr-only">Close sidebar</span>
-                    <XMarkIcon aria-hidden="true" className="size-6 text-white" />
-                  </button>
-                </div>
-              </TransitionChild>
-              {/* Sidebar component, swap this element with another sidebar if you like */}
-              <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 px-6 pb-2 ring-1 ring-white/10">
-                <div className="flex h-16 shrink-0 items-center">
-                  <img
-                    alt="Your Company"
-                    src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500"
-                    className="h-8 w-auto"
-                  />
-                </div>
-                <nav className="flex flex-1 flex-col">
-                  <ul role="list" className="flex flex-1 flex-col gap-y-7">
-                    <li>
-                      <ul role="list" className="-mx-2 space-y-1">
-                        {navigation.map((item) => (
-                          <li key={item.name}>
-                            <a
-                              href={item.href}
-                              className={classNames(
-                                item.current
-                                  ? 'bg-gray-800 text-white'
-                                  : 'text-gray-400 hover:bg-gray-800 hover:text-white',
-                                'group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold',
-                              )}
-                            >
-                              <item.icon aria-hidden="true" className="size-6 shrink-0" />
-                              {item.name}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    </li>
-                    <li>
-                      <div className="text-xs/6 font-semibold text-gray-400">Your teams</div>
-                      <ul role="list" className="-mx-2 mt-2 space-y-1">
-                        {teams.map((team) => (
-                          <li key={team.name}>
-                            <a
-                              href={team.href}
-                              className={classNames(
-                                team.current
-                                  ? 'bg-gray-800 text-white'
-                                  : 'text-gray-400 hover:bg-gray-800 hover:text-white',
-                                'group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold',
-                              )}
-                            >
-                              <span className="flex size-6 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium text-gray-400 group-hover:text-white">
-                                {team.initial}
-                              </span>
-                              <span className="truncate">{team.name}</span>
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    </li>
-                  </ul>
-                </nav>
+      {/* Mobile Sidebar */}
+      <Dialog open={sidebarOpen} onClose={setSidebarOpen} className="relative z-50 lg:hidden">
+        <DialogBackdrop className="fixed inset-0 bg-gray-900/80 transition-opacity duration-300 ease-linear" />
+        <div className="fixed inset-0 flex">
+          <DialogPanel className="relative mr-16 flex w-full max-w-xs flex-1 transform transition duration-300 ease-in-out">
+            <TransitionChild>
+              <div className="absolute top-0 left-full flex w-16 justify-center pt-5">
+                <button type="button" onClick={() => setSidebarOpen(false)} className="-m-2.5 p-2.5">
+                  <span className="sr-only">{t('sidebar.closeSidebar')}</span>
+                  <XMarkIcon className="size-6 text-white" />
+                </button>
               </div>
-            </DialogPanel>
-          </div>
-        </Dialog>
+            </TransitionChild>
 
-        {/* Static sidebar for desktop */}
-        <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
-          {/* Sidebar component, swap this element with another sidebar if you like */}
-          <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 px-6">
-            <div className="flex h-16 shrink-0 items-center">
-              <img
-                alt="Your Company"
-                src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500"
-                className="h-8 w-auto"
-              />
+            <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-base-200 px-6 pb-2 ring-1 ring-base-content/10">
+              <div className="flex h-16 shrink-0 items-center">
+                <img
+                  alt="Budgenix"
+                  src={BudgenixLogo}
+                  className="h-8 w-auto"
+                />
+              </div>
+
+              <nav className="flex flex-1 flex-col">
+                {sidebarNav.map((section) => (
+                  <div key={section.section} className="mb-4">
+                    <p className="text-xs text-base-content/60 font-semibold uppercase mb-2">
+                      {t(section.section)}
+                    </p>
+                    <ul className="-mx-2 space-y-1">
+                      {section.items.map((item) => (
+                        <li key={item.label}>
+                          <a
+                            href={item.path}
+                            className={classNames(
+                              'group flex items-center gap-x-3 rounded-md p-2 text-sm font-semibold',
+                              'text-base-content/70 hover:bg-neutral hover:text-neutral-content'
+                            )}
+                          >
+                            <item.icon className="size-5 shrink-0" aria-hidden="true" />
+                            {t(item.label)}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </nav>
             </div>
-            <nav className="flex flex-1 flex-col">
-              <ul role="list" className="flex flex-1 flex-col gap-y-7">
-                <li>
-                  <ul role="list" className="-mx-2 space-y-1">
-                    {navigation.map((item) => (
-                      <li key={item.name}>
-                        <a
-                          href={item.href}
-                          className={classNames(
-                            item.current
-                              ? 'bg-gray-800 text-white'
-                              : 'text-gray-400 hover:bg-gray-800 hover:text-white',
-                            'group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold',
-                          )}
-                        >
-                          <item.icon aria-hidden="true" className="size-6 shrink-0" />
-                          {item.name}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </li>
-                <li>
-                  <div className="text-xs/6 font-semibold text-gray-400">Your teams</div>
-                  <ul role="list" className="-mx-2 mt-2 space-y-1">
-                    {teams.map((team) => (
-                      <li key={team.name}>
-                        <a
-                          href={team.href}
-                          className={classNames(
-                            team.current
-                              ? 'bg-gray-800 text-white'
-                              : 'text-gray-400 hover:bg-gray-800 hover:text-white',
-                            'group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold',
-                          )}
-                        >
-                          <span className="flex size-6 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium text-gray-400 group-hover:text-white">
-                            {team.initial}
-                          </span>
-                          <span className="truncate">{team.name}</span>
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </li>
-                <li className="-mx-6 mt-auto">
-                  <a
-                    href="#"
-                    className="flex items-center gap-x-4 px-6 py-3 text-sm/6 font-semibold text-white hover:bg-gray-800"
-                  >
-                    <img
-                      alt=""
-                      src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                      className="size-8 rounded-full bg-gray-800"
-                    />
-                    <span className="sr-only">Your profile</span>
-                    <span aria-hidden="true">Tom Cook</span>
-                  </a>
-                </li>
+          </DialogPanel>
+        </div>
+      </Dialog>
+
+      {/* Desktop Sidebar */}
+      <div className="hidden lg:flex lg:flex-col lg:w-72 lg:fixed lg:inset-y-0 bg-base-200 px-6">
+        <div className="flex items-center gap-x-3 h-14 px-2">
+          <img src={BudgenixLogo} alt="Budgenix Logo" className="h-8 w-auto" />
+          <span className="logo-font font-bold text-lg text-base-content">Budgenix</span>
+        </div>
+        <div className="h-2 w-full rounded-full mb-4">
+          <GradientSeparator direction="horizontal" />
+        </div>
+
+        <nav className="flex-1 flex flex-col justify-start">
+          {sidebarNav.map((section) => (
+            <div key={section.section} className="mb-6">
+              <p className="text-xs text-base-content/60 font-semibold uppercase mb-2">
+                {t(section.section)}
+              </p>
+              <ul className="-mx-2 space-y-1">
+                {section.items.map((item) => (
+                  <li key={item.label}>
+                    {item.action === 'logout' ? (
+                    <button
+                      onClick={logout}
+                      className={classNames(
+                        'cursor-pointer group flex w-full items-center gap-x-3 rounded-md p-2 text-sm font-semibold',
+                        'text-base-content/70 hover:bg-neutral hover:text-neutral-content'
+                      )}
+                    >
+                      <item.icon className="size-5 shrink-0" />
+                      {t(item.label)}
+                    </button>
+                  ) : (
+                    <a
+                      href={item.path}
+                      className={classNames(
+                        'group flex items-center gap-x-3 rounded-md p-2 text-sm font-semibold',
+                        'text-base-content/70 hover:bg-neutral hover:text-neutral-content'
+                      )}
+                    >
+                      <item.icon className="size-5 shrink-0" aria-hidden="true" />
+                      {t(item.label)}
+                    </a>
+                  )}
+                  </li>
+                ))}
               </ul>
-            </nav>
+            </div>
+          ))}
+        </nav>
+
+        {/* Bottom profile section */}
+        <div className="mt-auto border-t border-base-content/10 pt-4 mb-4">
+          <div className="flex items-center gap-x-3">
+            <img
+              alt="User avatar"
+              src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e"
+              className="w-10 h-10 rounded-full"
+            />
+            <div className="flex-1">
+              <div className="text-sm font-semibold text-base-content">
+                {t('sidebar.profile')}
+              </div>
+            </div>
           </div>
         </div>
+      </div>
 
-        <div className="sticky top-0 z-40 flex items-center gap-x-6 bg-gray-900 px-4 py-4 shadow-xs sm:px-6 lg:hidden">
-          <button type="button" onClick={() => setSidebarOpen(true)} className="-m-2.5 p-2.5 text-gray-400 lg:hidden">
-            <span className="sr-only">Open sidebar</span>
-            <Bars3Icon aria-hidden="true" className="size-6" />
-          </button>
-          <div className="flex-1 text-sm/6 font-semibold text-white">Dashboard</div>
-          <a href="#">
-            <span className="sr-only">Your profile</span>
-            <img
-              alt=""
-              src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-              className="size-8 rounded-full bg-gray-800"
-            />
-          </a>
-        </div>
-
-        <main className="py-10 lg:pl-72">
-          <div className="px-4 sm:px-6 lg:px-8">{/* Your content */}</div>
-        </main>
+      {/* Mobile Topbar Toggle */}
+      <div className="fixed top-0 left-0 right-0 z-50 flex items-center bg-base-100 px-4 py-4 shadow sm:px-6 lg:hidden">
+        <button type="button" onClick={() => setSidebarOpen(true)} className="-m-2.5 p-2.5 text-base-content/70">
+          <span className="sr-only">{t('sidebar.openSidebar')}</span>
+          <Bars3Icon className="size-6" aria-hidden="true" />
+        </button>
       </div>
     </>
   )
