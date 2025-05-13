@@ -17,7 +17,7 @@ namespace Budgenix.Helpers.Query
 
             // Filter: category
             if (!string.IsNullOrWhiteSpace(category))
-                expenses = expenses.Where(e => string.Equals(e.Category.Name, category, StringComparison.OrdinalIgnoreCase));
+                expenses = expenses.Where(e => e.Category!.Name != null && e.Category.Name.ToLower() == category.ToLower());
 
             return expenses;
         }

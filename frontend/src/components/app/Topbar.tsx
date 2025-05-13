@@ -1,16 +1,33 @@
-import { useAuth } from '../../context/AuthContext';
+// import { useAuth } from '../../context/AuthContext';
+import { useTranslation } from 'react-i18next';
+import { ThemeDropdown } from '../common/ThemeDropdown';
+import { useLocation } from 'react-router-dom';
 
-export default function Topbar() {
-    const { logout } = useAuth();
+const routeTitles: Record<string, string> = {
+    '/dashboard': 'topbar.dashboard',
+    '/budgets': 'topbar.budgets',
+    '/expenses': 'topbar.expenses',
+    '/income': 'topbar.income',
+    '/goals': 'topbar.goals',
+    '/vacation-mode': 'topbar.vacation',
+    '/reports': 'topbar.reports',
+    '/settings': 'topbar.settings',
+  }
+
+  export default function Topbar() {
+    const { pathname } = useLocation()
+    const { t } = useTranslation()
+  
+    const titleKey = routeTitles[pathname] || ''
+    const title = t(titleKey)
 
     return (
-        <div className="flex justify-between items-center bg-gray-800 p-4 border-b border-gray-700">
-            <h1 className="text-lg font-bold">Dashboard</h1>
-            <button
-                onClick={logout}
-                className="bg-indigo-500 hover:bg-indigo-400 px-3 py-1 rounded text-sm font-semibold">
-                Log Out
-            </button>
-        </div>
+        <>
+            <div className="h-14 flex shadow items-center justify-between px-6 bg-base-100">
+                <h1 className="text-xl font-bold">{title}</h1>
+                {/* Future: add buttons or user info here */}
+                <ThemeDropdown />  
+            </div>            
+        </>
     );
 }

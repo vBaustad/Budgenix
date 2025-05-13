@@ -1,27 +1,54 @@
-import React, { useState }  from 'react';
 import './styles/app.css'
-import './styles/components.css';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
-import Dashboard from './pages/app/Dashboard';
-import LandingPage from './pages/public/LandingPage';
-import LoginPage from './pages/public/LoginPage';
+import './styles/components.css'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { AuthProvider } from './context/AuthContext'
+
+import PrivateRoute from './components/app/PrivateRoute'
+import AppLayout from './components/app/AppLayout'
 import BaseLayout from './components/public/BaseLayout'
-import SignUpPage from './pages/public/SignUpPage';
-import PrivateRoute from './components/app/PrivateRoute';
-import AppLayout from './components/app/AppLayout';
+
+import {
+  DashboardPage,
+  BudgetsPage,
+  ExpensesPage,
+  IncomePage,
+  GoalsPage,
+  VacationModePage,
+  ReportsPage,
+  SettingsPage,
+} from './pages/app'
+
+import {
+  LandingPage,
+  LoginPage,
+  SignUpPage,
+} from './pages/public'
 
 function App() {
-  const [isLoggedIn] = useState(false);
-  return (    
+  return (
     <AuthProvider>
       <Router>
-        {!isLoggedIn}
         <Routes>
+          {/* Public Routes */}
           <Route path="/" element={<BaseLayout><LandingPage /></BaseLayout>} />
-          <Route path="/login" element={<BaseLayout><LoginPage/></BaseLayout>} />
-          <Route path="/signup" element={<BaseLayout><SignUpPage/></BaseLayout>} />
-          <Route path="/dashboard" element={<PrivateRoute><AppLayout><Dashboard /></AppLayout></PrivateRoute>} />
+          <Route path="/login" element={<BaseLayout><LoginPage /></BaseLayout>} />
+          <Route path="/signup" element={<BaseLayout><SignUpPage /></BaseLayout>} />
+
+          {/* Private Routes (AppLayout wraps ALL protected content) */}
+          <Route element={<AppLayout />}>
+            <Route
+              element={<PrivateRoute />}
+            >
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/budgets" element={<BudgetsPage />} />
+              <Route path="/expenses" element={<ExpensesPage />} />
+              <Route path="/income" element={<IncomePage />} />
+              <Route path="/goals" element={<GoalsPage />} />
+              <Route path="/vacation-mode" element={<VacationModePage />} />
+              <Route path="/reports" element={<ReportsPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
+            </Route>
+          </Route>
         </Routes>
       </Router>
     </AuthProvider>

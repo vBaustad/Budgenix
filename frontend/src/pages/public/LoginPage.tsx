@@ -1,8 +1,12 @@
+'use client'
+
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export default function LoginPage() {
+  const { t } = useTranslation();
   const { login, isLoggedIn } = useAuth();
   const navigate = useNavigate();
 
@@ -20,32 +24,30 @@ export default function LoginPage() {
     e.preventDefault();
     try {
       setError(null);
-      await login(email, password); // pass email + password
+      await login(email, password);
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('Login failed');
+        setError(t('login.errorFallback'));
       }
     }
-    };
+  };
 
-  if (isLoggedIn) {
-    return null; // or a loading spinner
-  }
+  if (isLoggedIn) return null;
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-base-200">
       <div className="card w-full max-w-sm shadow-2xl bg-base-100">
         <div className="card-body">
-          <h2 className="text-center text-2xl font-bold text-primary">Sign in to your account</h2>
-  
+          <h2 className="text-center text-2xl font-bold text-primary">{t('login.title')}</h2>
+
           {error && <p className="text-error text-sm text-center">{error}</p>}
-  
+
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="form-control">
               <label className="label" htmlFor="email">
-                <span className="label-text">Email address</span>
+                <span className="label-text">{t('login.email')}</span>
               </label>
               <input
                 id="email"
@@ -57,10 +59,10 @@ export default function LoginPage() {
                 className="input input-bordered w-full"
               />
             </div>
-  
+
             <div className="form-control">
               <label className="label" htmlFor="password">
-                <span className="label-text">Password</span>
+                <span className="label-text">{t('login.password')}</span>
               </label>
               <input
                 id="password"
@@ -72,23 +74,23 @@ export default function LoginPage() {
                 className="input input-bordered w-full"
               />
               <div className="text-right mt-1">
-              <a href="#" className="label-text-alt link link-hover">
-                  Forgot password?
+                <a href="#" className="label-text-alt link link-hover">
+                  {t('login.forgotPassword')}
                 </a>
               </div>
             </div>
-  
+
             <div className="form-control mt-4">
               <button type="submit" className="btn btn-primary w-full">
-                Sign in
+                {t('login.signIn')}
               </button>
             </div>
           </form>
-  
+
           <p className="mt-4 text-center text-sm">
-            Not a member?{' '}
+            {t('login.noAccount')}{' '}
             <a href="/signup" className="link link-primary">
-              Register for free
+              {t('login.register')}
             </a>
           </p>
         </div>

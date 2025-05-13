@@ -8,6 +8,8 @@ using AutoMapper;
 using Budgenix.Dtos.Expenses;
 using Budgenix.Helpers.Query;
 using Microsoft.AspNetCore.Authorization;
+using Budgenix.Models.Shared;
+using Microsoft.Extensions.Localization;
 
 namespace Budgenix.API.Controllers
 {
@@ -19,12 +21,14 @@ namespace Budgenix.API.Controllers
         private readonly BudgenixDbContext _context;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
+        private readonly IStringLocalizer<SharedResource> _localizer;
 
-        public BudgetController(BudgenixDbContext context, IUserService userService, IMapper mapper)
+        public BudgetController(BudgenixDbContext context, IUserService userService, IMapper mapper, IStringLocalizer<SharedResource> localizer)
         {
             _context = context;
             _userService = userService;
             _mapper = mapper;
+            _localizer = localizer;
         }
 
         // =======================================
@@ -143,7 +147,7 @@ namespace Budgenix.API.Controllers
 
             var category = await _context.Categories.FindAsync(dto.CategoryId);
             if (category == null)
-                return BadRequest("Invalid category ID");
+                return BadRequest(_localizer["Shared_InvalidCategoryId"]);
 
             // Duplicate detection logic
             const decimal allowedAmountDifferencePercentage = 0.01m; // 1%
@@ -162,7 +166,7 @@ namespace Budgenix.API.Controllers
 
             if (similarBudgetExists)
             {
-                return BadRequest("A similar budget already exists for this category, name, date range, and amount.");
+                return BadRequest(_localizer["Budget_ConflictSimilarExists"]);
             }
 
             var budget = _mapper.Map<Budget>(dto);
@@ -193,7 +197,7 @@ namespace Budgenix.API.Controllers
 
             var category = await _context.Categories.FindAsync(dto.CategoryId);
             if (category == null)
-                return BadRequest("Invalid category ID");
+                return BadRequest(_localizer["Shared_InvalidCategoryId"]);
 
             const decimal allowedAmountdifferencePercentage = 0.01m; // 1%
             var similarBudgetExists = await _context.Budgets
@@ -211,7 +215,7 @@ namespace Budgenix.API.Controllers
                 );
 
             if (similarBudgetExists)
-                return BadRequest("A similar budget already exists for this category, nmame, date range, and amount.");
+                return BadRequest(_localizer["Budget_ConflictSimilarExists"]);
 
 
             _mapper.Map(dto, budget);

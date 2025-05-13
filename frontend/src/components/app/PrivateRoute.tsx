@@ -1,17 +1,16 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { JSX } from 'react';
 
-type PrivateRouteProps = {
-    children: JSX.Element;
-};
+export default function PrivateRoute() {
+  const { isLoading, isLoggedIn } = useAuth();
 
-export default function PrivateRoute({ children }: PrivateRouteProps) {
-    const { isLoggedIn } = useAuth();
+  if (isLoading || isLoggedIn === null) {
+    return null; // or a loader
+  }
 
-    if (!isLoggedIn) {
-        return <Navigate to="/login" replace />;
-    }
+  if (!isLoggedIn) {
+    return <Navigate to="/login" replace />;
+  }
 
-    return children;
+  return <Outlet />;
 }
