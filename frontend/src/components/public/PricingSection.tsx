@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Radio, RadioGroup } from '@headlessui/react'
 import { CheckIcon } from '@heroicons/react/20/solid'
-import { tiers } from '../../utils/plans'
+import { tiers } from '../../constants/plans'
 
 type FrequencyValue = 'monthly' | 'annually'
 

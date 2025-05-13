@@ -17,8 +17,14 @@
         "closeSidebar": "Close sidebar"
     },
     "topbar": {
-        "dashboardTitle": "Dashboard",
-        "logout": "Log Out"
+        "dashboard": "Dashboard",
+        "budgets": "Budgets",
+        "expenses": "Expenses",
+        "income": "Income",
+        "goals": "Goals",
+        "vacation": "Vacation Mode",
+        "reports": "Reports",
+        "settings": "Settings"
     },
     "dashboard": {
         "welcome": "Welcome to your Dashboard 👋",
@@ -184,10 +190,20 @@
             "generic": "Registration failed.",
             "network": "Something went wrong. Please try again."
         }
+    },
+    "expenses": {
+        "addNew": "Add New Expense",
+        "allExpenses": "All Expenses"
+    },    
+    "shared": {
+        "allCategories": "All categories",
+        "noGrouping": "No grouping",
+        "groupBy": "Group By",
+        "filterByCategory": "Filter by Category",        
+        "groupingOptions": {
+            "month": "Month",
+            "year": "Year",
+            "category": "Category"
+        }
     }
-
-
-
-
-  }
-  
+}

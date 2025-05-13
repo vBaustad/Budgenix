@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { tiers } from '../../utils/plans';
-import InputField from './InputField';
+import { tiers } from '../../constants/plans';
+import InputField from '../common/forms/InputField';
 import PaymentSelector from './PaymentSelector';
-import { PasswordIcon, UserIcon, EmailIcon } from './icons/InputIcons';
-import { countryOptions } from '../../utils/countries';
-import SelectField from './SelectField';
+import { PasswordIcon, UserIcon, EmailIcon } from '../common/forms/icons/InputIcons';
+import { countryOptions } from '../../constants/countries';
+import SelectField from '../common/forms/SelectField';
 import { useTranslation } from 'react-i18next';
 
 export type SubscriptionType = typeof tiers[number]['id'];

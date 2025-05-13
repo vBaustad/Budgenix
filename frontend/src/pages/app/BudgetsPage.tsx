@@ -1,7 +1,7 @@
 // import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
-export default function Dashboard() {
+export default function BudgetsPage() {
   const { t } = useTranslation();
 
   // useEffect(() => {

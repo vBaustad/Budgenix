@@ -20,7 +20,6 @@ const GradientSeparator: React.FC<GradientSeparatorProps> = ({
   const end = 'var(--color-primary-content)';   // DaisyUI secondary color
 
   let gradient = '';
- console.log(start);
   if (direction === 'horizontal') {
     gradient = reverse
       ? `linear-gradient(to left, ${start}, ${end})`

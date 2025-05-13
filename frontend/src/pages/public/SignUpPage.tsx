@@ -2,10 +2,10 @@
 
 import { useState } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
-import { tiers } from '../../utils/plans'
+import { tiers } from '../../constants/plans'
 import { Radio, RadioGroup } from '@headlessui/react'
 import { CheckIcon } from '@heroicons/react/20/solid'
-import RegistrationForm from '../../components/forms/RegistrationForm'
+import RegistrationForm from '../../components/public/RegistrationForm'
 import { useTranslation } from 'react-i18next'
 
 function classNames(...classes: (string | boolean | undefined | null)[]) {

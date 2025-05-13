@@ -17,8 +17,14 @@
         "closeSidebar": "Lukk sidemeny"
     },
     "topbar": {
-        "dashboardTitle": "Dashbord",
-        "logout": "Logg ut"
+        "dashboard": "Oversikt",
+        "budgets": "Budsjetter",
+        "expenses": "Utgifter",
+        "income": "Inntekt",
+        "goals": "Mål",
+        "vacation": "Feriemodus",
+        "reports": "Rapporter",
+        "settings": "Innstillinger"
     },
     "dashboard": {
         "welcome": "Velkommen til dashbordet ditt 👋",

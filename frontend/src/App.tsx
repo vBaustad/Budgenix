@@ -1,39 +1,54 @@
-
 import './styles/app.css'
-import './styles/components.css';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
-import Dashboard from './pages/app/Dashboard';
-import LandingPage from './pages/public/LandingPage';
-import LoginPage from './pages/public/LoginPage';
+import './styles/components.css'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { AuthProvider } from './context/AuthContext'
+
+import PrivateRoute from './components/app/PrivateRoute'
+import AppLayout from './components/app/AppLayout'
 import BaseLayout from './components/public/BaseLayout'
-import SignUpPage from './pages/public/SignUpPage';
-import PrivateRoute from './components/app/PrivateRoute';
-import AppLayout from './components/app/AppLayout';
+
+import {
+  DashboardPage,
+  BudgetsPage,
+  ExpensesPage,
+  IncomePage,
+  GoalsPage,
+  VacationModePage,
+  ReportsPage,
+  SettingsPage,
+} from './pages/app'
+
+import {
+  LandingPage,
+  LoginPage,
+  SignUpPage,
+} from './pages/public'
 
 function App() {
-  return ( 
+  return (
     <AuthProvider>
       <Router>
         <Routes>
-          {/* Landing page - before logging in */}
+          {/* Public Routes */}
           <Route path="/" element={<BaseLayout><LandingPage /></BaseLayout>} />
-          <Route path="/login" element={<BaseLayout><LoginPage/></BaseLayout>} />
-          <Route path="/signup" element={<BaseLayout><SignUpPage/></BaseLayout>} />
-          {/* After logging in */}
-          <PrivateRoute>
-            <AppLayout>
-              <Route path="/dashboard" element={<Dashboard />} />
-              {/* <Route path="/budgets" element={<Budgets />} />
-              <Route path="/expenses" element={<Expenses />} />
-              <Route path="/income" element={<Income />} />
-              <Route path="/goals" element={<Goals />} />
-              <Route path="/vacation-mode" element={><VacationMode />} />
-              <Route path="/reports" element={<Reports />} /> */}
-              {/* User/Account settings */}
-              {/* <Route path="/settings" element={<Settings />} /> */}
-            </AppLayout>
-          </PrivateRoute>
+          <Route path="/login" element={<BaseLayout><LoginPage /></BaseLayout>} />
+          <Route path="/signup" element={<BaseLayout><SignUpPage /></BaseLayout>} />
+
+          {/* Private Routes (AppLayout wraps ALL protected content) */}
+          <Route element={<AppLayout />}>
+            <Route
+              element={<PrivateRoute />}
+            >
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/budgets" element={<BudgetsPage />} />
+              <Route path="/expenses" element={<ExpensesPage />} />
+              <Route path="/income" element={<IncomePage />} />
+              <Route path="/goals" element={<GoalsPage />} />
+              <Route path="/vacation-mode" element={<VacationModePage />} />
+              <Route path="/reports" element={<ReportsPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
+            </Route>
+          </Route>
         </Routes>
       </Router>
     </AuthProvider>
