@@ -114,5 +114,44 @@ namespace Budgenix.Services.Recurring
 
             return allItems.Where(item => item.IsActive && range.Any(day => IsDueToday(item, day))).ToList();
         }
+
+        public DateTime? GetNextOccurrenceDate(RecurringItem item, DateTime fromDate)
+        {
+            if (!item.IsActive || item.EndDate < fromDate)
+                return null;
+
+            var date = fromDate.Date;
+
+            switch (item.Frequency)
+            {
+                case RecurrenceTypeEnum.Daily:
+                    return date;
+
+                case RecurrenceTypeEnum.Weekly:
+                    int daysUntil = ((int)item.StartDate.DayOfWeek - (int)date.DayOfWeek + 7) % 7;
+                    return date.AddDays(daysUntil == 0 ? 7 : daysUntil); // next week if today
+
+                case RecurrenceTypeEnum.BiWeekly:
+                    var totalDays = (date - item.StartDate).Days;
+                    var daysToNext = 14 - (totalDays % 14);
+                    return date.AddDays(daysToNext == 0 ? 14 : daysToNext);
+
+                case RecurrenceTypeEnum.Monthly:
+                    var day = item.StartDate.Day;
+                    var target = new DateTime(date.Year, date.Month, 1).AddMonths(1);
+                    var finalDay = Math.Min(day, DateTime.DaysInMonth(target.Year, target.Month));
+                    return new DateTime(target.Year, target.Month, finalDay);
+
+                case RecurrenceTypeEnum.Quarterly:
+                    return item.StartDate.AddMonths(3); // placeholder — refine if needed
+
+                case RecurrenceTypeEnum.Yearly:
+                    return item.StartDate.AddYears(1); // placeholder — refine if needed
+
+                default:
+                    return null;
+            }
+        }
+
     }
 }

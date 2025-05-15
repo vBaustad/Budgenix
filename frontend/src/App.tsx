@@ -2,7 +2,7 @@ import './styles/app.css'
 import './styles/components.css'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
-
+import { Toaster } from 'react-hot-toast';
 import PrivateRoute from './components/app/PrivateRoute'
 import AppLayout from './components/app/AppLayout'
 import BaseLayout from './components/public/BaseLayout'
@@ -28,6 +28,7 @@ function App() {
   return (
     <AuthProvider>
       <Router>
+        <Toaster position="top-right" />
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<BaseLayout><LandingPage /></BaseLayout>} />
@@ -39,6 +40,7 @@ function App() {
             <Route
               element={<PrivateRoute />}
             >
+              
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/budgets" element={<BudgetsPage />} />
               <Route path="/expenses" element={<ExpensesPage />} />

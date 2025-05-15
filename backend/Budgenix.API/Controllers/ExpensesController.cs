@@ -163,8 +163,8 @@ namespace Budgenix.API.Controllers
 
         // Create a new expense and return it with a new ID
         [HttpPost]
-        public async Task<ActionResult> AddExpense(CreateExpenseDto dto)
-        {
+        public async Task<ActionResult> AddExpense([FromBody] CreateExpenseDto dto)        {
+
             var userId = _userService.GetUserId();
             var category = await _context.Categories.FindAsync(dto.CategoryId);
 
@@ -177,6 +177,27 @@ namespace Budgenix.API.Controllers
             expense.UserId = userId;     // Set ownership
 
             _context.Expenses.Add(expense);
+
+            if (dto.IsRecurring)
+            {
+                var recurringItem = new RecurringItem
+                {
+                    Id = Guid.NewGuid(),
+                    Name = expense.Name,
+                    Description = expense.Description,
+                    Amount = expense.Amount,
+                    StartDate = expense.Date,
+                    EndDate = null, // or let the user choose in the future
+                    Frequency = expense.RecurrenceFrequency,
+                    Type = "Expense",
+                    CategoryId = expense.CategoryId,
+                    IsActive = true,
+                    UserId = userId
+                };
+
+                _context.RecurringItems.Add(recurringItem);                
+            }
+
             await _context.SaveChangesAsync();
 
             var expenseDto = _mapper.Map<ExpenseDto>(expense);

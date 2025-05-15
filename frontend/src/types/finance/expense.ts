@@ -1,3 +1,6 @@
+import { RecurrenceFrequency } from '../shared/recurrence';
+
+
 // /types/finance/expense.ts
 export type Expense = {
   id: string;
@@ -11,6 +14,18 @@ export type Expense = {
   notes?: string | null;
 };
 
+export type CreateExpenseDto = {
+  name: string;
+  description: string;
+  amount: number;
+  date: string;
+  categoryId: string;
+  isRecurring: boolean;
+  recurrenceFrequency: RecurrenceFrequency;
+  notes?: string | null;
+};
+
+
 export type GroupedExpenseItem = {
   group: string;
   expenses: Expense[];
@@ -18,11 +33,3 @@ export type GroupedExpenseItem = {
 
 export type GroupedExpenses = GroupedExpenseItem[];
 
-export enum RecurrenceFrequency {
-  None = 0,
-  Daily = 1,
-  Weekly = 2,
-  Monthly = 3,
-  Yearly = 4,
-}
-  

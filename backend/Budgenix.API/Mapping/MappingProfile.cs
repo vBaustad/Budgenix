@@ -20,7 +20,7 @@ namespace Budgenix.Mapping
             CreateMap<UpdateIncomeDto, Income>();
 
 
-            //Expense mappigns
+            //Expense mappings
             CreateMap<Expense, ExpenseDto>()
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name));
 

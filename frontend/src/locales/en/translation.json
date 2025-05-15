@@ -198,6 +198,7 @@
     "shared": {
         "allCategories": "All categories",
         "noGrouping": "No grouping",
+        "noFilter":"No filter",
         "groupBy": "Group By",
         "filterByCategory": "Filter by Category",        
         "groupingOptions": {
