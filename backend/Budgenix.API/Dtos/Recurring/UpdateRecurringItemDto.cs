@@ -1,0 +1,34 @@
+﻿using Budgenix.Models.Shared;
+using System.ComponentModel.DataAnnotations;
+
+namespace Budgenix.Dtos.Recurring
+{
+    public class UpdateRecurringItemDto
+    {
+        [Required]
+        public string Name { get; set; } = null!;
+
+        [MaxLength(250)]
+        public string? Description { get; set; }
+
+        [Range(0.01, double.MaxValue)]
+        public decimal Amount { get; set; }
+
+        [Required]
+        public DateTime StartDate { get; set; }
+
+        public DateTime? EndDate { get; set; }
+
+        [Required]
+        public RecurrenceTypeEnum Frequency { get; set; }
+
+        [Required]
+        public bool IsActive { get; set; }
+
+        [Required]
+        [RegularExpression("Income|Expense", ErrorMessage = "Type must be either 'Income' or 'Expense'.")]
+        public string Type { get; set; } = "Expense";
+
+        public Guid? CategoryId { get; set; }
+    }
+}

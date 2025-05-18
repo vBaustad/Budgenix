@@ -5,13 +5,18 @@ using Budgenix.Models.Finance;
 using Budgenix.Dtos.Budgets;
 using Budgenix.Models.Categories;
 using Budgenix.Dtos.Categories;
+using Budgenix.Dtos.Recurring;
 
 namespace Budgenix.Mapping
 {
     public class MappingProfile : Profile
     {
+        
+
         public MappingProfile() 
-        { 
+        {
+
+
             //Income mappings
             CreateMap<Income, IncomeDto>()
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name));
@@ -20,7 +25,7 @@ namespace Budgenix.Mapping
             CreateMap<UpdateIncomeDto, Income>();
 
 
-            //Expense mappigns
+            //Expense mappings
             CreateMap<Expense, ExpenseDto>()
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name));
 
@@ -36,6 +41,14 @@ namespace Budgenix.Mapping
 
             //Category mapping
             CreateMap<Category, CategoryDto>();
+
+            //Recurring mapping
+            CreateMap<RecurringItem, RecurringItemDto>()
+                .ForMember(dest => dest.NextOccurrenceDate,
+                    opt => opt.MapFrom<NextOccurrenceResolver>());
+
+
+
         }
     }
 }

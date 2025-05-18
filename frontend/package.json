@@ -20,6 +20,7 @@
     "i18next-browser-languagedetector": "^8.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-hot-toast": "^2.5.2",
     "react-i18next": "^15.5.1",
     "react-router-dom": "^7.5.3",
     "recharts": "^2.15.3",

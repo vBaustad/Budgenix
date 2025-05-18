@@ -9,6 +9,7 @@ using Budgenix.Dtos.Expenses;
 using Budgenix.Models.Finance;
 using Budgenix.Models.Shared;
 using Microsoft.Extensions.Localization;
+using Budgenix.Models.Categories;
 
 namespace Budgenix.API.Controllers
 {
@@ -40,7 +41,7 @@ namespace Budgenix.API.Controllers
         public async Task<ActionResult<IEnumerable<Expense>>> GetExpenses(
             DateTime? from = null,
             DateTime? to = null,
-            string? category = null,
+            string? categories = null,
             string sort = "date_desc",
             string? groupBy = null,
             int skip = 0,
@@ -53,8 +54,16 @@ namespace Budgenix.API.Controllers
                 .Include(e => e.Category)
                 .Where(e => e.UserId == userId)
                 .AsQueryable();
-            //Apply filters and sorting
-            expenses = ExpenseQueryHelper.ApplyFilters(expenses, from, to, category);
+
+            var categoryGuids = categories?
+               .Split(',')
+               .Select(c => Guid.TryParse(c.Trim(), out var id) ? id : (Guid?)null)
+               .Where(g => g.HasValue)
+               .Select(g => g.Value)
+               .ToList() ?? new List<Guid>();
+
+            expenses = ExpenseQueryHelper.ApplyFilters(expenses, from, to, categoryGuids);
+
             expenses = ExpenseQueryHelper.ApplySorting(expenses, sort);
 
             //Apply grouping
@@ -163,8 +172,8 @@ namespace Budgenix.API.Controllers
 
         // Create a new expense and return it with a new ID
         [HttpPost]
-        public async Task<ActionResult> AddExpense(CreateExpenseDto dto)
-        {
+        public async Task<ActionResult> AddExpense([FromBody] CreateExpenseDto dto)        {
+
             var userId = _userService.GetUserId();
             var category = await _context.Categories.FindAsync(dto.CategoryId);
 
@@ -177,6 +186,27 @@ namespace Budgenix.API.Controllers
             expense.UserId = userId;     // Set ownership
 
             _context.Expenses.Add(expense);
+
+            if (dto.IsRecurring)
+            {
+                var recurringItem = new RecurringItem
+                {
+                    Id = Guid.NewGuid(),
+                    Name = dto.Name,
+                    Description = dto.Description,
+                    Amount = dto.Amount,
+                    StartDate = dto.Date,
+                    EndDate = null,
+                    Frequency = dto.RecurrenceFrequency,
+                    Type = "Expense",
+                    CategoryId = dto.CategoryId,
+                    IsActive = true,
+                    UserId = userId
+                };
+
+                _context.RecurringItems.Add(recurringItem);                
+            }
+
             await _context.SaveChangesAsync();
 
             var expenseDto = _mapper.Map<ExpenseDto>(expense);

@@ -102,7 +102,7 @@ export default function DataTable<T>({
                   <td
                     key={String(col.accessor)}
                     style={{width: col.width}}  
-                    className={`px-4 py-2 whitespace-nowrap border-r border-base-300 ${
+                    className={`px-4 py-2 whitespace-nowrap text-base-content border-r border-base-300 ${
                       col.align === 'right'
                         ? 'text-right'
                         : col.align === 'center'

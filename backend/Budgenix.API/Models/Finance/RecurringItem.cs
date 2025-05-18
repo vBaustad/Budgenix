@@ -1,4 +1,5 @@
-﻿using Budgenix.Models.Shared;
+﻿using Budgenix.Models.Categories;
+using Budgenix.Models.Shared;
 using Budgenix.Models.Users;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
@@ -37,6 +38,12 @@ namespace Budgenix.Models.Finance
 
         [Required]
         public bool IsActive { get; set; } = true;
+        public DateTime? LastSkippedDate { get; set; }
+        public DateTime? LastTriggeredDate { get; set; }
+
+        [ForeignKey("CategoryId")]
+        public Category? Category { get; set; }
+
 
         public string? UserId { get; set; }
         [ForeignKey("UserId")]

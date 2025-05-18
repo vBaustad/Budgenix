@@ -1,4 +1,5 @@
 ﻿using Budgenix.API.Models.Users;
+using Budgenix.Dtos.Shared;
 using Budgenix.Dtos.Users;
 using Budgenix.Helpers;
 using Budgenix.Models.Shared;
@@ -208,6 +209,27 @@ namespace Budgenix.API.Controllers
                 user.BillingCycle,
                 user.ReferralCode
             });
+        }
+
+        [Authorize]
+        [HttpGet("me/currency")]
+        public async Task<ActionResult<string>> GetCurrency()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            return Ok(new { currency = user.PreferredCurrency ?? "USD" });
+
+
+        }
+
+        [HttpPut("me/currency")]
+        public async Task<IActionResult> UpdateCurrency([FromBody] UpdateCurrencyDto dto)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var user = await _userManager.GetUserAsync(User);
+            user.PreferredCurrency = dto.Currency;
+            await _userManager.UpdateAsync(user);
+            return NoContent();
         }
 
     }

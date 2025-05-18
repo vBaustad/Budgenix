@@ -26,10 +26,11 @@ namespace Budgenix.API.Controllers
         public async Task<ActionResult<IEnumerable<CategoryDto>>> GetCategories()
         {
 
-            var categories = await _context.Categories.ToListAsync();
-            var categoriesDto = _mapper.Map<List<CategoryDto>>(categories);
+            var categories = await _context.Categories
+                .Select(c => new CategoryDto { Id = c.Id, Name = c.Name })
+                .ToListAsync();
 
-            return Ok(categoriesDto);
+            return Ok(categories);
         }
     }
 }

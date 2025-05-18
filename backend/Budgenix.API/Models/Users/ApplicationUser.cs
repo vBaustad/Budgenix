@@ -18,9 +18,7 @@ namespace Budgenix.Models.Users
         [MaxLength(100)]
         public required string LastName { get; set; }   // Required: last name
 
-        // Email is already inherited from IdentityUser and is required by default
 
-        // Optional: Address fields (only if needed for billing/invoice)
 
         [MaxLength(200)]
         public string? AddressLine1 { get; set; }  // Optional
@@ -82,6 +80,9 @@ namespace Budgenix.Models.Users
         public decimal? DiscountPercent { get; set; }  // e.g. 20% off
         public DateTime? DiscountEndDate { get; set; }
 
+
+        //Financial
+        public string PreferredCurrency { get; set; } = "USD"; // Default fallback
 
         // Related collections
 

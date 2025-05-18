@@ -2,6 +2,7 @@
 import { useTranslation } from 'react-i18next';
 import { ThemeDropdown } from '../common/ThemeDropdown';
 import { useLocation } from 'react-router-dom';
+import CurrencyDropdown from '../common/CurrencyDropdown';
 
 const routeTitles: Record<string, string> = {
     '/dashboard': 'topbar.dashboard',
@@ -16,18 +17,20 @@ const routeTitles: Record<string, string> = {
 
   export default function Topbar() {
     const { pathname } = useLocation()
-    const { t } = useTranslation()
-  
+    const { t } = useTranslation()  
     const titleKey = routeTitles[pathname] || ''
     const title = t(titleKey)
+    
 
-    return (
-        <>
-            <div className="h-14 flex shadow items-center justify-between px-6 bg-base-100">
-                <h1 className="text-xl font-bold">{title}</h1>
-                {/* Future: add buttons or user info here */}
-                <ThemeDropdown />  
-            </div>            
-        </>
+return (
+    <>
+        <div className="h-14 flex shadow justify-between bg-base-100">
+            <h1 className="text-xl items-center p-4 font-bold">{title}</h1>
+            <div className="flex items-center justify-end gap-6 text-sm font-medium text-base-content">
+            <CurrencyDropdown />
+            <ThemeDropdown />
+            </div>
+        </div>            
+    </>
     );
 }

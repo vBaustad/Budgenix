@@ -1,21 +1,21 @@
 export const tiers = [
   {
     id: 'free',
-    href: '/register',
+    href: '/signup',
     price: { monthly: '$0', annually: '$0' },
     mostPopular: false,
     features: ['trackExpenses', 'simpleBudgets', 'basicReports'],
   },
   {
     id: 'hobby',
-    href: '/register?plan=hobby',
+    href: '/signup?plan=hobby',
     price: { monthly: '$7', annually: '$60' },
     mostPopular: false,
     features: ['recurringExpenses', 'categoryGrouping', 'exportCSV', 'emailSupport'],
   },
   {
     id: 'pro',
-    href: '/register?plan=pro',
+    href: '/signup?plan=pro',
     price: { monthly: '$14', annually: '$150' },
     mostPopular: true,
     features: [
@@ -28,7 +28,7 @@ export const tiers = [
   },
   {
     id: 'proplus',
-    href: '/register?plan=proplus',
+    href: '/signup?plan=proplus',
     price: { monthly: '$24', annually: '$220' },
     mostPopular: false,
     features: [

@@ -3,6 +3,7 @@ using Budgenix.Helpers;
 using Budgenix.Mapping;
 using Budgenix.Models.Users;
 using Budgenix.Services;
+using Budgenix.Services.Recurring;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
@@ -38,6 +39,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<RecurringItemService>();
+builder.Services.AddTransient<NextOccurrenceResolver>();
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 // Add DbContext
 builder.Services.AddDbContext<BudgenixDbContext>(options =>
