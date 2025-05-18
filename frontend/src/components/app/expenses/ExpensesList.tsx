@@ -1,8 +1,12 @@
 import DataTable from '../../common/tables/DataTable';
 import { Expense } from '../../../types/finance/expense';
 import { formatCurrency, formatDate, truncateText } from '../../../utils/formatting';
+import { useCurrency } from '../../../context/CurrencyContext';
+
 
 export default function ExpensesList({ expenses }: { expenses: Expense[] }) {
+  const { currency } = useCurrency();
+
   return (
     <DataTable
       rowKey="id"
@@ -32,7 +36,7 @@ export default function ExpensesList({ expenses }: { expenses: Expense[] }) {
           label: 'Amount',
           accessor: 'amount',
           align: 'right',
-          format: formatCurrency,
+          format: (val) => formatCurrency(val, currency),
           width: '100px',
           sortable: true,
         },

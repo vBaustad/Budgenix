@@ -27,7 +27,8 @@ export type CreateExpenseDto = {
 
 
 export type GroupedExpenseItem = {
-  group: string;
+  groupName: string;
+  totalAmount: number;
   expenses: Expense[];
 };
 

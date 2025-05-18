@@ -3,6 +3,7 @@ using System;
 using Budgenix.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Budgenix.API.Migrations
 {
     [DbContext(typeof(BudgenixDbContext))]
-    partial class BudgenixDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250516084621_AddLastSkippedDateToRecurringItem")]
+    partial class AddLastSkippedDateToRecurringItem
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.4");
@@ -337,10 +340,6 @@ namespace Budgenix.API.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("PreferredCurrency")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
 
                     b.Property<string>("ReferralCode")
                         .HasMaxLength(50)

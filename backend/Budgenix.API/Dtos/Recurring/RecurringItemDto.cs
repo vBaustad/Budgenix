@@ -5,10 +5,19 @@ namespace Budgenix.Dtos.Recurring
     public class RecurringItemDto
     {
         public Guid Id { get; set; }
-        public string Name { get; set; } = string.Empty;
+        public string Name { get; set; } = null!;
+        public string? Description { get; set; }
         public decimal Amount { get; set; }
         public DateTime StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
         public RecurrenceTypeEnum Frequency { get; set; }
-        public DateTime? NextOccurrenceDate { get; set; }
+        public bool IsActive { get; set; }
+        public string Type { get; set; } = "Expense";
+        public Guid? CategoryId { get; set; }
+
+        public DateTime? LastSkippedDate { get; set; }
+        public DateTime? LastTriggeredDate { get; set; }
+
+        public DateTime? NextOccurrenceDate { get; set; } // dynamically calculated
     }
 }

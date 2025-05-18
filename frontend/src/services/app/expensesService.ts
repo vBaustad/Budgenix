@@ -1,11 +1,11 @@
-import { Expense, GroupedExpenses, GroupedExpenseItem, CreateExpenseDto } from '../../types/finance/expense';
+import { Expense, GroupedExpenses, CreateExpenseDto } from '../../types/finance/expense';
 
 
 
 type FetchExpenseOptions = {
-  from?: string;       // ISO string
-  to?: string;         // ISO string
-  category?: string;   // Category ID
+  from?: string; 
+  to?: string; 
+  categories?: string[];
   sort?: string;
   groupBy?: 'month' | 'category' | 'year';
   skip?: number;
@@ -21,7 +21,9 @@ export async function fetchExpenses(filters: FetchExpenseOptions = {}): Promise<
 
   if (filters.from) params.append('from', filters.from);
   if (filters.to) params.append('to', filters.to);
-  if (filters.category) params.append('category', filters.category);
+  if (filters.categories?.length) {
+    params.append('categories', filters.categories.join(','));
+  }
   if (filters.sort) params.append('sort', filters.sort);
   if (filters.groupBy) params.append('groupBy', filters.groupBy);
   if (filters.skip) params.append('skip', filters.skip.toString());
@@ -36,19 +38,20 @@ export async function fetchExpenses(filters: FetchExpenseOptions = {}): Promise<
 }
 
 
-
-
-export function isGroupedExpenses(data: Expense[] | GroupedExpenses): data is GroupedExpenses {
+export function isGroupedExpenses(
+  data: Expense[] | GroupedExpenses
+): data is GroupedExpenses {
   return (
     Array.isArray(data) &&
     data.length > 0 &&
     typeof data[0] === 'object' &&
     data[0] !== null &&
-    'group' in data[0] &&
+    'groupName' in data[0] &&
     'expenses' in data[0] &&
-    Array.isArray((data[0] as GroupedExpenseItem).expenses)
+    Array.isArray(data[0].expenses)
   );
 }
+
 
 export async function createExpense(expense: CreateExpenseDto): Promise<Expense> {
 

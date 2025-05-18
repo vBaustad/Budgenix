@@ -1,23 +1,24 @@
 ﻿using AutoMapper;
 using Budgenix.Dtos.Expenses;
 using Budgenix.Models.Finance;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Budgenix.Helpers.Query
 {
     public static class ExpenseQueryHelper
     {
-        public static IQueryable<Expense> ApplyFilters(IQueryable<Expense> expenses, DateTime? from, DateTime? to, string? category)
+        public static IQueryable<Expense> ApplyFilters(IQueryable<Expense> expenses, DateTime? from, DateTime? to, List<Guid> categoryGuids)
         {
-            // Filter: date range
-            if (from.HasValue)
-                expenses = expenses.Where(e => e.Date >= from.Value);
+              
 
-            if (to.HasValue)
-                expenses = expenses.Where(e => e.Date <= to.Value);
+            if (categoryGuids.Any())
+                expenses = expenses.Where(e => categoryGuids.Contains(e.CategoryId));
 
-            // Filter: category
-            if (!string.IsNullOrWhiteSpace(category))
-                expenses = expenses.Where(e => e.Category!.Name != null && e.Category.Name.ToLower() == category.ToLower());
+            if (from != null)
+                expenses = expenses.Where(e => e.Date >= from);
+
+            if (to != null)
+                expenses = expenses.Where(e => e.Date <= to);
 
             return expenses;
         }

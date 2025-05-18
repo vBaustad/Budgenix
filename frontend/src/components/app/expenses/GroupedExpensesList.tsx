@@ -2,6 +2,7 @@ import { GroupedExpenses } from '../../../types/finance/expense';
 import { formatCurrency, formatDate, truncateText } from '../../../utils/formatting';
 import DataTable from '../../common/tables/DataTable';
 // import { useTranslation } from 'react-i18next';
+import { useCurrency } from '../../../context/CurrencyContext';
 
 type GroupedExpensesListProps = {
     data: GroupedExpenses;
@@ -10,32 +11,32 @@ type GroupedExpensesListProps = {
 
 export default function GroupedExpensesList({ data, groupBy }: GroupedExpensesListProps) {
 //   const { t } = useTranslation();
+  const { currency } = useCurrency();
 
-  const formatGroupLabel = (key: string): string => {
-    switch (groupBy) {
-      case 'month': {
-        const [year, month] = key.split('-');
-        const date = new Date(Number(year), Number(month) - 1);
-        return date.toLocaleString(undefined, { month: 'long', year: 'numeric' });
-      }
-      case 'year':
-        return key;
-      case 'category':
-        return key;
-      default:
-        return key;
+const formatGroupLabel = (key: string | undefined): string => {
+  if (!key) return 'Unknown';
+
+  switch (groupBy) {
+    case 'month': {
+      const [year, month] = key.split('-');
+      const date = new Date(Number(year), Number(month) - 1);
+      return date.toLocaleString(undefined, { month: 'long', year: 'numeric' });
     }
-  };
+    case 'year':
+    case 'category':
+    default:
+      return key;
+  }
+};
+
 
   return (
     <div className="flex flex-col gap-6">
-      {data.map(({ group, expenses }) => (
-        <div
-        key={group}
-          className="rounded-xl border border-l-4 border-primary bg-base-100 shadow-sm p-4"
+      {data.map(({ groupName, expenses }) => (
+        <div key={groupName} className="rounded-xl border border-l-4 border-primary bg-base-100 shadow-sm p-4"
         >
           <h3 className="text-lg font-semibold text-base-content mb-3">
-            {formatGroupLabel(group)}
+            {formatGroupLabel(groupName)}
           </h3>
           <DataTable
             rowKey="id"
@@ -65,7 +66,7 @@ export default function GroupedExpensesList({ data, groupBy }: GroupedExpensesLi
                 label: 'Amount',
                 accessor: 'amount',
                 align: 'right',
-                format: formatCurrency,                
+                format:  (val) => formatCurrency(val, currency),               
                 width: '100px',
               },
               {

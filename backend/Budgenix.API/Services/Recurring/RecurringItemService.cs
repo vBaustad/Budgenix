@@ -19,23 +19,34 @@ namespace Budgenix.Services.Recurring
             _localizer = localizer;
         }
 
-        public bool IsDueToday(RecurringItem recurringItem, DateTime todayDate) 
+        public bool IsDueToday(RecurringItem recurringItem, DateTime todayDate)
         {
-            if(!recurringItem.IsActive)
+            if (!recurringItem.IsActive)
                 return false;
 
-            if (recurringItem.StartDate >= todayDate)
-                return false;                                
-                
+            if (recurringItem.LastTriggeredDate != null && recurringItem.LastTriggeredDate.Value.Date >= todayDate)
+                return false;
+
+            if (recurringItem.LastSkippedDate != null && recurringItem.LastSkippedDate.Value.Date == todayDate)
+                return false;
+
+            if (recurringItem.StartDate > todayDate)
+                return false;
+
             if (recurringItem.EndDate != null && recurringItem.EndDate < todayDate)
                 return false;
 
-            switch(recurringItem.Frequency)
+            switch (recurringItem.Frequency)
             {
-                case RecurrenceTypeEnum.Daily: return true;
+                case RecurrenceTypeEnum.Daily:
+                    return true;
 
                 case RecurrenceTypeEnum.Weekly:
                     return recurringItem.StartDate.DayOfWeek == todayDate.DayOfWeek;
+
+                case RecurrenceTypeEnum.BiWeekly:
+                    var daysSinceStart = (todayDate - recurringItem.StartDate.Date).Days;
+                    return daysSinceStart % 14 == 0;
 
                 case RecurrenceTypeEnum.Monthly:
                     var startDay = recurringItem.StartDate.Day;
@@ -43,10 +54,45 @@ namespace Budgenix.Services.Recurring
                     var dueDay = Math.Min(startDay, daysInMonth);
                     return todayDate.Day == dueDay;
 
+                case RecurrenceTypeEnum.Quarterly:
+                    var monthsSinceStart = (todayDate.Year - recurringItem.StartDate.Year) * 12 + (todayDate.Month - recurringItem.StartDate.Month);
+                    return monthsSinceStart % 3 == 0 && recurringItem.StartDate.Day == todayDate.Day;
 
-                default: return false;
-            };            
+                case RecurrenceTypeEnum.Yearly:
+                    return recurringItem.StartDate.Month == todayDate.Month &&
+                           recurringItem.StartDate.Day == todayDate.Day;
+
+                default:
+                    return false;
+            }
         }
+
+        public void AdvanceStartDate(RecurringItem item)
+        {
+            var today = DateTime.Today;
+            var next = GetNextOccurrenceDate(item, today); // already exists
+
+            if (next != null)
+            {
+                item.StartDate = item.Frequency switch
+                {
+                    RecurrenceTypeEnum.Daily => next.Value.AddDays(1),
+                    RecurrenceTypeEnum.Weekly => next.Value.AddDays(7),
+                    RecurrenceTypeEnum.BiWeekly => next.Value.AddDays(14),
+                    RecurrenceTypeEnum.Monthly => next.Value.AddMonths(1),
+                    RecurrenceTypeEnum.Quarterly => next.Value.AddMonths(3),
+                    RecurrenceTypeEnum.Yearly => next.Value.AddYears(1),
+                    _ => item.StartDate
+                };
+            }
+
+            if (item.EndDate != null && item.StartDate > item.EndDate)
+            {
+                item.IsActive = false;
+            }
+        }
+
+
 
         public Expense CreateExpenseFromRecurringItem(RecurringItem recurringItem)
         {
@@ -117,41 +163,23 @@ namespace Budgenix.Services.Recurring
 
         public DateTime? GetNextOccurrenceDate(RecurringItem item, DateTime fromDate)
         {
-            if (!item.IsActive || item.EndDate < fromDate)
+            if (!item.IsActive || (item.EndDate != null && item.EndDate < fromDate))
                 return null;
+            
+            var date = item.StartDate.Date;
 
-            var date = fromDate.Date;
-
-            switch (item.Frequency)
+            return item.Frequency switch
             {
-                case RecurrenceTypeEnum.Daily:
-                    return date;
-
-                case RecurrenceTypeEnum.Weekly:
-                    int daysUntil = ((int)item.StartDate.DayOfWeek - (int)date.DayOfWeek + 7) % 7;
-                    return date.AddDays(daysUntil == 0 ? 7 : daysUntil); // next week if today
-
-                case RecurrenceTypeEnum.BiWeekly:
-                    var totalDays = (date - item.StartDate).Days;
-                    var daysToNext = 14 - (totalDays % 14);
-                    return date.AddDays(daysToNext == 0 ? 14 : daysToNext);
-
-                case RecurrenceTypeEnum.Monthly:
-                    var day = item.StartDate.Day;
-                    var target = new DateTime(date.Year, date.Month, 1).AddMonths(1);
-                    var finalDay = Math.Min(day, DateTime.DaysInMonth(target.Year, target.Month));
-                    return new DateTime(target.Year, target.Month, finalDay);
-
-                case RecurrenceTypeEnum.Quarterly:
-                    return item.StartDate.AddMonths(3); // placeholder — refine if needed
-
-                case RecurrenceTypeEnum.Yearly:
-                    return item.StartDate.AddYears(1); // placeholder — refine if needed
-
-                default:
-                    return null;
-            }
+                RecurrenceTypeEnum.Daily => date.AddDays(1),
+                RecurrenceTypeEnum.Weekly => date.AddDays(7),
+                RecurrenceTypeEnum.BiWeekly => date.AddDays(14),
+                RecurrenceTypeEnum.Monthly => date.AddMonths(1),
+                RecurrenceTypeEnum.Quarterly => date.AddMonths(3),
+                RecurrenceTypeEnum.Yearly => date.AddYears(1),
+                _ => null
+            };
         }
+
 
     }
 }

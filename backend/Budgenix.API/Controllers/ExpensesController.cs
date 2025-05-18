@@ -9,6 +9,7 @@ using Budgenix.Dtos.Expenses;
 using Budgenix.Models.Finance;
 using Budgenix.Models.Shared;
 using Microsoft.Extensions.Localization;
+using Budgenix.Models.Categories;
 
 namespace Budgenix.API.Controllers
 {
@@ -40,7 +41,7 @@ namespace Budgenix.API.Controllers
         public async Task<ActionResult<IEnumerable<Expense>>> GetExpenses(
             DateTime? from = null,
             DateTime? to = null,
-            string? category = null,
+            string? categories = null,
             string sort = "date_desc",
             string? groupBy = null,
             int skip = 0,
@@ -53,8 +54,16 @@ namespace Budgenix.API.Controllers
                 .Include(e => e.Category)
                 .Where(e => e.UserId == userId)
                 .AsQueryable();
-            //Apply filters and sorting
-            expenses = ExpenseQueryHelper.ApplyFilters(expenses, from, to, category);
+
+            var categoryGuids = categories?
+               .Split(',')
+               .Select(c => Guid.TryParse(c.Trim(), out var id) ? id : (Guid?)null)
+               .Where(g => g.HasValue)
+               .Select(g => g.Value)
+               .ToList() ?? new List<Guid>();
+
+            expenses = ExpenseQueryHelper.ApplyFilters(expenses, from, to, categoryGuids);
+
             expenses = ExpenseQueryHelper.ApplySorting(expenses, sort);
 
             //Apply grouping
@@ -183,14 +192,14 @@ namespace Budgenix.API.Controllers
                 var recurringItem = new RecurringItem
                 {
                     Id = Guid.NewGuid(),
-                    Name = expense.Name,
-                    Description = expense.Description,
-                    Amount = expense.Amount,
-                    StartDate = expense.Date,
-                    EndDate = null, // or let the user choose in the future
-                    Frequency = expense.RecurrenceFrequency,
+                    Name = dto.Name,
+                    Description = dto.Description,
+                    Amount = dto.Amount,
+                    StartDate = dto.Date,
+                    EndDate = null,
+                    Frequency = dto.RecurrenceFrequency,
                     Type = "Expense",
-                    CategoryId = expense.CategoryId,
+                    CategoryId = dto.CategoryId,
                     IsActive = true,
                     UserId = userId
                 };

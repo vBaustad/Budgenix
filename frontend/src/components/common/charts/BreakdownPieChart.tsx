@@ -1,5 +1,7 @@
 import { useMemo } from 'react';
 import { PieChart, Pie, Cell, Tooltip } from 'recharts';
+import { formatCurrency } from '../../../utils/formatting';
+import { useCurrency } from '../../../context/CurrencyContext';
 
 const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7f50', '#ffbb28', '#00c49f'];
 
@@ -33,16 +35,18 @@ export default function BreakdownPieChart<T>({
     return Array.from(map.entries()).map(([label, value]) => ({ label, value }));
   }, [data, groupBy, getValue]);
 
+  const { currency: userCurrency } = useCurrency();
+
   return (
     <div className="flex w-full h-[600px]  justify-between">
     {/* Category Totals List */}
-    <div className="w-1/4 space-y-2 bg-primary/70 rounded-xl p-4 mt-4">
+    <div className="w-1/4 space-y-2 border border-primary bg-primary/10 rounded-xl p-4 mt-4">
         {[...chartData]
         .sort((a, b) => b.value - a.value)
         .map((item, idx) => (
-        <div key={idx} className="flex justify-between text-sm text-primary-content">
+        <div key={idx} className="flex justify-between text-sm text-based-content">
             <span className="truncate">{item.label}</span>
-            <span className="font-semibold">${item.value.toFixed(2)}</span>
+            <span className="font-semibold">{formatCurrency(item.value, userCurrency)}</span>
         </div>
         ))}
     </div>

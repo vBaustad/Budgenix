@@ -6,6 +6,8 @@ import { fetchUsedCategories } from '../../../services/app/categoriesService';
 import InputField from '../../../components/common/forms/InputField';
 import SelectField from '../../../components/common/forms/SelectField';
 import toast from 'react-hot-toast';
+import { formatCurrency } from '../../../utils/formatting';
+import { useCurrency } from '../../../context/CurrencyContext';
 
 type Props = {
   onAdd: (expense: Expense) => void;
@@ -85,8 +87,7 @@ export default function AddExpenseForm({ onAdd, onRecurringChange }: Props) {
 
   useEffect(() => {
     fetchUsedCategories()
-      .then((data) => {
-        console.log('Categories received from API:', data);
+      .then((data) => {        
         setCategories(data);
       })
       .catch((err) => {
@@ -95,6 +96,7 @@ export default function AddExpenseForm({ onAdd, onRecurringChange }: Props) {
       });
   }, []);
 
+  const { currency: userCurrency } = useCurrency();
 
   return (
     
@@ -112,9 +114,10 @@ export default function AddExpenseForm({ onAdd, onRecurringChange }: Props) {
           <InputField
             name="amount"
             type="number"
-            placeholder="0$"
-            value={form.amount.toString()}
+            value={form.amount === 0 ? '' : form.amount.toString()}
+            placeholder={formatCurrency(0, userCurrency)}
             onChange={handleChange}
+            showCurrency={true}
             required
           />              
           <SelectField
@@ -138,7 +141,7 @@ export default function AddExpenseForm({ onAdd, onRecurringChange }: Props) {
         <div className="flex items-center gap-2">
           <input
             type="checkbox"
-            name="isRecurring" // ← this is important
+            name="isRecurring"
             checked={form.isRecurring}
             onChange={handleChange}
           />
