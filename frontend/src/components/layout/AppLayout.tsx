@@ -1,5 +1,5 @@
 import Sidebar from './Sidebar';
-import Topbar from './Topbar'; // add your Topbar here
+import Topbar from './Topbar';
 import { Outlet } from 'react-router-dom';
 
 

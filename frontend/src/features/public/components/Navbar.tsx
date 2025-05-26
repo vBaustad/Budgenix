@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react'
 import { Dialog, DialogPanel } from '@headlessui/react'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
-import BudgenixLogo from '../../assets/Logo/BudgenixLogo.png';
-import { ThemeDropdown } from '../common/ThemeDropdown';
+import BudgenixLogo from '@/assets/Logo/BudgenixLogo.png';
+import { ThemeDropdown } from '@/components/common/ThemeDropdown';
 import { useTranslation } from 'react-i18next';
 
 export default function Navbar() {

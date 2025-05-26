@@ -1,4 +1,4 @@
-import DataTable from '../../common/tables/DataTable';
+import DataTable from '../../../components/common/tables/DataTable';
 import { Expense } from '../../../types/finance/expense';
 import { formatCurrency, formatDate, truncateText } from '../../../utils/formatting';
 import { useCurrency } from '../../../context/CurrencyContext';

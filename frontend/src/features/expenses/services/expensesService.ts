@@ -1,5 +1,4 @@
-import { Expense, GroupedExpenses, CreateExpenseDto } from '../../types/finance/expense';
-
+import { Expense, GroupedExpenses, CreateExpenseDto } from "@/types/finance/expense";
 
 
 type FetchExpenseOptions = {

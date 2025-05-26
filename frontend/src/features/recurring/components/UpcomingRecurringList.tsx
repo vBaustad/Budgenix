@@ -1,9 +1,9 @@
-import { useCurrency } from '../../../context/CurrencyContext';
-import { fetchRecurringExpenses, skipRecurringItem, triggerRecurringItem } from '../../../services/app/recurringService';
-import { RecurringExpenseDto } from '../../../types/finance/recurring';
-import { RecurrenceFrequencyLabels } from '../../../types/shared/recurrence';
-import { formatCurrency, formatDate } from '../../../utils/formatting';
-
+import { useCurrency } from '@/context/CurrencyContext';
+import { fetchRecurringExpenses, skipRecurringItem, triggerRecurringItem } from '../services/recurringService';
+import { RecurringExpenseDto } from '@/types/finance/recurring';
+import { RecurrenceFrequencyLabels } from '@/types/shared/recurrence';
+import { formatCurrency, formatDate } from '@/utils/formatting';
+import { Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 type Props = {
@@ -86,6 +86,15 @@ export default function UpcomingRecurringList({ recurringExpenses, setRecurringE
                   ✏️ Edit
                 </button>
              </div>
+              {/* Delete icon */}
+              <button
+                className="absolute bottom-2 right-2 p-1 rounded hover:bg-error/20 transition"
+                onClick={() => handleDelete?.(exp.id)}
+                aria-label="Delete"
+                title="Delete"
+              >
+                <Trash2 className="w-4 h-4 text-error hover:text-error-content" />
+              </button>
           </li>
         ))}
     </ul>

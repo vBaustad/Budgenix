@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { CreateExpenseDto, Expense } from '../../../types/finance/expense';
 import { RecurrenceFrequency, RecurrenceFrequencyOptions } from '../../../types/shared/recurrence';
-import { createExpense } from '../../../services/app/expensesService';
-import { fetchUsedCategories } from '../../../services/app/categoriesService';
+import { createExpense } from '../services/expensesService';
+import { fetchUsedCategories } from '../../../services/global/categoriesService';
 import InputField from '../../../components/common/forms/InputField';
 import SelectField from '../../../components/common/forms/SelectField';
 import toast from 'react-hot-toast';

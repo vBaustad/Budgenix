@@ -1,6 +1,6 @@
 import React from 'react';
-import { useCurrency } from '../../../context/CurrencyContext';
-import { getCurrencySymbol } from '../../../utils/formatting';
+import { useCurrency } from '@/context/CurrencyContext';
+import { getCurrencySymbol } from '@/utils/formatting';
 
 
 type InputFieldProps = {
@@ -43,7 +43,7 @@ name,
   const displayCurrency = showCurrency ? getCurrencySymbol(userCurrency) : '';
 
 
-
+  
   return (
     <div>
       {label && (

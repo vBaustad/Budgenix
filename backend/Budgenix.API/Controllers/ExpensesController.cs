@@ -64,7 +64,7 @@ namespace Budgenix.API.Controllers
 
             expenses = ExpenseQueryHelper.ApplyFilters(expenses, from, to, categoryGuids);
 
-            expenses = ExpenseQueryHelper.ApplySorting(expenses, sort);
+            expenses = ExpenseQueryHelper.ApplySorting(expenses, sort);             
 
             //Apply grouping
             if (!string.IsNullOrWhiteSpace(groupBy))

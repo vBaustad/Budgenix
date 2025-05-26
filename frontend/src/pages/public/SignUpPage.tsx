@@ -5,7 +5,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom'
 import { tiers } from '../../constants/plans'
 import { Radio, RadioGroup } from '@headlessui/react'
 import { CheckIcon } from '@heroicons/react/20/solid'
-import RegistrationForm from '../../components/public/RegistrationForm'
+import RegistrationForm from '@/features/public/components/RegistrationForm'
 import { useTranslation } from 'react-i18next'
 
 function classNames(...classes: (string | boolean | undefined | null)[]) {

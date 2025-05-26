@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import { RecurrenceFrequencyOptions } from '../../../types/shared/recurrence';
-import { RecurringExpenseDto } from '../../../types/finance/recurring';
-import { deleteRecurringItem, updateRecurringItem } from '../../../services/app/recurringService';
-import InputField from '../../../components/common/forms/InputField';
-import SelectField from '../../../components/common/forms/SelectField';
+import { RecurrenceFrequencyOptions } from '@/types/shared/recurrence';
+import { RecurringExpenseDto } from '@/types/finance/recurring';
+import { deleteRecurringItem, updateRecurringItem } from '../services/recurringService';
+import InputField from '@/components/common/forms/InputField';
+import SelectField from '@/components/common/forms/SelectField';
 import toast from 'react-hot-toast';
-
 
 type Props = {
   item: RecurringExpenseDto;

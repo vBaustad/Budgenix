@@ -1,7 +1,7 @@
-import React, { ReactNode } from 'react';
-import ScrollToHash from '../public/ScrolltoHash'
-import Navbar from '../public/Navbar'
-import Footer from '../public/Footer'
+import { ReactNode } from 'react';
+import ScrollToHash from './ScrolltoHash';
+import Navbar from './Navbar';
+import Footer from './Footer';
 import BackgroundWrapper from './BackgroundWrapper';
 
 type BaseLayoutProps = {

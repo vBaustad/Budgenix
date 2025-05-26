@@ -1,6 +1,5 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
-import BudgenixLogo from '../../assets/Logo/BudgenixLogo.png';
+import BudgenixLogo from '@/assets/Logo/BudgenixLogo.png';
 
 const currentYear = new Date().getFullYear();
 

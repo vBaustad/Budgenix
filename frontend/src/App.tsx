@@ -3,9 +3,9 @@ import './styles/components.css'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import { Toaster } from 'react-hot-toast';
-import PrivateRoute from './components/app/PrivateRoute'
-import AppLayout from './components/app/AppLayout'
-import BaseLayout from './components/public/BaseLayout'
+import PrivateRoute from './components/routing/PrivateRoute'
+import AppLayout from './components/layout/AppLayout'
+import BaseLayout from './features/public/components/BaseLayout';
 
 import {
   DashboardPage,
