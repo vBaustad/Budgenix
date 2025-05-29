@@ -1,10 +1,4 @@
-import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { fetchExpenses, isGroupedExpenses} from '@/features/expenses/services/expensesService';
-import { fetchRecurringExpenses } from '@/features/recurring/services/recurringService';
-import { fetchUsedCategories } from '@/services/global/categoriesService';
-import { Expense, GroupedExpenses } from '@/types/finance/expense';
-import { RecurringExpenseDto } from '@/types/finance/recurring';
+import { useExpensesPageState } from '@/features/expenses/hooks/useExpensesPageState';
 import ExpensesOverview from '@/features/expenses/components/ExpensesOverview';
 import AddExpenseForm from '@/features/expenses/components/AddExpenseForm';
 import ExpensesList from '@/features/expenses/components/ExpensesList';
@@ -16,87 +10,55 @@ import CategoryFilter from '@/components/common/filters/CategoryFilter';
 import GroupByDropdown from '@/components/common/filters/GroupByDropdown';
 import SectionShell from '@/components/layout/SectionShell';
 import { AppIcons } from '@/components/icons/AppIcons';
-
-export const GROUP_OPTIONS: { value: GroupByValue; label: string }[] = [
-  { value: 'month', label: 'Month' },
-  { value: 'year', label: 'Year' },
-  { value: 'category', label: 'Category' },
-];
-
+import { GROUP_OPTIONS } from '@/features/expenses/constants/grouping';
+import RecurringSummary from '@/features/recurring/components/RecurringSummary';
 
 export type GroupByOption = typeof GROUP_OPTIONS[number]['value'];
-export type GroupByValue = 'month' | 'year' | 'category';
-
 
 export default function ExpensesPage() {
-  const { t } = useTranslation();
-  const [groupBy, setGroupBy] = useState<'month' | 'category' | 'year' | ''>('');
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [categoryOptions, setCategoryOptions] = useState<{ value: string; label: string }[]>([]);
+  const {
+    t,
+    groupBy,
+    setGroupBy,
+    selectedCategories,
+    setSelectedCategories,
+    categoryOptions,
+    expenses,
+    groupedExpenses,
+    loading,
+    recurringExpenses,
+    loadingRecurring,
+    selectedRecurringItem,
+    setSelectedRecurringItem,
+    handleAddExpense,
+    refreshRecurring,
+    setRecurringExpenses,  
+    monthlyRecurringTotal,
+    lastTriggeredRecurring,
+    lastSkippedRecurring,
+  } = useExpensesPageState();
 
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [groupedExpenses, setGroupedExpenses] = useState<GroupedExpenses>([]);
-  const [loading, setLoading] = useState(true);
-
-  const [recurringExpenses, setRecurringExpenses] = useState<RecurringExpenseDto[]>([]);
-  const [loadingRecurring, setLoadingRecurring] = useState(true);
-  const [selectedRecurringItem, setSelectedRecurringItem] = useState<RecurringExpenseDto | null>(null);
-
-  const handleAddExpense = (newExpense: Expense) => {
-    setExpenses(prev => [newExpense, ...prev]);
+  const handleRecurringSave = async () => {
+    setSelectedRecurringItem(null);
+    await refreshRecurring();
   };
 
-  useEffect(() => {
-    fetchUsedCategories()
-      .then((categories) => {
-        setCategoryOptions(categories.map(c => ({ value: c.id, label: c.name })));
-      })
-      .catch(console.error);
-  }, []);
+  const chartData = groupedExpenses.length > 0
+    ? groupedExpenses.flatMap(g => g.expenses)
+    : expenses;
 
-  useEffect(() => {
-    setLoading(true);
-    fetchExpenses({
-      categories: selectedCategories.length > 0 ? selectedCategories : undefined,
-      groupBy: groupBy || undefined,
-    })
-      .then((data) => {
-        if (isGroupedExpenses(data)) {
-          setGroupedExpenses(data);
-          setExpenses([]);
-        } else {
-          setExpenses(data);
-          setGroupedExpenses([]);
-        }
-      })
-      .catch(() => {
-        setExpenses([]);
-        setGroupedExpenses([]);
-      })
-      .finally(() => setLoading(false));
-  }, [selectedCategories, groupBy]);
-
-  useEffect(() => {
-    setLoadingRecurring(true);
-    fetchRecurringExpenses()
-      .then(setRecurringExpenses)
-      .catch(console.error)
-      .finally(() => setLoadingRecurring(false));
-  }, []);
 
   return (
     <div className="flex flex-col">
 
-      <SectionShell title="Overview" icon={AppIcons.barChart} refreshable>
-        <ExpensesOverview />
-      </SectionShell>
-     
+      <ExpensesOverview />   
+           
       <div className="flex flex-col lg:flex-row">
-        <SectionShell title={t('expenses.addNew')} icon={AppIcons.payout}>
-          <AddExpenseForm onAdd={handleAddExpense} onRecurringChange={() => fetchRecurringExpenses().then(setRecurringExpenses)} />
+        <SectionShell title={t('expenses.add')} icon={AppIcons.add} minimizable>
+          <AddExpenseForm onAdd={handleAddExpense} onRecurringChange={() => refreshRecurring()} />
         </SectionShell>
 
-        <SectionShell title="Upcoming Expenses" refreshable>
+        <SectionShell title="Upcoming Expenses" icon={AppIcons.recurring} refreshable>
           <div className="flex flex-col lg:flex-row gap-4">
             {/* LEFT: Recurring list */}
             <div className="w-full lg:w-1/2">
@@ -107,52 +69,31 @@ export default function ExpensesPage() {
                 setRecurringExpenses={setRecurringExpenses}
               />
             </div>
-
             {/* RIGHT: Edit or Summary */}
             <div className="w-full lg:w-1/2">
               {selectedRecurringItem ? (
                 <EditRecurringItemForm
                   item={selectedRecurringItem}
-                  onSave={async () => {
-                    setSelectedRecurringItem(null);
-                    const data = await fetchRecurringExpenses();
-                    setRecurringExpenses(data);
-                  }}
+                  onSave={handleRecurringSave}
                   onCancel={() => setSelectedRecurringItem(null)}
                 />
-              ) : (
-                <div className="w-full">
-                  <h3 className="text-xl text-primary font-semibold mb-2">Recurring Summary</h3>
-
-                  <div className="space-y-2 text-base-content/80">
-                    <div>
-                      <span className="font-semibold">Total active recurring:</span>{' '}
-                      {recurringExpenses.filter(e => e.isActive).length}
-                    </div>
-                    <div>
-                      <span className="font-semibold">Monthly total:</span>{' '}
-                      {/* insert monthly total here */}
-                    </div>
-                    <div>
-                      <span className="font-semibold">Last triggered:</span>{' '}
-                      {/* insert last triggered date here */}
-                    </div>
-                  </div>
-                </div>
+              ) : (                
+                <RecurringSummary
+                  recurringExpenses={recurringExpenses}
+                  monthlyTotal={monthlyRecurringTotal}
+                  lastTriggered={lastTriggeredRecurring}
+                  lastSkipped={lastSkippedRecurring}
+                />
               )}
             </div>
           </div>
         </SectionShell>
       </div>
 
-      <div className="flex flex-col lg:flex-row m-4 gap-4">
-        <section className="w-full bg-base-100 p-4 rounded-xl shadow-md">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2">
-            <h2 className="text-xl text-primary font-semibold mb-2 sm:mb-0">
-              {t('expenses.allExpenses')}
-            </h2>
-
-            <div className="flex gap-4 text-sm font-medium text-based-content relative">
+      <div className="flex flex-col lg:flex-row">
+        <SectionShell title={t('expenses.allExpenses')} icon={AppIcons.list}>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex gap-4 mb-2 text-sm font-medium text-base-content ml-auto">
                 <CategoryFilter
                   options={categoryOptions}
                   selected={selectedCategories}
@@ -164,9 +105,8 @@ export default function ExpensesPage() {
                   onChange={setGroupBy}
                   options={GROUP_OPTIONS}
                 />
-              </div>
             </div>
-
+          </div>
           <div className="max-h-[600px] overflow-x-auto shadow-md">
             {loading ? (
               <p className="text-base-content/60">{t('shared.loading')}</p>
@@ -175,19 +115,17 @@ export default function ExpensesPage() {
             ) : (
               <ExpensesList expenses={expenses} />
             )}
-          </div>
-        </section>
-
-        <section className="w-full bg-base-100 p-4 rounded-xl shadow-md">
-          <h3 className="text-xl text-primary font-semibold">Spending by Category</h3>
+          </div>          
+        </SectionShell>
+        <SectionShell title="Spending by Category" icon={AppIcons.pieChart}>
           <BreakdownPieChart
-            data={expenses}
-            groupBy={(e) => e.categoryName || 'Uncategorized'}
-            getValue={(e) => e.amount}
-            height={600}
-            width={700}
-          />
-        </section>
+                      data={chartData}
+                      groupBy={(e) => e.categoryName || 'Uncategorized'}
+                      getValue={(e) => e.amount}
+                      height={600}
+                      width={700}
+                    />
+        </SectionShell>
       </div>
     </div>
   );

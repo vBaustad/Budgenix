@@ -24,7 +24,7 @@ const routeTitles: Record<string, string> = {
 
 return (
     <>
-        <div className="h-14 flex shadow justify-between bg-base-100">
+        <div className="h-14 flex justify-between bg-base-100">
             <h1 className="text-xl items-center p-4 font-bold">{title}</h1>
             <div className="flex items-center justify-end gap-6 text-sm font-medium text-base-content">
             <CurrencyDropdown />

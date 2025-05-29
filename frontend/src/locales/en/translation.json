@@ -192,7 +192,7 @@
         }
     },
     "expenses": {
-        "addNew": "Add New Expense",
+        "add": "Add Expense",
         "allExpenses": "All Expenses"
     },    
     "shared": {

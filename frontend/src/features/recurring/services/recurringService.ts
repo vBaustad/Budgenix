@@ -1,5 +1,5 @@
-import { Expense } from "../../types/finance/expense";
-import { RecurringExpenseDto } from "../../types/finance/recurring";
+import { Expense } from "@/types/finance/expense";
+import { RecurringExpenseDto } from "@/types/finance/recurring";
 
 const RECURRING_API_BASE = '/api/recurring';
 

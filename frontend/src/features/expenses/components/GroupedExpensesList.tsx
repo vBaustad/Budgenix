@@ -29,13 +29,12 @@ const formatGroupLabel = (key: string | undefined): string => {
   }
 };
 
-
   return (
     <div className="flex flex-col gap-6">
       {data.map(({ groupName, expenses }) => (
-        <div key={groupName} className="rounded-xl border border-l-4 border-primary bg-base-100 shadow-sm p-4"
+        <div key={groupName} className="rounded-xl border border-l-4 border-primary bg-base-100 shadow-sm"
         >
-          <h3 className="text-lg font-semibold text-base-content mb-3">
+          <h3 className="text-lg font-semibold text-base-content mb-2 mt-2 ml-2">
             {formatGroupLabel(groupName)}
           </h3>
           <DataTable

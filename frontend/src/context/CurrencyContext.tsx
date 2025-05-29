@@ -1,46 +1,40 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext } from 'react';
+import { useUser } from './UserContext';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 
 type CurrencyContextType = {
   currency: string;
-  setCurrency: (val: string) => void;
+  setCurrency: (val: string) => Promise<void>;
 };
 
 const CurrencyContext = createContext<CurrencyContextType>({
   currency: 'USD',
-  setCurrency: () => {}, // no val needed here
+  setCurrency: async () => {},
 });
 
-
 export function CurrencyProvider({ children }: { children: React.ReactNode }) {
-  const [currency, setCurrency] = useState<string | null>(null);
+  const { user, refetchUser, isLoading } = useUser();
 
-useEffect(() => {
-  fetch('/api/account/me/currency')
-    .then(res => {
-      if (!res.ok) throw new Error(`Failed with status ${res.status}`);
-      return res.json(); // only attempt to parse if successful
-    })
-    .then(data => setCurrency(data.currency))
-    .catch(err => {
-      console.error('Failed to fetch currency:', err);
-      setCurrency('USD');
-    });
-}, []);
-
-
-const updateCurrency = async (newCurrency: string) => {
-    await fetch('/api/account/me/currency', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ currency: newCurrency }),
-    });
-    setCurrency(newCurrency);
+  const updateCurrency = async (newCurrency: string) => {
+    console.log('[CurrencyContext] updating currency to', newCurrency);
+    try {
+      await fetch('/api/account/me/currency', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currency: newCurrency }),
+        credentials: 'include',
+      });
+      await refetchUser(); // Refresh user from source
+    } catch (err) {
+      console.error('Failed to update currency:', err);
+    }
   };
 
-  if (currency === null) return null;
+  // Don't render until user is loaded
+  if (isLoading || !user) return <LoadingSpinner />;
 
   return (
-    <CurrencyContext.Provider value={{ currency, setCurrency: updateCurrency }}>
+    <CurrencyContext.Provider value={{ currency: user.currency, setCurrency: updateCurrency }}>
       {children}
     </CurrencyContext.Provider>
   );

@@ -139,7 +139,7 @@ namespace Budgenix.API.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId", "Date");
 
                     b.ToTable("Expenses");
                 });
@@ -186,7 +186,7 @@ namespace Budgenix.API.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId", "Date");
 
                     b.ToTable("Incomes");
                 });
@@ -242,7 +242,7 @@ namespace Budgenix.API.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId", "StartDate");
 
                     b.ToTable("RecurringItems");
                 });

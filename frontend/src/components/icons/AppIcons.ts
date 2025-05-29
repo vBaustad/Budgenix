@@ -59,9 +59,12 @@ import {
   // Buttons / Utilities
   RefreshCcw,
   Trash2,
+  ArrowUp,
+  ArrowDown,
   Edit,
   Plus,
   Minus,
+  Lightbulb,
   Eye,
   EyeOff,
   ChevronDown,
@@ -71,6 +74,11 @@ import {
   AlertTriangle,
   Info,
   Star,
+  FilePlus,
+  CirclePlus,
+  List,
+  Table,
+  AlignJustify,
 } from 'lucide-react';
 
 export const AppIcons = {
@@ -141,9 +149,19 @@ export const AppIcons = {
   hide: EyeOff,
   down: ChevronDown,
   up: ChevronUp,
+  arrowUp: ArrowUp,
+  arrowDown: ArrowDown,
   left: ChevronLeft,
   right: ChevronRight,
   warning: AlertTriangle,
   info: Info,
   star: Star,
+
+  // Utilities
+  lightBulb: Lightbulb,
+  addForm: FilePlus,
+  addCircle: CirclePlus,
+  list: List,
+  table: Table,
+  justify: AlignJustify,
 };

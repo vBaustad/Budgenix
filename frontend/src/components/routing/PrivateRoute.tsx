@@ -1,16 +1,23 @@
 import { Navigate, Outlet } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { useUser } from '../../context/UserContext';
 
 export default function PrivateRoute() {
-  const { isLoading, isLoggedIn } = useAuth();
+  const { user, isLoading } = useUser();
 
-  if (isLoading || isLoggedIn === null) {
-    return null; // or a loader
+  if (isLoading) {
+    console.log('[PrivateRoute] Still loading user...');
+    return (
+      <div className="p-4 text-center text-base-content/70">
+        Checking authentication...
+      </div>
+    );
   }
 
-  if (!isLoggedIn) {
+  if (!user) {
+    console.warn('[PrivateRoute] No user found, redirecting to /login');
     return <Navigate to="/login" replace />;
   }
 
+  console.log('[PrivateRoute] Authenticated, rendering outlet');
   return <Outlet />;
 }

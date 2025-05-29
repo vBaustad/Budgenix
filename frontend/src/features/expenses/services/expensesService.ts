@@ -11,6 +11,13 @@ type FetchExpenseOptions = {
   take?: number;
 };
 
+type ExpensesOverviewResponse = {
+  totalSpent: number;
+  lastMonthSpent: number;
+  incomeReceived: number;
+  upcomingRecurring: number;
+  dailyTotals: number[];
+};
 
 const API_BASE_URL = '/api/expenses';
 
@@ -33,6 +40,26 @@ export async function fetchExpenses(filters: FetchExpenseOptions = {}): Promise<
   });
 
   if (!res.ok) throw new Error('Failed to fetch expenses');
+  return await res.json();
+}
+
+export async function fetchExpensesOverview(
+  month: number,
+  year: number
+): Promise<ExpensesOverviewResponse> {
+  const params = new URLSearchParams({
+    month: month.toString(),
+    year: year.toString(),
+  });
+
+  const res = await fetch(`${API_BASE_URL}/overview?${params.toString()}`, {
+    credentials: 'include',
+  });
+
+  if (!res.ok) {
+    throw new Error('Failed to fetch overview data');
+  }
+
   return await res.json();
 }
 

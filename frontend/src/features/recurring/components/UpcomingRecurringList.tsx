@@ -1,10 +1,9 @@
 import { useCurrency } from '@/context/CurrencyContext';
-import { fetchRecurringExpenses, skipRecurringItem, triggerRecurringItem } from '../services/recurringService';
 import { RecurringExpenseDto } from '@/types/finance/recurring';
 import { RecurrenceFrequencyLabels } from '@/types/shared/recurrence';
 import { formatCurrency, formatDate } from '@/utils/formatting';
-import { Trash2 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { AppIcons } from '@/components/icons/AppIcons';
+import { useRecurringActions } from '@/features/recurring/hooks/useRecurringActions';
 
 type Props = {
   recurringExpenses: RecurringExpenseDto[];
@@ -15,36 +14,13 @@ type Props = {
 
 const MAX_UPCOMING = 3;
 
-
-
 export default function UpcomingRecurringList({ recurringExpenses, setRecurringExpenses, loading, onSelect }: Props) {
   const { currency: userCurrency } = useCurrency();
+  const { remove, skip, markAsPaid } = useRecurringActions(setRecurringExpenses);
 
   if (loading) return <span className="loading loading-spinner loading-md" />;
   if (recurringExpenses.length === 0)
     return <p className="text-base-content/70">No recurring expenses found.</p>;
-
-  const handleMarkAsPaid = async (id: string) => {
-  try {
-    await triggerRecurringItem(id);
-    toast.success("Marked as paid!");
-    const updated = await fetchRecurringExpenses();
-    setRecurringExpenses(updated);  
-  } catch (err) {
-    toast.error((err as Error).message);
-  }
-  };
-
-  const handleSkip = async (id: string) => {
-  try {
-    await skipRecurringItem(id);
-    toast.success("Skipped this occurrence.");
-    const updated = await fetchRecurringExpenses();
-    setRecurringExpenses(updated);  
-  } catch (err) {
-    toast.error((err as Error).message);
-  }
-  };
 
   return (
     <ul className="mt-4 space-y-4">
@@ -54,7 +30,7 @@ export default function UpcomingRecurringList({ recurringExpenses, setRecurringE
         .map((exp) => (
           <li
             key={exp.id}
-            className="bg-primary/10 rounded-xl p-2 border border-primary shadow-md w-full"
+            className="relative bg-primary/10 rounded-xl p-2 border border-primary shadow-md w-full"
           >
             <div className="flex justify-between items-center">
               <div className="font-medium text-base-content">{exp.name}</div>
@@ -62,39 +38,42 @@ export default function UpcomingRecurringList({ recurringExpenses, setRecurringE
                 {formatCurrency(exp.amount, userCurrency)}
               </div>
             </div>
-            <div className="text-sm text-base-content mt-1">
-              🗓️ {formatDate(exp.nextOccurrenceDate)} · {RecurrenceFrequencyLabels[exp.frequency]}
+            <div className="flex items-center gap-1 text-sm text-base-content mt-1">
+              <AppIcons.calendar className="w-4 h-4" />
+              {formatDate(exp.nextOccurrenceDate)} · {RecurrenceFrequencyLabels[exp.frequency]}
             </div>
             {/* Action buttons */}
             <div className="flex gap-2 mt-3">
               <button
                 className="btn btn-xs btn-success"
-                onClick={() => handleMarkAsPaid(exp.id)}
+                onClick={() => markAsPaid(exp.id)}
               >
-                ✓ Mark Paid
+                <AppIcons.complete className="w-4 h-4" />
+                Mark Paid
+              </button>
+              <button 
+                className="btn btn-xs btn-outline" 
+                onClick={() => skip(exp.id)}
+              >
+                <AppIcons.recurring className="w-4 h-4" />
+                Skip
               </button>
               <button
                 className="btn btn-xs btn-outline"
-                onClick={() => handleSkip(exp.id)}
+                onClick={() => onSelect?.(exp)}
               >
-                ⏭ Skip
+                <AppIcons.edit className="w-4 h-4" />
+                Edit
               </button>
-                <button
-                  className="btn btn-xs btn-outline"
-                  onClick={() => onSelect?.(exp)}
-                >
-                  ✏️ Edit
-                </button>
-             </div>
-              {/* Delete icon */}
-              <button
-                className="absolute bottom-2 right-2 p-1 rounded hover:bg-error/20 transition"
-                onClick={() => handleDelete?.(exp.id)}
-                aria-label="Delete"
-                title="Delete"
-              >
-                <Trash2 className="w-4 h-4 text-error hover:text-error-content" />
-              </button>
+            </div>
+            <button
+              className="absolute bottom-2 right-2 p-1 rounded-md hover:bg-error/20 transition"
+              onClick={() => remove(exp.id)}
+              aria-label="Delete"
+              title="Delete"
+            >
+              <AppIcons.delete className="w-4 h-4 text-error hover:text-error-content" />
+            </button>
           </li>
         ))}
     </ul>

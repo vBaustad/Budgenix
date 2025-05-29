@@ -1,23 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { CreateExpenseDto, Expense } from '../../../types/finance/expense';
 import { RecurrenceFrequency, RecurrenceFrequencyOptions } from '../../../types/shared/recurrence';
 import { createExpense } from '../services/expensesService';
-import { fetchUsedCategories } from '../../../services/global/categoriesService';
 import InputField from '../../../components/common/forms/InputField';
 import SelectField from '../../../components/common/forms/SelectField';
 import toast from 'react-hot-toast';
 import { formatCurrency } from '../../../utils/formatting';
 import { useCurrency } from '../../../context/CurrencyContext';
+import { useCategories } from '@/context/CategoryContext';
 
 type Props = {
   onAdd: (expense: Expense) => void;
   onRecurringChange?: () => Promise<void>; // optional and async
-};
-
-
-type Category = {
-  id: string;
-  name: string;
 };
 
 export default function AddExpenseForm({ onAdd, onRecurringChange }: Props) {
@@ -31,10 +25,8 @@ export default function AddExpenseForm({ onAdd, onRecurringChange }: Props) {
     recurrenceFrequency: 'None' as RecurrenceFrequency,
     notes: '',
   });
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
+const [loading, setLoading] = useState(false);
 
 
     const handleChange = (
@@ -85,17 +77,7 @@ export default function AddExpenseForm({ onAdd, onRecurringChange }: Props) {
     }
   };
 
-  useEffect(() => {
-    fetchUsedCategories()
-      .then((data) => {        
-        setCategories(data);
-      })
-      .catch((err) => {
-        console.error('Failed to fetch categories', err);
-        setCategories([]);
-      });
-  }, []);
-
+  const { categories } = useCategories();
   const { currency: userCurrency } = useCurrency();
 
   return (
