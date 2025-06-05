@@ -23,21 +23,19 @@ namespace Budgenix.Data
         {
             base.OnModelCreating(builder);
 
-            // Configure Expense → User
+            // === Existing configuration ===
             builder.Entity<Expense>()
                 .HasOne(e => e.User)
                 .WithMany(u => u.Expenses)
                 .HasForeignKey(e => e.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Configure Income → User
             builder.Entity<Income>()
                 .HasOne(i => i.User)
                 .WithMany(u => u.Incomes)
                 .HasForeignKey(i => i.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Configure Budget → User
             builder.Entity<Budget>()
                 .HasOne(b => b.User)
                 .WithMany(u => u.Budgets)
@@ -50,6 +48,16 @@ namespace Budgenix.Data
                 .HasForeignKey(r => r.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // === ✅ Add these indexes ===
+            builder.Entity<Expense>()
+                .HasIndex(e => new { e.UserId, e.Date });
+
+            builder.Entity<Income>()
+                .HasIndex(i => new { i.UserId, i.Date });
+
+            builder.Entity<RecurringItem>()
+                .HasIndex(r => new { r.UserId, r.StartDate });
         }
+
     }
 }

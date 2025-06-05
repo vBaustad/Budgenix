@@ -9,7 +9,6 @@ export type Expense = {
   amount: number;
   date: string;
   categoryName: string;
-  isRecurring: boolean;
   recurrenceFrequency: number;
   notes?: string | null;
 };
@@ -20,7 +19,6 @@ export type CreateExpenseDto = {
   amount: number;
   date: string;
   categoryId: string;
-  isRecurring: boolean;
   recurrenceFrequency: RecurrenceFrequency;
   notes?: string | null;
 };

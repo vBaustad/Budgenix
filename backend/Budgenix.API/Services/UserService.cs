@@ -1,4 +1,6 @@
 ﻿using Budgenix.Models.Shared;
+using Budgenix.Models.Users;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Localization;
 using System.Security.Claims;
 
@@ -8,11 +10,13 @@ namespace Budgenix.Services
     {
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly IStringLocalizer<SharedResource> _localizer;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public UserService(IHttpContextAccessor contextAccessor, IStringLocalizer<SharedResource> localizer)
+        public UserService(IHttpContextAccessor contextAccessor, IStringLocalizer<SharedResource> localizer, UserManager<ApplicationUser> userManager)
         {
             _contextAccessor = contextAccessor;
             _localizer = localizer;
+            _userManager = userManager;
         }
 
         public string GetUserId()
@@ -26,6 +30,12 @@ namespace Budgenix.Services
         {
             var user = _contextAccessor.HttpContext?.User;
             return user?.FindFirstValue(ClaimTypes.Email);
+        }
+
+        public async Task<ApplicationUser?> GetCurrentUserAsync()
+        {
+            return await _userManager.GetUserAsync(_contextAccessor.HttpContext?.User);
+
         }
     }
 }

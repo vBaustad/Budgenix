@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useCurrency } from '../../context/CurrencyContext';
 import { getCurrencySymbol } from '../../utils/formatting';
 
@@ -10,6 +11,17 @@ const currencies = [
 
 export default function CurrencyDropdown() {
   const { currency, setCurrency } = useCurrency();
+  const [selected, setSelected] = useState(currency);
+
+  // Sync if context updates
+  useEffect(() => {
+    setSelected(currency);
+  }, [currency]);
+
+  const handleChange = async (newCurrency: string) => {
+    setSelected(newCurrency); // Optimistically update
+    await setCurrency(newCurrency); // Update server
+  };
 
   return (
     <div className="dropdown dropdown-end">
@@ -17,7 +29,7 @@ export default function CurrencyDropdown() {
         tabIndex={0}
         className="text-sm font-medium text-base-content hover:text-primary cursor-pointer"
       >
-        Currency: {currency}
+        Currency: {selected}
       </label>
 
       <ul
@@ -27,9 +39,9 @@ export default function CurrencyDropdown() {
         {currencies.map((c) => (
           <li key={c.code}>
             <button
-              onClick={() => setCurrency(c.code)}
+              onClick={() => handleChange(c.code)}
               className={`w-full text-left px-2 py-1 rounded hover:bg-base-200 ${
-                currency === c.code ? 'font-bold' : ''
+                selected === c.code ? 'font-bold' : ''
               }`}
             >
               {getCurrencySymbol(c.code)} – {c.label}

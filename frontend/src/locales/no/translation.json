@@ -1,4 +1,7 @@
 {
+    "app":{
+        "name": "Budgenix"
+    },
     "sidebar": {
         "main": "Hovedmeny",
         "dashboard": "Oversikt",

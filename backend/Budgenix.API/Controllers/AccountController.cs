@@ -207,7 +207,8 @@ namespace Budgenix.API.Controllers
                 user.SubscriptionStartDate,
                 user.SubscriptionEndDate,
                 user.BillingCycle,
-                user.ReferralCode
+                user.ReferralCode,
+                currency = user.PreferredCurrency ?? "USD"
             });
         }
 

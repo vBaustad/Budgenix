@@ -1,8 +1,7 @@
 import React from 'react';
-import HeroSection from '../../components/public/HeroSection';
-import PricingSection from '../../components/public/PricingSection';
-import AboutSection from '../../components/public/AboutSection';
-
+import AboutSection from '@/features/public/components/AboutSection';
+import PricingSection from '@/features/public/components/PricingSection';
+import HeroSection from '@/features/public/components/HeroSection';
 
 const LandingPage: React.FC = () => {
     return (

@@ -1,12 +1,19 @@
-export const getCurrencySymbol = (code: string): string => {
-  switch (code.toUpperCase()) {
-    case 'USD': return '$';
-    case 'EUR': return '€';
-    case 'NOK': return 'kr';
-    case 'GBP': return '£';
-    default: return code;
+export function getCurrencySymbol(currency: string | undefined | null): string {
+  if (!currency) return '?';
+  switch (currency.toUpperCase()) {
+    case 'USD':
+      return '$';
+    case 'EUR':
+      return '€';
+    case 'GBP':
+      return '£';
+    case 'NOK':
+      return 'kr';
+    default:
+      return currency;
   }
-};
+}
+
 
 export const getDefaultLocaleForCurrency = (currency: string): string => {
   switch (currency.toUpperCase()) {
