@@ -1,17 +1,17 @@
 import { useState } from 'react';
-import { CreateExpenseDto, Expense } from '../../../types/finance/expense';
-import { RecurrenceFrequency, RecurrenceFrequencyOptions } from '../../../types/shared/recurrence';
+import { CreateExpenseDto, Expense } from '@/types/finance/expense';
+import {  RecurrenceFrequencyOptions } from '@/types/shared/recurrence';
 import { createExpense } from '../services/expensesService';
-import InputField from '../../../components/common/forms/InputField';
-import SelectField from '../../../components/common/forms/SelectField';
+import InputField from '@/components/common/forms/InputField';
+import SelectField from '@/components/common/forms/SelectField';
 import toast from 'react-hot-toast';
-import { formatCurrency } from '../../../utils/formatting';
-import { useCurrency } from '../../../context/CurrencyContext';
+import { formatCurrency } from '@/utils/formatting';
+import { useCurrency } from '@/context/CurrencyContext';
 import { useCategories } from '@/context/CategoryContext';
 
 type Props = {
   onAdd: (expense: Expense) => void;
-  onRecurringChange?: () => Promise<void>; // optional and async
+  onRecurringChange?: () => Promise<void>;
 };
 
 export default function AddExpenseForm({ onAdd, onRecurringChange }: Props) {
@@ -21,57 +21,51 @@ export default function AddExpenseForm({ onAdd, onRecurringChange }: Props) {
     amount: 0,
     date: new Date().toISOString().slice(0, 10),
     categoryId: '',
-    isRecurring: false,
-    recurrenceFrequency: 'None' as RecurrenceFrequency,
+    recurrenceFrequency: 'None',
     notes: '',
   });
+
   const [error, setError] = useState<string | null>(null);
-const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const isRecurring = form.recurrenceFrequency !== 'None';
 
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
 
-    const handleChange = (
-      e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-    ) => {
-      const { name, value, type } = e.target;
-      const checked = (e.target as HTMLInputElement).checked;
-
-      setForm(prev => ({
-        ...prev,
-        [name]: type === 'checkbox'
-          ? checked
-          : value,
-      }));
-    };
-  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+
     try {
-      const newExpense = await createExpense(form);
+      const payload: CreateExpenseDto = {
+        ...form,
+      };
+
+      const newExpense = await createExpense(payload);
       onAdd(newExpense);
-      if (form.isRecurring && onRecurringChange) {
+
+      if (isRecurring && onRecurringChange) {
         await onRecurringChange();
       }
+
       toast.success('Expense added successfully!');
-      // Reset form
       setForm({
         name: '',
         description: '',
         amount: 0,
         date: new Date().toISOString().slice(0, 10),
         categoryId: '',
-        isRecurring: false,
-        recurrenceFrequency: 'None' as RecurrenceFrequency,
+        recurrenceFrequency: 'None',
         notes: '',
       });
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        toast.error('Failed to add expense')
-        setError(err.message || 'Failed to add expense');
-      } else {
-        setError('Failed to add expense');
-      }
+      toast.error('Failed to add expense');
+      setError(err instanceof Error ? err.message : 'Failed to add expense');
     } finally {
       setLoading(false);
     }
@@ -81,8 +75,7 @@ const [loading, setLoading] = useState(false);
   const { currency: userCurrency } = useCurrency();
 
   return (
-    
-    <form onSubmit={handleSubmit} className="space-y-4 p-4">
+    <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl">
       <div className="grid grid-cols-1 gap-4">
         <div className="grid grid-cols-2 gap-4">
           <InputField
@@ -99,17 +92,14 @@ const [loading, setLoading] = useState(false);
             value={form.amount === 0 ? '' : form.amount.toString()}
             placeholder={formatCurrency(0, userCurrency)}
             onChange={handleChange}
-            showCurrency={true}
+            showCurrency
             required
-          />              
+          />
           <SelectField
             name="categoryId"
             value={form.categoryId}
             onChange={handleChange}
-            options={categories.map(c => ({
-              value: c.id,
-              label: c.name, 
-            }))}
+            options={categories.map((c) => ({ value: c.id, label: c.name }))}
             placeholder="Select a category"
           />
           <InputField
@@ -119,38 +109,29 @@ const [loading, setLoading] = useState(false);
             onChange={handleChange}
             required
           />
-        </div>  
-        <div className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            name="isRecurring"
-            checked={form.isRecurring}
-            onChange={handleChange}
-          />
-          <label className="label-text">Recurring</label>
         </div>
-        {form.isRecurring && (
-          <SelectField
-            name="recurrenceFrequency"
-            label="Frequency"
-            value={form.recurrenceFrequency.toString()}
-            onChange={handleChange}
-            options={[...RecurrenceFrequencyOptions]}          
-          />
 
-        )}
-          <InputField
+        <SelectField
+          name="recurrenceFrequency"
+          value={form.recurrenceFrequency}
+          onChange={handleChange}
+          options={[{ value: 'None', label: 'Not Recurring' }, ...RecurrenceFrequencyOptions]}
+        />
+
+        <InputField
           name="description"
           type="text"
           placeholder="Description"
           value={form.description}
           onChange={handleChange}
         />
-        {error && <p className="text-error">{error}</p>}        
+
+        {error && <p className="text-error">{error}</p>}
+
         <button type="submit" className="btn btn-primary w-full" disabled={loading}>
           {loading ? 'Saving...' : 'Add Expense'}
         </button>
       </div>
-    </form>    
+    </form>
   );
 }

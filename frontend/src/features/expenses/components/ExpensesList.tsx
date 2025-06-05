@@ -54,14 +54,14 @@ export default function ExpensesList({ expenses }: { expenses: Expense[] }) {
         },       
         {
           label: 'Recurring',
-          accessor: 'isRecurring',
-          format: (val) =>
-            val ? (
-              <span className="badge badge-outline badge-success text-xs">Yes</span>
-            ) : (
-              <span className="text-base-content/40">No</span>
-            ),
-          width: '100px',
+          accessor: 'recurrenceFrequency' as keyof Expense,
+          format: (val) => {
+            if (typeof val === 'string' && val !== 'None') {
+              return <span className="badge badge-outline badge-info text-xs">{val}</span>;
+            }
+            return <span className="text-base-content/40 text-xs">No</span>;
+          },
+          width: '130px',
           align: 'center',
         },
       ]}

@@ -9,9 +9,11 @@ export async function markRecurringAsPaid(
   try {
     await triggerRecurringItem(id);
     toast.success('Marked as paid!');
+
     const updated = await fetchRecurringExpenses();
     onRefresh(updated);
   } catch (err) {
-    toast.error((err as Error).message);
+    const message = err instanceof Error ? err.message : 'Failed to mark as paid.';
+    toast.error(message);
   }
 }

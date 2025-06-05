@@ -72,7 +72,7 @@ name,
           title={title}
           placeholder={placeholder}
           inputMode={type === 'number' ? 'decimal' : undefined}
-          className={`input input-bordered w-full pr-12 ${
+          className={`input input-bordered text-base-content w-full pr-12 ${
             icon ? 'pl-10' : ''
           }`}
         />

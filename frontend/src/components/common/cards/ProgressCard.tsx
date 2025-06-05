@@ -14,7 +14,7 @@ export default function ProgressCard({
   colorClass,
 }: ProgressCardProps) {
   return (
-    <div className="bg-base-100 border border-base-200 rounded-xl p-4 shadow space-y-1">
+    <div className="bg-base-100 rounded-xl p-4 shadow-md space-y-1">
       <p className="text-sm text-base-content font-medium">{label}</p>
       <div className="w-full bg-base-200 h-2 rounded-full overflow-hidden">
         <div

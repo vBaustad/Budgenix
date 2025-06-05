@@ -1,8 +1,12 @@
-﻿namespace Budgenix.Services
+﻿using Budgenix.Models.Users;
+
+namespace Budgenix.Services
 {
     public interface IUserService
     {
         string GetUserId();
-        string? GetUserEmail(); // Optional: handy for logging or extra info
+        string? GetUserEmail();
+
+        Task<ApplicationUser?> GetCurrentUserAsync();
     }
 }

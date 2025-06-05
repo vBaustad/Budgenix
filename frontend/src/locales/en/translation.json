@@ -1,4 +1,7 @@
 {
+    "app":{
+        "name": "Budgenix"
+    },
     "sidebar": {
         "main": "Main",
         "dashboard": "Dashboard",
@@ -27,7 +30,7 @@
         "settings": "Settings"
     },
     "dashboard": {
-        "welcome": "Welcome to your Dashboard 👋",
+        "welcome": "Welcome to your Dashboard",
         "description": "Here you'll see your budget, expenses, and more."
     },
     "navbar": {

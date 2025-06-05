@@ -74,7 +74,7 @@ export default function Sidebar() {
       </Dialog>
 
       {/* Desktop Sidebar */}
-      <div className="hidden lg:flex lg:flex-col lg:w-72 lg:fixed lg:inset-y-0 bg-base-100 px-6 shadow-md">
+      <div className="hidden lg:flex lg:flex-col lg:w-72 lg:fixed lg:inset-y-0 bg-base-300 px-6">
         <div className="flex items-center gap-x-3 h-14 px-2">
           <img src={BudgenixLogo} alt="Budgenix Logo" className="h-8 w-auto" />
           <span className="logo-font font-bold text-lg text-base-content">Budgenix</span>

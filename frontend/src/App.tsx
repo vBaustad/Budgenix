@@ -27,35 +27,51 @@ import {
   SignUpPage,
 } from './pages/public'
 
+import { ExpensesProvider } from './context/ExpensesContext'
+import { RecurringProvider } from './context/RecurringContext'
+import { InsightsProvider } from './context/InsightContext'
+import { DateFilterProvider } from './context/DateFilterContext'
+import { IncomeProvider } from './features/Incomes/context/IncomesContext'
+
 function App() {
   return (
     <AuthProvider>
       <UserProvider>
         <CurrencyProvider>
           <CategoryProvider>
-            <Router>
-              <Toaster position="top-right" />
-              <Routes>
-                {/* Public Routes */}
-                <Route path="/" element={<BaseLayout><LandingPage /></BaseLayout>} />
-                <Route path="/login" element={<BaseLayout><LoginPage /></BaseLayout>} />
-                <Route path="/signup" element={<BaseLayout><SignUpPage /></BaseLayout>} />
+            <DateFilterProvider>
+              <IncomeProvider>
+                <ExpensesProvider>
+                  <RecurringProvider>
+                    <InsightsProvider> 
+                      <Router>
+                        <Toaster position="top-right" />
+                        <Routes>
+                          {/* Public Routes */}
+                          <Route path="/" element={<BaseLayout><LandingPage /></BaseLayout>} />
+                          <Route path="/login" element={<BaseLayout><LoginPage /></BaseLayout>} />
+                          <Route path="/signup" element={<BaseLayout><SignUpPage /></BaseLayout>} />
 
-                {/* Private Routes */}
-                <Route element={<AppLayout />}>
-                  <Route element={<PrivateRoute />}>
-                    <Route path="/dashboard" element={<DashboardPage />} />
-                    <Route path="/budgets" element={<BudgetsPage />} />
-                    <Route path="/expenses" element={<ExpensesPage />} />
-                    <Route path="/income" element={<IncomePage />} />
-                    <Route path="/goals" element={<GoalsPage />} />
-                    <Route path="/vacation-mode" element={<VacationModePage />} />
-                    <Route path="/reports" element={<ReportsPage />} />
-                    <Route path="/settings" element={<SettingsPage />} />
-                  </Route>
-                </Route>
-              </Routes>
-            </Router>
+                          {/* Private Routes */}
+                          <Route element={<AppLayout />}>
+                            <Route element={<PrivateRoute />}>
+                              <Route path="/dashboard" element={<DashboardPage />} />
+                              <Route path="/budgets" element={<BudgetsPage />} />
+                              <Route path="/expenses" element={<ExpensesPage />} />
+                              <Route path="/income" element={<IncomePage />} />
+                              <Route path="/goals" element={<GoalsPage />} />
+                              <Route path="/vacation-mode" element={<VacationModePage />} />
+                              <Route path="/reports" element={<ReportsPage />} />
+                              <Route path="/settings" element={<SettingsPage />} />
+                            </Route>
+                          </Route>
+                        </Routes>
+                      </Router>
+                    </InsightsProvider>
+                  </RecurringProvider>
+                </ExpensesProvider>
+              </IncomeProvider>
+            </DateFilterProvider>
           </CategoryProvider>
         </CurrencyProvider>
       </UserProvider>

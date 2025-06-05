@@ -7,40 +7,41 @@ import { useRecurringActions } from '@/features/recurring/hooks/useRecurringActi
 
 type Props = {
   recurringExpenses: RecurringExpenseDto[];
-  setRecurringExpenses: React.Dispatch<React.SetStateAction<RecurringExpenseDto[]>>;
   loading: boolean;
   onSelect?: (item: RecurringExpenseDto) => void;
 };
 
 const MAX_UPCOMING = 3;
 
-export default function UpcomingRecurringList({ recurringExpenses, setRecurringExpenses, loading, onSelect }: Props) {
+export default function UpcomingRecurringList({ recurringExpenses, loading, onSelect }: Props) {
   const { currency: userCurrency } = useCurrency();
-  const { remove, skip, markAsPaid } = useRecurringActions(setRecurringExpenses);
+  const { remove, skip, markAsPaid } = useRecurringActions();
 
   if (loading) return <span className="loading loading-spinner loading-md" />;
   if (recurringExpenses.length === 0)
-    return <p className="text-base-content/70">No recurring expenses found.</p>;
+    return <p className="text-base-content">No recurring expenses found.</p>;
 
   return (
-    <ul className="mt-4 space-y-4">
+    <ul className="space-y-4">
       {[...recurringExpenses]
         .sort((a, b) => new Date(a.nextOccurrenceDate).getTime() - new Date(b.nextOccurrenceDate).getTime())
         .slice(0, MAX_UPCOMING)
         .map((exp) => (
           <li
             key={exp.id}
-            className="relative bg-primary/10 rounded-xl p-2 border border-primary shadow-md w-full"
+            className="relative bg-base-100 rounded-xl p-2 border border-base-300 shadow-md w-full"
           >
             <div className="flex justify-between items-center">
-              <div className="font-medium text-base-content">{exp.name}</div>
-              <div className="text-sm font-semibold text-base-content">
-                {formatCurrency(exp.amount, userCurrency)}
+              <div className="flex justify-between">
+                <div className="font-medium text-base-content">{exp.name}</div>
+                <div className="flex items-center gap-1 text-sm text-base-content ml-4">
+                  <AppIcons.calendar className="w-4 h-4" />
+                  {formatDate(exp.nextOccurrenceDate)} · {RecurrenceFrequencyLabels[exp.frequency]}
+                </div>
               </div>
-            </div>
-            <div className="flex items-center gap-1 text-sm text-base-content mt-1">
-              <AppIcons.calendar className="w-4 h-4" />
-              {formatDate(exp.nextOccurrenceDate)} · {RecurrenceFrequencyLabels[exp.frequency]}
+              <div className="text-sm font-semibold text-base-content">
+                  {formatCurrency(exp.amount, userCurrency)}
+              </div>
             </div>
             {/* Action buttons */}
             <div className="flex gap-2 mt-3">
@@ -52,14 +53,14 @@ export default function UpcomingRecurringList({ recurringExpenses, setRecurringE
                 Mark Paid
               </button>
               <button 
-                className="btn btn-xs btn-outline" 
+                className="btn btn-xs btn-info" 
                 onClick={() => skip(exp.id)}
               >
                 <AppIcons.recurring className="w-4 h-4" />
                 Skip
               </button>
               <button
-                className="btn btn-xs btn-outline"
+                className="btn btn-xs btn-warning"
                 onClick={() => onSelect?.(exp)}
               >
                 <AppIcons.edit className="w-4 h-4" />

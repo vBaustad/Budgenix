@@ -158,6 +158,92 @@ namespace Budgenix.API.Controllers
             return Ok(categories);
         }
 
+        [HttpGet("overview")]
+        public async Task<IActionResult> GetIncomeOverview([FromQuery] int month, [FromQuery] int year)
+        {
+            var userId = _userService.GetUserId();
+
+            if (month < 1 || month > 12 || year < 2000)
+                return BadRequest("Invalid month or year");
+
+            var firstOfMonth = new DateTime(year, month, 1);
+            var lastMonth = firstOfMonth.AddMonths(-1);
+
+            var totalIncome = await _context.Incomes
+                .Where(i => i.UserId == userId && i.Date.Month == month && i.Date.Year == year)
+                .SumAsync(i => (decimal?)i.Amount) ?? 0;
+
+            var lastMonthIncome = await _context.Incomes
+                .Where(i => i.UserId == userId && i.Date.Month == lastMonth.Month && i.Date.Year == lastMonth.Year)
+                .SumAsync(i => (decimal?)i.Amount) ?? 0;
+
+            var upcomingRecurring = await _context.RecurringItems
+                .Where(r => r.UserId == userId &&
+                            r.Type == "Income" &&
+                            r.IsActive &&
+                            r.StartDate <= firstOfMonth.AddMonths(1).AddDays(-1))
+                .SumAsync(r => (decimal?)r.Amount) ?? 0;
+
+            var daysInMonth = DateTime.DaysInMonth(year, month);
+            var dailyTotals = new decimal[daysInMonth];
+
+            var dailyIncomes = await _context.Incomes
+                .Where(i => i.UserId == userId && i.Date.Month == month && i.Date.Year == year)
+                .GroupBy(i => i.Date.Day)
+                .Select(g => new { Day = g.Key, Total = g.Sum(i => i.Amount) })
+                .ToListAsync();
+
+            foreach (var entry in dailyIncomes)
+            {
+                dailyTotals[entry.Day - 1] = entry.Total;
+            }
+
+            return Ok(new
+            {
+                totalIncome,
+                lastMonthIncome,
+                upcomingRecurring,
+                dailyTotals
+            });
+        }
+
+        [HttpGet("monthly-summary")]
+        public async Task<ActionResult> GetMonthlyIncomeSummary([FromQuery] int months = 6)
+        {
+            var userId = _userService.GetUserId();
+
+            if (months <= 0 || months > 24)
+                return BadRequest("Invalid range");
+
+            var start = DateTime.UtcNow.Date.AddMonths(-months + 1);
+
+            var incomes = await _context.Incomes
+                .Include(i => i.Category)
+                .Where(i => i.UserId == userId && i.Date >= start && i.Category != null)
+                .ToListAsync(); // 👈 Fetch first, then group in memory
+
+            var summary = incomes
+                .GroupBy(i => new
+                {
+                    i.Date.Year,
+                    i.Date.Month,
+                    Category = i.Category!.Name
+                })
+                .Select(g => new
+                {
+                    Month = new DateTime(g.Key.Year, g.Key.Month, 1),
+                    Category = g.Key.Category,
+                    Total = g.Sum(i => i.Amount)
+                })
+                .OrderBy(g => g.Month)
+                .ToList();
+
+            return Ok(summary);
+        }
+
+
+
+
         // =======================================
         // ==========     POST APIs      =========
         // =======================================

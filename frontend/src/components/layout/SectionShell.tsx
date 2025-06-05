@@ -19,9 +19,9 @@ type SectionShellProps = {
 
 export default function SectionShell({
   title = '',
-  titleTextColor = 'text-primary',
+  titleTextColor = 'text-base-content',
   icon,
-  iconColor = 'text-primary',
+  iconColor = 'text-base-content',
   background = 'bg-base-100',  
   refreshable = false,
   minimizable = false,
@@ -36,7 +36,7 @@ export default function SectionShell({
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className={`w-full ${background} p-2 rounded-2xl shadow-md m-2 ${className}`}
+      className={`w-full ${background} shadow-md p-2 rounded-2xl m-2 ${className}`}
     >
       <div className="flex items-center justify-between min-h-[2.5rem]">
         <h2 className={`text-xl ${titleTextColor} font-semibold flex items-center gap-2`}>

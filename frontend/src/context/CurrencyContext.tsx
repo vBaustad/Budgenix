@@ -1,43 +1,51 @@
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useUser } from './UserContext';
-import LoadingSpinner from '@/components/common/LoadingSpinner';
 
 type CurrencyContextType = {
   currency: string;
-  setCurrency: (val: string) => Promise<void>;
+  setCurrency: (newCurrency: string) => void;
 };
 
 const CurrencyContext = createContext<CurrencyContextType>({
   currency: 'USD',
-  setCurrency: async () => {},
+  setCurrency: () => {},
 });
 
 export function CurrencyProvider({ children }: { children: React.ReactNode }) {
-  const { user, refetchUser, isLoading } = useUser();
+  const { user } = useUser();
+  const queryClient = useQueryClient();
 
-  const updateCurrency = async (newCurrency: string) => {
-    console.log('[CurrencyContext] updating currency to', newCurrency);
-    try {
+  const [currency, setCurrencyState] = useState('USD');
+
+  useEffect(() => {
+    if (user?.currency) {
+      setCurrencyState(user.currency);
+    }
+  }, [user?.currency]);
+
+
+  const { mutate: updateCurrency } = useMutation({
+    mutationFn: async (newCurrency: string) => {
       await fetch('/api/account/me/currency', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ currency: newCurrency }),
         credentials: 'include',
+        body: JSON.stringify({ currency: newCurrency }),
       });
-      await refetchUser(); // Refresh user from source
-    } catch (err) {
-      console.error('Failed to update currency:', err);
-    }
-  };
-
-  // Don't render until user is loaded
-  if (isLoading || !user) return <LoadingSpinner />;
+    },
+    onSuccess: (_, newCurrency) => {
+      setCurrencyState(newCurrency); // update instantly
+      queryClient.invalidateQueries({ queryKey: ['user'] });
+    },
+  });
 
   return (
-    <CurrencyContext.Provider value={{ currency: user.currency, setCurrency: updateCurrency }}>
+    <CurrencyContext.Provider value={{ currency, setCurrency: updateCurrency }}>
       {children}
     </CurrencyContext.Provider>
   );
 }
+
 
 export const useCurrency = () => useContext(CurrencyContext);

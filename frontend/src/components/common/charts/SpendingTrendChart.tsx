@@ -13,6 +13,7 @@ import { formatCurrency } from '@/utils/formatting';
 import { useCurrency } from '@/context/CurrencyContext';
 import { DotProps } from 'recharts';
 import { AppIcons } from '@/components/icons/AppIcons';
+import { useDateFilter } from '@/context/DateFilterContext';
 
 type ViewMode = 'daily' | 'monthly' | 'yearly';
 type CustomPayload = { isMax?: boolean; isMin?: boolean };
@@ -37,10 +38,10 @@ type TooltipProps = {
 // Utility: Generate chart data based on view mode
 function getChartData(view: ViewMode, data: number[], year: number, month: number, isCurrentMonth: boolean) {
   if (view === 'daily') {
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const daysInMonth = new Date(year, month, 0).getDate(); // get correct number of days
     const numDays = isCurrentMonth ? new Date().getDate() : daysInMonth;
     return Array.from({ length: numDays }, (_, i) => {
-      const date = new Date(year, month, i + 1);
+      const date = new Date(year, month - 1, i + 1); // 👈 FIXED HERE
       return {
         label: date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
         value: data[i] ?? 0,
@@ -88,13 +89,16 @@ function getAverage(data: { value: number }[]) {
 export default function SpendingTrendChart({
   data,
   view = 'daily',
-  year = new Date().getFullYear(),
-  month = new Date().getMonth(),
   highlightSpikes = false,
 }: Props) {
-  const now = new Date();
-  const isCurrentMonth =
-    year === now.getFullYear() && month === now.getMonth();
+  const { selectedMonth, selectedYear } = useDateFilter();
+  const year = selectedYear;
+  const month = selectedMonth;
+
+const now = new Date();
+const isCurrentMonth =
+  year === now.getFullYear() && month === now.getMonth() + 1;
+
 
 const chartData = useMemo(() => getChartData(view, data, year, month, isCurrentMonth), [view, data, year, month, isCurrentMonth]);
 const [min, max] = useMemo(() => getMinMax(chartData), [chartData]);
@@ -143,7 +147,7 @@ const CustomTooltip = ({ active, payload, label, currency }: TooltipProps) => {
   const { isMax, isMin, value } = payload[0].payload;
 
   return (
-    <div className="bg-base-100 border rounded px-2 py-1 text-sm shadow">
+    <div className="bg-base-100 rounded px-2 py-1 text-sm shadow">
       <div className="flex items-center gap-1 font-medium">
         {isMax && <AppIcons.arrowUp className="text-error w-4 h-4" />}
         {isMin && <AppIcons.arrowDown className="text-success w-4 h-4" />}

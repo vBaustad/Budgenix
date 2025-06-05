@@ -19,7 +19,7 @@ export default function RecurringSummary({
   const activeCount = recurringExpenses.filter(e => e.isActive).length;
 
   return (
-    <div className="w-full bg-base-100 border border-base-200 rounded-xl shadow-sm p-4 mt-4 space-y-4">
+    <div className="w-full bg-base-100 border border-base-200 rounded-xl shadow-sm p-4 space-y-4">
       <h3 className="text-xl text-primary font-semibold mb-1 flex items-center gap-2">
         <AppIcons.recurring className="w-5 h-5" />
         Recurring Summary

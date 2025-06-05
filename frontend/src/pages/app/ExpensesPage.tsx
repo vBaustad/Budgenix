@@ -1,4 +1,3 @@
-import { useExpensesPageState } from '@/features/expenses/hooks/useExpensesPageState';
 import ExpensesOverview from '@/features/expenses/components/ExpensesOverview';
 import AddExpenseForm from '@/features/expenses/components/AddExpenseForm';
 import ExpensesList from '@/features/expenses/components/ExpensesList';
@@ -12,31 +11,43 @@ import SectionShell from '@/components/layout/SectionShell';
 import { AppIcons } from '@/components/icons/AppIcons';
 import { GROUP_OPTIONS } from '@/features/expenses/constants/grouping';
 import RecurringSummary from '@/features/recurring/components/RecurringSummary';
+import { useExpenses } from '@/context/ExpensesContext';
+import { useRecurring } from '@/context/RecurringContext';
+import { useCategories } from '@/context/CategoryContext';
+import { t } from 'i18next';
 
 export type GroupByOption = typeof GROUP_OPTIONS[number]['value'];
 
 export default function ExpensesPage() {
+
   const {
-    t,
-    groupBy,
-    setGroupBy,
-    selectedCategories,
-    setSelectedCategories,
-    categoryOptions,
     expenses,
     groupedExpenses,
     loading,
+    groupBy,
+    selectedCategories,
+    setGroupBy,
+    setSelectedCategories,
+    handleAddExpense,    
+  } = useExpenses();
+
+  const {
     recurringExpenses,
     loadingRecurring,
+    refreshRecurring,
     selectedRecurringItem,
     setSelectedRecurringItem,
-    handleAddExpense,
-    refreshRecurring,
-    setRecurringExpenses,  
     monthlyRecurringTotal,
     lastTriggeredRecurring,
     lastSkippedRecurring,
-  } = useExpensesPageState();
+  } = useRecurring();
+
+  const { categories } = useCategories();
+
+  const categoryOptions = categories.map((c) => ({
+  value: c.id,
+  label: c.name,
+  }));
 
   const handleRecurringSave = async () => {
     setSelectedRecurringItem(null);
@@ -49,7 +60,7 @@ export default function ExpensesPage() {
 
 
   return (
-    <div className="flex flex-col">
+    <div className="flex bg-base-200 flex-col p-2">
 
       <ExpensesOverview />   
            
@@ -66,7 +77,6 @@ export default function ExpensesPage() {
                 recurringExpenses={recurringExpenses}
                 loading={loadingRecurring}
                 onSelect={setSelectedRecurringItem}
-                setRecurringExpenses={setRecurringExpenses}
               />
             </div>
             {/* RIGHT: Edit or Summary */}
@@ -81,8 +91,8 @@ export default function ExpensesPage() {
                 <RecurringSummary
                   recurringExpenses={recurringExpenses}
                   monthlyTotal={monthlyRecurringTotal}
-                  lastTriggered={lastTriggeredRecurring}
-                  lastSkipped={lastSkippedRecurring}
+                  lastTriggered={lastTriggeredRecurring ?? undefined}
+                  lastSkipped={lastSkippedRecurring ?? undefined}
                 />
               )}
             </div>
@@ -91,22 +101,24 @@ export default function ExpensesPage() {
       </div>
 
       <div className="flex flex-col lg:flex-row">
-        <SectionShell title={t('expenses.allExpenses')} icon={AppIcons.list}>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex gap-4 mb-2 text-sm font-medium text-base-content ml-auto">
-                <CategoryFilter
-                  options={categoryOptions}
-                  selected={selectedCategories}
-                  onChange={setSelectedCategories}                 
-                />
-
-                <GroupByDropdown
-                  value={groupBy}
-                  onChange={setGroupBy}
-                  options={GROUP_OPTIONS}
-                />
+        <SectionShell
+          title={t('expenses.allExpenses')}
+          icon={AppIcons.list}
+          extraHeaderContent={
+            <div className="flex gap-4 text-sm font-medium text-base-content">
+              <CategoryFilter
+                options={categoryOptions}
+                selected={selectedCategories}
+                onChange={setSelectedCategories}
+              />
+              <GroupByDropdown
+                value={groupBy}
+                onChange={setGroupBy}
+                options={GROUP_OPTIONS}
+              />
             </div>
-          </div>
+          }
+        >
           <div className="max-h-[600px] overflow-x-auto shadow-md">
             {loading ? (
               <p className="text-base-content/60">{t('shared.loading')}</p>
@@ -118,13 +130,13 @@ export default function ExpensesPage() {
           </div>          
         </SectionShell>
         <SectionShell title="Spending by Category" icon={AppIcons.pieChart}>
-          <BreakdownPieChart
-                      data={chartData}
-                      groupBy={(e) => e.categoryName || 'Uncategorized'}
-                      getValue={(e) => e.amount}
-                      height={600}
-                      width={700}
-                    />
+        <BreakdownPieChart
+          data={chartData}
+          groupBy={(e) => e.categoryName || 'Uncategorized'}
+          getValue={(e) => e.amount}
+          height={600}
+          width={700}
+        />
         </SectionShell>
       </div>
     </div>

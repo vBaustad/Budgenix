@@ -30,7 +30,7 @@ export default function SelectField({
         value={value}
         onChange={onChange}
         required={required}
-        className="select select-bordered w-full"
+        className="select select-bordered text-base-content w-full"
       >
         {placeholder && (
           <option value="">{placeholder}</option>
