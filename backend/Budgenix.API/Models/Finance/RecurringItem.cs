@@ -14,9 +14,9 @@ namespace Budgenix.Models.Finance
         [Required]
         [MaxLength(100)]
         public required string Name { get; set; }
-        [Required]
+        
         [MaxLength(250)]
-        public required string Description { get; set; }
+        public string? Description { get; set; }
 
         [Required]
         [Range(0.01, double.MaxValue, ErrorMessage = "Amount must be greater than zero.")]
@@ -31,8 +31,7 @@ namespace Budgenix.Models.Finance
         public RecurrenceTypeEnum Frequency { get; set; }
 
         [Required]
-        [RegularExpression("Income|Expense", ErrorMessage = "Type must be either 'Income' or 'Expense'.")]
-        public required string Type { get; set; } // Optional: Foreign key to user/household if needed
+        public RecurringItemType Type { get; set; }
 
         public Guid? CategoryId { get; set; }
 

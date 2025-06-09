@@ -1,5 +1,5 @@
 ﻿using Budgenix.Data;
-using Microsoft.AspNetCore.Mvc;
+using Budgenix.Models.Shared;
 
 namespace Budgenix.Services.Recurring
 {
@@ -19,27 +19,30 @@ namespace Budgenix.Services.Recurring
         public void ProcessDueItems(DateTime today)
         {
             var userId = _userService.GetUserId();
-
             if (userId == null)
-                return; // or throw exception
+                return;
 
-            var allRecurringItems = _context.RecurringItems.Where(r => r.IsActive && r.UserId == userId).ToList();
+            var allRecurringItems = _context.RecurringItems
+                .Where(r => r.IsActive && r.UserId == userId)
+                .ToList();
 
             var dueItems = _service.GetDueItems(allRecurringItems, today);
 
-            foreach(var item in dueItems)
+            foreach (var item in dueItems)
             {
-                if(item.Type == "Expense")
+                switch (item.Type)
                 {
-                    var expense = _service.CreateExpenseFromRecurringItem(item);
-                    expense.UserId = userId;
-                    _context.Expenses.Add(expense);
+                    case RecurringItemType.Expense:
+                        var expense = _service.CreateExpenseFromRecurringItem(item);
+                        expense.UserId = userId;
+                        _context.Expenses.Add(expense);
+                        break;
 
-                }else if (item.Type == "Income")
-                {
-                    var income = _service.CreateIncomeFromRecurringItem(item);
-                    income.UserId = userId;
-                    _context.Incomes.Add(income);
+                    case RecurringItemType.Income:
+                        var income = _service.CreateIncomeFromRecurringItem(item);
+                        income.UserId = userId;
+                        _context.Incomes.Add(income);
+                        break;
                 }
             }
 

@@ -8,9 +8,6 @@ namespace Budgenix.Models.Shared
     {
         None,
 
-        [Display(Name = "One Time")]
-        OneTime,
-
         [Display(Name = "Daily")]
         Daily,
 

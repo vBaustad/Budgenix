@@ -12,7 +12,7 @@ namespace Budgenix.Dtos.Recurring
         public DateTime? EndDate { get; set; }
         public RecurrenceTypeEnum Frequency { get; set; }
         public bool IsActive { get; set; }
-        public string Type { get; set; } = "Expense";
+        public RecurringItemType Type { get; set; }
         public Guid? CategoryId { get; set; }
 
         public DateTime? LastSkippedDate { get; set; }

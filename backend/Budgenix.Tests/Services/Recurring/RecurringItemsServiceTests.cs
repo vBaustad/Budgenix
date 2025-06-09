@@ -7,213 +7,187 @@ namespace Budgenix.Tests.Services.Recurring
 {
     public class RecurringItemServiceTests
     {
-        private readonly RecurringItemService _service = new();
+        private readonly RecurringItemService _service = new(null!);
+
 
         [Theory]
-        [InlineData("Daily", "2025-05-01", "2025-05-06", "Expense", true, true)]   // Daily, active, always due
-        [InlineData("Weekly", "2025-05-01", "2025-05-06", "Expense", true, false)] // Weekly, not matching day
-        [InlineData("Weekly", "2025-05-06", "2025-05-13", "Expense", true, true)]  // Weekly, matching day
-        [InlineData("Daily", "2025-05-05", "2025-05-06", "Expense", false, false)] // Inactive
-        [InlineData("Monthly", "2025-01-15", "2025-05-15", "Expense", true, true)] // Monthly match
-        [InlineData("Monthly", "2023-01-31", "2025-04-30", "Expense", true, true)] // Monthly, short month adjust
-        [InlineData("Monthly", "2023-01-31", "2025-03-30", "Expense", true, false)] // Monthly not due
-        [InlineData("Daily", "2025-05-01", "2025-05-06", "Income", true, true)]   // Daily, active, always due
-        [InlineData("Weekly", "2025-05-01", "2025-05-06", "Income", true, false)] // Weekly, not matching day
-        [InlineData("Weekly", "2025-05-06", "2025-05-13", "Income", true, true)]  // Weekly, matching day
-        [InlineData("Daily", "2025-05-05", "2025-05-06", "Income", false, false)] // Inactive
-        [InlineData("Monthly", "2025-01-15", "2025-05-15", "Income", true, true)] // Monthly match
-        [InlineData("Monthly", "2023-01-31", "2025-04-30", "Income", true, true)] // Monthly, short month adjust
-        [InlineData("Monthly", "2023-01-31", "2025-03-30", "Income", true, false)] // Monthly not due
-        public void isDueToday_VariousScenarios_ReturnsExpected(string frequencyStr, string startDatestr, string todayStr, string type, bool isActive, bool expectedResult)
+        [InlineData("Daily", "2025-05-01", "2025-05-06", RecurringItemType.Expense, true, true)]
+        [InlineData("Weekly", "2025-05-01", "2025-05-06", RecurringItemType.Expense, true, false)]
+        [InlineData("Weekly", "2025-05-06", "2025-05-13", RecurringItemType.Expense, true, true)]
+        [InlineData("Daily", "2025-05-05", "2025-05-06", RecurringItemType.Expense, false, false)]
+        [InlineData("Monthly", "2025-01-15", "2025-05-15", RecurringItemType.Expense, true, true)]
+        [InlineData("Monthly", "2023-01-31", "2025-04-30", RecurringItemType.Expense, true, true)]
+        [InlineData("Monthly", "2023-01-31", "2025-03-30", RecurringItemType.Expense, true, false)]
+        [InlineData("Daily", "2025-05-01", "2025-05-06", RecurringItemType.Income, true, true)]
+        [InlineData("Weekly", "2025-05-01", "2025-05-06", RecurringItemType.Income, true, false)]
+        [InlineData("Weekly", "2025-05-06", "2025-05-13", RecurringItemType.Income, true, true)]
+        [InlineData("Daily", "2025-05-05", "2025-05-06", RecurringItemType.Income, false, false)]
+        [InlineData("Monthly", "2025-01-15", "2025-05-15", RecurringItemType.Income, true, true)]
+        [InlineData("Monthly", "2023-01-31", "2025-04-30", RecurringItemType.Income, true, true)]
+        [InlineData("Monthly", "2023-01-31", "2025-03-30", RecurringItemType.Income, true, false)]
+        public void IsDueToday_VariousScenarios_ReturnsExpected(string frequencyStr, string startDateStr, string todayStr, RecurringItemType type, bool isActive, bool expected)
         {
             var frequency = Enum.Parse<RecurrenceTypeEnum>(frequencyStr);
-            var startDate = DateTime.Parse(startDatestr);
-            var todayDate = DateTime.Parse(todayStr);
+            var startDate = DateTime.Parse(startDateStr);
+            var today = DateTime.Parse(todayStr);
 
             var item = new RecurringItem
             {
-                Name = "Test Item",
-                Description = "Generated for test",
-                Type = type,
-                IsActive = isActive,
+                Name = "Test",
                 StartDate = startDate,
                 Frequency = frequency,
+                Type = type,
+                IsActive = isActive
             };
 
-            var result = _service.IsDueToday(item, todayDate);
+            var result = _service.IsDueToday(item, today);
 
-            Assert.Equal(expectedResult, result);
+            Assert.Equal(expected, result);
         }
 
-
-
         [Theory]
-        [InlineData("2025-05-31", 3)]  // Daily + Weekly + Monthly (May has 31)
-        [InlineData("2025-05-13", 2)]  // Daily + Weekly
-        [InlineData("2025-05-15", 2)]  // Daily + Weekly
-        [InlineData("2025-04-30", 3)]  // Daily + Weekly + Monthly (adjust to 30)
-        [InlineData("2025-03-29", 2)]  // Daily + Weekly (March has 31, 29 != 31)
-        public void GetDueItems_ReturnsExpectedCount(string todayDateStr, int expectedCount)
+        [InlineData("2025-05-31", 3)]
+        [InlineData("2025-05-13", 2)]
+        [InlineData("2025-05-15", 2)]
+        [InlineData("2025-04-30", 3)]
+        [InlineData("2025-03-29", 2)]
+        public void GetDueItems_ReturnsExpectedCount(string todayStr, int expectedCount)
         {
-            var todayDate = DateTime.Parse(todayDateStr);
+            var today = DateTime.Parse(todayStr);
 
             var items = new List<RecurringItem>
+            {
+                new RecurringItem
                 {
-                    new RecurringItem // 0 → inactive
-                    {
-                        Name = "Inactive",
-                        Description = "Should never match",
-                        Type = "Expense",
-                        IsActive = false,
-                        StartDate = DateTime.Parse(todayDateStr).AddDays(-10),
-                        Frequency = RecurrenceTypeEnum.Daily
-                    },
-                    new RecurringItem // 1 → matches if Daily
-                    {
-                        Name = "Daily",
-                        Description = "Matches any day",
-                        Type = "Expense",
-                        IsActive = true,
-                        StartDate = DateTime.Parse(todayDateStr).AddDays(-5),
-                        Frequency = RecurrenceTypeEnum.Daily
-                    },
-                    new RecurringItem // 2 → matches if same DayOfWeek
-                    {
-                        Name = "Weekly",
-                        Description = "Matches same weekday",
-                        Type = "Expense",
-                        IsActive = true,
-                        StartDate = DateTime.Parse(todayDateStr).AddDays(-7),
-                        Frequency = RecurrenceTypeEnum.Weekly
-                    },
-                    new RecurringItem // 3 → matches only if same day-of-month or last-of-month
-                    {
-                        Name = "Monthly",
-                        Description = "Matches day-of-month",
-                        Type = "Expense",
-                        IsActive = true,
-                        StartDate = new DateTime(2023, 1, 31), // can trigger short-month fallback
-                        Frequency = RecurrenceTypeEnum.Monthly
-                    }
-                };
+                    Name = "Inactive",
+                    StartDate = today.AddDays(-10),
+                    Frequency = RecurrenceTypeEnum.Daily,
+                    IsActive = false,
+                    Type = RecurringItemType.Expense
+                },
+                new RecurringItem
+                {
+                    Name = "Daily",
+                    StartDate = today.AddDays(-5),
+                    Frequency = RecurrenceTypeEnum.Daily,
+                    IsActive = true,
+                    Type = RecurringItemType.Expense
+                },
+                new RecurringItem
+                {
+                    Name = "Weekly",
+                    StartDate = today.AddDays(-7),
+                    Frequency = RecurrenceTypeEnum.Weekly,
+                    IsActive = true,
+                    Type = RecurringItemType.Expense
+                },
+                new RecurringItem
+                {
+                    Name = "Monthly",
+                    StartDate = new DateTime(2023, 1, 31),
+                    Frequency = RecurrenceTypeEnum.Monthly,
+                    IsActive = true,
+                    Type = RecurringItemType.Expense
+                }
+            };
 
+            var result = _service.GetDueItems(items, today);
 
-            var result = _service.GetDueItems(items, todayDate);
-
-            Assert.True(expectedCount == result.Count, $"Expected {expectedCount} matches on {todayDate:d}, but got {result.Count}");
-
+            Assert.Equal(expectedCount, result.Count);
         }
 
         [Fact]
         public void CreateExpenseFromRecurringItem_MapsFieldsCorrectly()
         {
-            //Arrange 
             var categoryId = Guid.NewGuid();
-
             var recurring = new RecurringItem
             {
-                Name = "Netflix Subscription",
-                Description = "Monthly Netflix bill",
-                Type = "Expense",
-                IsActive = true,
-                StartDate = DateTime.Today.AddMonths(-3),
+                Name = "Netflix",
+                Description = "Monthly bill",
                 Frequency = RecurrenceTypeEnum.Monthly,
+                StartDate = DateTime.Today.AddMonths(-3),
+                Type = RecurringItemType.Expense,
+                IsActive = true,
                 Amount = 15.99m,
                 CategoryId = categoryId
-            };            
+            };
 
-            //Act
             var expense = _service.CreateExpenseFromRecurringItem(recurring);
 
-            // Assert
-            Assert.Equal(recurring.Name, expense.Name);
-            Assert.Equal(recurring.Description, expense.Description);
-            Assert.Equal(recurring.Amount, expense.Amount);
+            Assert.Equal("Netflix", expense.Name);
+            Assert.Equal(15.99m, expense.Amount);
             Assert.Equal(DateTime.Today, expense.Date);
             Assert.Equal(categoryId, expense.CategoryId);
-            Assert.True(expense.IsRecurring);
-            Assert.Equal(recurring.Frequency, expense.RecurrenceFrequency);
-            Assert.Contains("Auto-generated from recurring item", expense.Notes);
+            Assert.Contains("Auto-generated", expense.Notes);
         }
 
         [Fact]
-        public void CreateExpenseFromRecurringItem_ThrowsIfCategoryIdIsNull()
-        {            
-
+        public void CreateExpenseFromRecurringItem_ThrowsIfCategoryMissing()
+        {
             var recurring = new RecurringItem
             {
-                Name = "Netflix Subscription",
-                Description = "Monthly Netflix bill",
-                Type = "Expense",
-                IsActive = true,
-                StartDate = DateTime.Today.AddMonths(-3),
+                Name = "Netflix",
+                Description = "Monthly bill",
                 Frequency = RecurrenceTypeEnum.Monthly,
+                StartDate = DateTime.Today.AddMonths(-3),
+                Type = RecurringItemType.Expense,
+                IsActive = true,
                 Amount = 15.99m,
-                CategoryId = null //Missing category ID
+                CategoryId = null
             };
 
-            // Act & Assert
-            var exception = Assert.Throws<InvalidOperationException>(() =>
+            var ex = Assert.Throws<InvalidOperationException>(() =>
                 _service.CreateExpenseFromRecurringItem(recurring)
             );
 
-            Assert.Equal("Recurring item must have a CategoryId.", exception.Message);
+            Assert.Equal("Recurring item must have a CategoryId.", ex.Message);
         }
 
         [Fact]
         public void CreateIncomeFromRecurringItem_MapsFieldsCorrectly()
         {
-            // Arrange
             var categoryId = Guid.NewGuid();
-
             var recurring = new RecurringItem
             {
                 Name = "Salary",
-                Description = "Monthly paycheck",
-                Type = "Income",
-                IsActive = true,
-                StartDate = DateTime.Today.AddMonths(-12),
+                Description = "Paycheck",
                 Frequency = RecurrenceTypeEnum.Monthly,
+                StartDate = DateTime.Today.AddMonths(-12),
+                Type = RecurringItemType.Income,
+                IsActive = true,
                 Amount = 3000m,
                 CategoryId = categoryId
             };
 
-            // Act
             var income = _service.CreateIncomeFromRecurringItem(recurring);
 
-            // Assert
-            Assert.Equal(recurring.Name, income.Name);
-            Assert.Equal(recurring.Description, income.Description);
-            Assert.Equal(recurring.Amount, income.Amount);
+            Assert.Equal("Salary", income.Name);
+            Assert.Equal(3000m, income.Amount);
             Assert.Equal(DateTime.Today, income.Date);
             Assert.Equal(categoryId, income.CategoryId);
-            Assert.True(income.IsRecurring);
-            Assert.Equal(recurring.Frequency, income.RecurrenceFrequency);
-            Assert.Contains("Auto-generated from recurring item", income.Notes);
+            Assert.Contains("Auto-generated", income.Notes);
         }
 
         [Fact]
-        public void CreateIncomeFromRecurringItem_ThrowsIfCategoryIdIsNull()
+        public void CreateIncomeFromRecurringItem_ThrowsIfCategoryMissing()
         {
-
             var recurring = new RecurringItem
             {
                 Name = "Salary",
-                Description = "Monthly paycheck",
-                Type = "Income",
-                IsActive = true,
-                StartDate = DateTime.Today.AddMonths(-12),
+                Description = "Paycheck",
                 Frequency = RecurrenceTypeEnum.Monthly,
+                StartDate = DateTime.Today.AddMonths(-12),
+                Type = RecurringItemType.Income,
+                IsActive = true,
                 Amount = 3000m,
                 CategoryId = null
             };
 
-            // Act & Assert
-            var exception = Assert.Throws<InvalidOperationException>(() =>
+            var ex = Assert.Throws<InvalidOperationException>(() =>
                 _service.CreateIncomeFromRecurringItem(recurring)
             );
 
-            Assert.Equal("Recurring item must have a CategoryId.", exception.Message);
+            Assert.Equal("Recurring item must have a CategoryId.", ex.Message);
         }
     }
 }

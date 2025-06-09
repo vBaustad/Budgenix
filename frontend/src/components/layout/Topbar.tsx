@@ -31,7 +31,7 @@ export default function Topbar() {
   });
 
   return (
-    <div className="h-14 flex justify-between bg-base-300 border-b border-base-300">
+    <div className="h-14 flex justify-between bg-base-200 border-b border-base-300">
       <div className="flex items-center p-4 gap-4">
         <h1 className="text-xl font-bold">{title}</h1>
         {isExpensesPage && (

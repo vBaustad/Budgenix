@@ -9,6 +9,9 @@ using Budgenix.Services;
 using Budgenix.Services.Recurring;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
+using Microsoft.Extensions.Localization;
+using Moq;
+
 
 namespace Budgenix.Tests.Services.Recurring
 {
@@ -32,9 +35,21 @@ namespace Budgenix.Tests.Services.Recurring
 
             public string? GetUserId() => _userId;
 
-            // Stub for GetUserEmail (return null or fake)
             public string? GetUserEmail() => "fakeuser@example.com";
+
+            public Task<ApplicationUser?> GetCurrentUserAsync()
+            {
+                return Task.FromResult<ApplicationUser?>(new ApplicationUser
+                {
+                    Id = _userId,
+                    UserName = "testuser",
+                    FirstName = "Test",
+                    LastName = "User",
+                    Email = "testuser@example.com"
+                });
+            }
         }
+
 
         [Fact]
         public void ProcessDueItems_CreateExpense_WhenRecurringItemIsDue()
@@ -44,7 +59,15 @@ namespace Budgenix.Tests.Services.Recurring
             var userId = Guid.NewGuid().ToString();
 
             // Seed a test user
-            var user = new ApplicationUser { Id = userId, UserName = "testuser" };
+            var user = new ApplicationUser
+            {
+                Id = userId,
+                UserName = "testuser",
+                FirstName = "Test",
+                LastName = "User",
+                Email = "testuser@example.com"
+            };
+
             dbContext.Users.Add(user);
 
             // Add a due recurring item (e.g., daily so it's always due)
@@ -52,7 +75,7 @@ namespace Budgenix.Tests.Services.Recurring
             {
                 Name = "Test Rent",
                 Description = "Monthly Rent",
-                Type = "Expense",
+                Type = RecurringItemType.Expense,
                 IsActive = true,
                 StartDate = DateTime.Today.AddMonths(-2),
                 Frequency = RecurrenceTypeEnum.Daily,
@@ -61,12 +84,14 @@ namespace Budgenix.Tests.Services.Recurring
                 UserId = userId,
             };
 
+
             dbContext.RecurringItems.Add(recurringItem);
 
             dbContext.SaveChanges();
 
             // Create real service + processor (you may need to pass a fake/mock IUserService)
-            var service = new RecurringItemService();
+            var localizerMock = new Mock<IStringLocalizer<SharedResource>>();
+            var service = new RecurringItemService(localizerMock.Object);
             var fakeUserService = new FakeUserService(userId);
             var processor = new RecurringItemProcessor(fakeUserService, dbContext, service);
 
@@ -87,8 +112,15 @@ namespace Budgenix.Tests.Services.Recurring
             var dbContext = CreateInMemoryDbContext();
             var userId = Guid.NewGuid().ToString();
 
-            //Seed a test user 
-            var user = new ApplicationUser { Id = userId, UserName = "testuser" };
+            // Seed a test user
+            var user = new ApplicationUser
+            {
+                Id = userId,
+                UserName = "testuser",
+                FirstName = "Test",
+                LastName = "User",
+                Email = "testuser@example.com"
+            };
             dbContext.Users.Add(user);
 
             // Add a due Expense recurring item (Daily)
@@ -96,7 +128,7 @@ namespace Budgenix.Tests.Services.Recurring
             {
                 Name = "Gym Membership",
                 Description = "Monthly gym fee",
-                Type = "Expense",
+                Type = RecurringItemType.Expense,
                 IsActive = true,
                 StartDate = DateTime.Today.AddMonths(-2),
                 Frequency = RecurrenceTypeEnum.Daily,
@@ -110,7 +142,7 @@ namespace Budgenix.Tests.Services.Recurring
             {
                 Name = "Salary",
                 Description = "Monthly salary",
-                Type = "Income",
+                Type = RecurringItemType.Income,
                 IsActive = true,
                 StartDate = DateTime.Today.AddMonths(-6),
                 Frequency = RecurrenceTypeEnum.Daily,
@@ -123,7 +155,8 @@ namespace Budgenix.Tests.Services.Recurring
 
             dbContext.SaveChanges();
 
-            var service = new RecurringItemService();
+            var localizerMock = new Mock<IStringLocalizer<SharedResource>>();
+            var service = new RecurringItemService(localizerMock.Object);
             var fakeUserService = new FakeUserService(userId);
             var processor = new RecurringItemProcessor(fakeUserService, dbContext, service);
 

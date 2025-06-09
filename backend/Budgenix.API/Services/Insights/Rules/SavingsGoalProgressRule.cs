@@ -15,14 +15,16 @@ namespace Budgenix.Services.Insights.Rules
                 .Where(b => b.UserId == userId &&
                             b.Type == BudgetTypeEnum.Saving &&
                             (b.EndDate == null || b.EndDate >= DateTime.Today))
-                .Include(b => b.Expenses)
                 .ToListAsync();
 
             foreach (var budget in savingsBudgets)
             {
-                var totalSaved = budget.Expenses
-                    .Where(e => e.Date.Month == month && e.Date.Year == year)
-                    .Sum(e => e.Amount);
+                var totalSaved = await context.Expenses
+                    .Where(e => e.UserId == userId &&
+                                e.CategoryId == budget.CategoryId &&
+                                e.Date.Month == month &&
+                                e.Date.Year == year)
+                    .SumAsync(e => (decimal?)e.Amount) ?? 0;
 
                 if (budget.AllocatedAmount > 0)
                 {

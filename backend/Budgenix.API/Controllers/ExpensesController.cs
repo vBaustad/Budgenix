@@ -10,6 +10,8 @@ using Budgenix.Models.Finance;
 using Budgenix.Models.Shared;
 using Microsoft.Extensions.Localization;
 using Budgenix.Models.Categories;
+using Budgenix.Services.Recurring;
+using Budgenix.Dtos.Recurring;
 
 namespace Budgenix.API.Controllers
 {
@@ -23,13 +25,15 @@ namespace Budgenix.API.Controllers
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
         private readonly IStringLocalizer<SharedResource> _localizer;
+        private readonly RecurringItemService _recurringService;
 
-        public ExpensesController(IUserService userService, BudgenixDbContext context, IMapper mapper, IStringLocalizer<SharedResource> localizer)
+        public ExpensesController(IUserService userService, BudgenixDbContext context, IMapper mapper, IStringLocalizer<SharedResource> localizer, RecurringItemService recurringService)
         {
             _context = context;
             _userService = userService;
             _mapper = mapper;
             _localizer = localizer;
+            _recurringService = recurringService;
         }
 
         // =======================================
@@ -119,21 +123,6 @@ namespace Budgenix.API.Controllers
             return Ok(total);
         }
 
-        [HttpGet("recurring-upcoming")]
-        public async Task<ActionResult<IEnumerable<ExpenseDto>>> GetUpcomingRecurringExpenses(int daysAhead = 30)
-        {
-            var userId = _userService.GetUserId();
-
-            var upcoming = await _context.Expenses
-                .Include(i => i.Category)
-                .Where(i => i.UserId == userId && i.IsRecurring && i.Date >= DateTime.Today && i.Date <= DateTime.Today.AddDays(daysAhead))
-                .ToListAsync();
-
-            var expenseDto = _mapper.Map<List<ExpenseDto>>(upcoming);
-
-            return Ok(expenseDto);
-        }
-
         [HttpGet("categories")]
         public async Task<ActionResult<IEnumerable<string>>> GetUsedExpenseCategories()
         {
@@ -167,54 +156,55 @@ namespace Budgenix.API.Controllers
         }
 
         [HttpGet("overview")]
-        public async Task<IActionResult> GetOverview([FromQuery] int month, [FromQuery] int year)
+        public async Task<IActionResult> GetExpenseOverview([FromQuery] int month, [FromQuery] int year)
         {
             var userId = _userService.GetUserId();
 
-            // Handle invalid input
             if (month < 1 || month > 12 || year < 2000)
                 return BadRequest("Invalid month or year");
 
             var firstOfMonth = new DateTime(year, month, 1);
             var lastMonth = firstOfMonth.AddMonths(-1);
 
-            // Total spent this month
-            var totalSpent = await _context.Expenses
-                .Where(e => e.UserId == userId &&
-                            e.Date.Month == month &&
-                            e.Date.Year == year)
+            var totalExpense = await _context.Expenses
+                .Where(e => e.UserId == userId && e.Date.Month == month && e.Date.Year == year)
                 .SumAsync(e => (decimal?)e.Amount) ?? 0;
 
-            // Total spent last month
-            var lastMonthSpent = await _context.Expenses
-                .Where(e => e.UserId == userId &&
-                            e.Date.Month == lastMonth.Month &&
-                            e.Date.Year == lastMonth.Year)
+            var lastMonthExpense = await _context.Expenses
+                .Where(e => e.UserId == userId && e.Date.Month == lastMonth.Month && e.Date.Year == lastMonth.Year)
                 .SumAsync(e => (decimal?)e.Amount) ?? 0;
 
-            // Income received this month
             var incomeReceived = await _context.Incomes
-                .Where(i => i.UserId == userId &&
-                            i.Date.Month == month &&
-                            i.Date.Year == year)
+                .Where(i => i.UserId == userId && i.Date.Month == month && i.Date.Year == year)
                 .SumAsync(i => (decimal?)i.Amount) ?? 0;
 
-            // Upcoming recurring expenses (from today to end of month)
-            var upcomingRecurring = await _context.RecurringItems
-                .Where(r => r.UserId == userId &&
-                            r.Type == "Expense" &&
-                            r.IsActive &&
-                            r.StartDate <= firstOfMonth.AddMonths(1).AddDays(-1)) // before end of current month
-                .SumAsync(r => (decimal?)r.Amount) ?? 0;
+            var recurringItems = await _context.RecurringItems
+                .Where(r => r.UserId == userId && r.Type == RecurringItemType.Expense && r.IsActive)
+                .ToListAsync();
 
-            // Daily totals for chart/sparkline
+            var nextItemWithDate = recurringItems
+                .Select(r => new
+                {
+                    Item = r,
+                    NextDate = _recurringService.GetNextOccurrenceDate(r, DateTime.Today)
+                })
+                .Where(x => x.NextDate != null)
+                .OrderBy(x => x.NextDate)
+                .FirstOrDefault();
+
+            var nextRecurring = nextItemWithDate == null
+                ? null
+                : new UpcomingRecurringDto
+                {
+                    NextDate = nextItemWithDate.NextDate.Value.ToString("o"),
+                    Amount = nextItemWithDate.Item.Amount
+                };
+
             var daysInMonth = DateTime.DaysInMonth(year, month);
             var dailyTotals = new decimal[daysInMonth];
 
             var dailyExpenses = await _context.Expenses
-                .Where(e => e.UserId == userId &&
-                            e.Date.Month == month &&
-                            e.Date.Year == year)
+                .Where(e => e.UserId == userId && e.Date.Month == month && e.Date.Year == year)
                 .GroupBy(e => e.Date.Day)
                 .Select(g => new { Day = g.Key, Total = g.Sum(e => e.Amount) })
                 .ToListAsync();
@@ -226,13 +216,14 @@ namespace Budgenix.API.Controllers
 
             return Ok(new
             {
-                totalSpent,
-                lastMonthSpent,
+                totalExpense,
+                lastMonthExpense,
                 incomeReceived,
-                upcomingRecurring,
+                upcomingRecurring = nextRecurring,
                 dailyTotals
             });
         }
+
 
 
         // =======================================
@@ -254,27 +245,7 @@ namespace Budgenix.API.Controllers
             expense.Category = category; // Set Category
             expense.UserId = userId;     // Set ownership
 
-            _context.Expenses.Add(expense);
-
-            if (dto.IsRecurring)
-            {
-                var recurringItem = new RecurringItem
-                {
-                    Id = Guid.NewGuid(),
-                    Name = dto.Name,
-                    Description = dto.Description,
-                    Amount = dto.Amount,
-                    StartDate = dto.Date,
-                    EndDate = null,
-                    Frequency = dto.RecurrenceFrequency,
-                    Type = "Expense",
-                    CategoryId = dto.CategoryId,
-                    IsActive = true,
-                    UserId = userId
-                };
-
-                _context.RecurringItems.Add(recurringItem);                
-            }
+            _context.Expenses.Add(expense);            
 
             await _context.SaveChangesAsync();
 

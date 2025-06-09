@@ -6,7 +6,7 @@ import { StatCard } from '@/components/common/cards/StatCard';
 import ProgressCard from '@/components/common/cards/ProgressCard';
 import { formatCurrency } from '@/utils/formatting';
 import { useCurrency } from '@/context/CurrencyContext';
-import { useExpenses } from '@/context/ExpensesContext';
+import { useExpenses } from '@/features/expenses/context/ExpensesContext';
 import { useInsights } from '../hooks/useInsights';
 import { InsightCategories } from '@/types/insights/insight';
 import { useDateFilter } from '@/context/DateFilterContext';

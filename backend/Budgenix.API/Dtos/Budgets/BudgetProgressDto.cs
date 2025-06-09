@@ -9,11 +9,15 @@ namespace Budgenix.Dtos.Budgets
         [Required]
         [MaxLength(100)]
         public required string Name { get; set; }
+
         public decimal AllocatedAmount { get; set; }
+
         public decimal TotalSpent { get; set; }
+
         public decimal RemainingAmount => AllocatedAmount - TotalSpent;
+
         public double PercentUsed => AllocatedAmount == 0 ? 0 : (double)(TotalSpent / AllocatedAmount) * 100;
+
         public bool IsOverBudget => TotalSpent > AllocatedAmount;
     }
-
 }

@@ -1,7 +1,7 @@
-import { RecurringExpenseDto } from '@/types/finance/recurring';
+import { RecurringItemDto } from '@/types/finance/recurring';
 import { skipRecurringItem, fetchRecurringExpenses } from '../services/recurringService';
 
-export async function skipRecurring(id: string, onRefresh: (items: RecurringExpenseDto[]) => void) {
+export async function skipRecurring(id: string, onRefresh: (items: RecurringItemDto[]) => void) {
   try {
     await skipRecurringItem(id);
     const updated = await fetchRecurringExpenses();

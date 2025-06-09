@@ -1,29 +1,29 @@
 import { useCurrency } from '@/context/CurrencyContext';
-import { RecurringExpenseDto } from '@/types/finance/recurring';
+import { RecurringItemDto } from '@/types/finance/recurring';
 import { RecurrenceFrequencyLabels } from '@/types/shared/recurrence';
 import { formatCurrency, formatDate } from '@/utils/formatting';
 import { AppIcons } from '@/components/icons/AppIcons';
 import { useRecurringActions } from '@/features/recurring/hooks/useRecurringActions';
 
 type Props = {
-  recurringExpenses: RecurringExpenseDto[];
+  recurringItems: RecurringItemDto[];
   loading: boolean;
-  onSelect?: (item: RecurringExpenseDto) => void;
+  onSelect?: (item: RecurringItemDto) => void;
 };
 
 const MAX_UPCOMING = 3;
 
-export default function UpcomingRecurringList({ recurringExpenses, loading, onSelect }: Props) {
+export default function UpcomingRecurringItemsList({ recurringItems, loading, onSelect }: Props) {
   const { currency: userCurrency } = useCurrency();
   const { remove, skip, markAsPaid } = useRecurringActions();
 
   if (loading) return <span className="loading loading-spinner loading-md" />;
-  if (recurringExpenses.length === 0)
+  if (recurringItems.length === 0)
     return <p className="text-base-content">No recurring expenses found.</p>;
 
   return (
     <ul className="space-y-4">
-      {[...recurringExpenses]
+      {[...recurringItems]
         .sort((a, b) => new Date(a.nextOccurrenceDate).getTime() - new Date(b.nextOccurrenceDate).getTime())
         .slice(0, MAX_UPCOMING)
         .map((exp) => (

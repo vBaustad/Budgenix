@@ -164,8 +164,6 @@ public class RecurringController : Controller
             Amount = item.Amount,
             Date = DateTime.Today,
             CategoryId = item.CategoryId.Value,
-            IsRecurring = true,
-            RecurrenceFrequency = item.Frequency,
             UserId = userId,
             Notes = "Triggered from recurring item"
         };
@@ -179,6 +177,7 @@ public class RecurringController : Controller
         var result = _mapper.Map<ExpenseDto>(expense);
         return Ok(result);
     }
+
 
 
     [HttpPost("{id}/skip")]

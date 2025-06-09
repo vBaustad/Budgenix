@@ -1,5 +1,5 @@
 import { Expense } from "@/types/finance/expense";
-import { RecurringExpenseDto } from "@/types/finance/recurring";
+import { CreateRecurringItemDto, RecurringItemDto } from '@/types/finance/recurring';
 
 const RECURRING_API_BASE = '/api/recurring';
 
@@ -17,13 +17,31 @@ export async function fetchUpcomingRecurring(): Promise<{
   }
   
   
-export async function fetchRecurringExpenses(): Promise<RecurringExpenseDto[]> {
+export async function fetchRecurringExpenses(): Promise<RecurringItemDto[]> {
   const res = await fetch(`${RECURRING_API_BASE}/upcoming`, { credentials: 'include' });
   if (!res.ok) throw new Error('Failed to fetch upcoming recurring expenses');
   return res.json();
 }
 
-export async function updateRecurringItem(item: RecurringExpenseDto): Promise<void> {
+export async function createRecurringItem(data: CreateRecurringItemDto): Promise<RecurringItemDto> {
+  const res = await fetch('/api/recurring', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify(data),
+  });
+
+  if (!res.ok) {
+    const error = await res.text();
+    throw new Error(`Failed to create recurring item: ${error}`);
+  }
+
+  return res.json();
+}
+
+export async function updateRecurringItem(item: RecurringItemDto): Promise<void> {
   const payload = {
     name: item.name,
     description: item.description ?? '',

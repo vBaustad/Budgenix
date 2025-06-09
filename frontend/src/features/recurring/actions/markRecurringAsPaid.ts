@@ -1,10 +1,10 @@
 import { toast } from 'react-hot-toast';
 import { fetchRecurringExpenses, triggerRecurringItem } from '../services/recurringService';
-import { RecurringExpenseDto } from '@/types/finance/recurring';
+import { RecurringItemDto } from '@/types/finance/recurring';
 
 export async function markRecurringAsPaid(
   id: string,
-  onRefresh: (items: RecurringExpenseDto[]) => void
+  onRefresh: (items: RecurringItemDto[]) => void
 ): Promise<void> {
   try {
     await triggerRecurringItem(id);

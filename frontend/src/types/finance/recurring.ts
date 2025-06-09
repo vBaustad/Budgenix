@@ -1,15 +1,15 @@
 import { RecurrenceFrequency } from '../shared/recurrence';
 
-export type RecurringExpenseDto = {
+export type RecurringItemDto = {
   id: string;
   name: string;
-  description: string;
+  description?: string;
   amount: number;
   startDate: string;
   endDate?: string;
   frequency: RecurrenceFrequency;
   isActive: boolean;
-  type: 'Income' | 'Expense';
+  type: RecurringItemType;
   categoryId?: string;
 
   nextOccurrenceDate: string;
@@ -17,16 +17,25 @@ export type RecurringExpenseDto = {
   lastSkippedDate?: string;
 };
 
+export type UpcomingRecurring = {
+  nextDate: string;
+  amount: number;
+};
 
-export type RecurringItemFormDto = {
+export enum RecurringItemType {
+  Expense = 'Expense',
+  Income = 'Income',
+}
+
+export type CreateRecurringItemDto = {
   name: string;
-  description: string;
+  description?: string;
   amount: number;
   startDate: string;
   endDate?: string;
   frequency: RecurrenceFrequency;
   isActive: boolean;
-  type: 'Income' | 'Expense';
+  type: RecurringItemType;
   categoryId?: string;
 
   lastTriggeredDate?: string;

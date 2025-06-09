@@ -23,7 +23,7 @@ namespace Budgenix.Data
         {
             base.OnModelCreating(builder);
 
-            // === Existing configuration ===
+            // === Entity relationships ===
             builder.Entity<Expense>()
                 .HasOne(e => e.User)
                 .WithMany(u => u.Expenses)
@@ -48,7 +48,11 @@ namespace Budgenix.Data
                 .HasForeignKey(r => r.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // === ✅ Add these indexes ===
+            builder.Entity<RecurringItem>()
+                .Property(r => r.Type)
+                .HasConversion<string>();
+
+            // === Indexes ===
             builder.Entity<Expense>()
                 .HasIndex(e => new { e.UserId, e.Date });
 
@@ -58,6 +62,5 @@ namespace Budgenix.Data
             builder.Entity<RecurringItem>()
                 .HasIndex(r => new { r.UserId, r.StartDate });
         }
-
     }
 }

@@ -12,8 +12,8 @@ namespace Budgenix.Models.Finance
 
         [Required, StringLength(100)]
         public required string Name { get; set; }
-        [Required, StringLength(250)]
-        public required string Description { get; set; }
+        [StringLength(250)]
+        public string? Description { get; set; }
         [Required]
         [Range(0.01, double.MaxValue, ErrorMessage = "Amount must be greater than 0")]
         public required decimal Amount { get; set; }
@@ -23,8 +23,7 @@ namespace Budgenix.Models.Finance
         public Guid CategoryId { get; set; }
         [Required]
         public Category? Category { get; set; }
-        public bool IsRecurring { get; set; }
-        public RecurrenceTypeEnum RecurrenceFrequency { get; set; }
+
         [StringLength(500)]
         public string? Notes { get; set; }
         public string? UserId { get; set; }

@@ -10,6 +10,9 @@ using AutoMapper;
 using Budgenix.Models.Finance;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Localization;
+using Budgenix.Dtos.Recurring;
+using System.Text.Json;
+using Budgenix.Services.Recurring;
 
 namespace Budgenix.API.Controllers
 {
@@ -22,13 +25,15 @@ namespace Budgenix.API.Controllers
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
         private readonly IStringLocalizer<SharedResource> _localizer;
+        private readonly RecurringItemService _recurringService;
 
-        public IncomesController(IUserService userService, BudgenixDbContext context, IMapper mapper, IStringLocalizer<SharedResource> localizer)
+        public IncomesController(IUserService userService, BudgenixDbContext context, IMapper mapper, IStringLocalizer<SharedResource> localizer, RecurringItemService recurringService)
         {
             _context = context;
             _userService = userService;
             _mapper = mapper;
             _localizer = localizer;
+            _recurringService = recurringService;
         }
 
         // =======================================
@@ -90,8 +95,7 @@ namespace Budgenix.API.Controllers
             var matches = await _context.Incomes
                 .Include(i => i.Category)
                 .Where(i => i.UserId == userId &&
-                       (!string.IsNullOrEmpty(i.Name) && i.Name.Contains(query, StringComparison.OrdinalIgnoreCase)) ||
-                       (!string.IsNullOrEmpty(i.Description) && i.Description.Contains(query, StringComparison.OrdinalIgnoreCase)))
+                    (i.Name.Contains(query) || (i.Description != null && i.Description.Contains(query))))
                 .ToListAsync();
 
             var incomeDto = _mapper.Map<List<IncomeDto>>(matches);
@@ -128,20 +132,6 @@ namespace Budgenix.API.Controllers
             return Ok(total);
         }
 
-        [HttpGet("recurring-upcoming")]
-        public async Task<ActionResult<IEnumerable<Income>>> GetUpcomingRecurringIncomes(int daysAhead = 30)
-        {
-            var userId = _userService.GetUserId();
-
-            var upcoming = await _context.Incomes
-                .Include(i => i.Category)
-                .Where(i => i.UserId == userId && i.IsRecurring && i.Date >= DateTime.Today && i.Date <= DateTime.Today.AddDays(daysAhead))
-                .ToListAsync();
-
-            var incomeDto = _mapper.Map<List<IncomeDto>>(upcoming);
-
-            return Ok(incomeDto);
-        }
 
         [HttpGet("categories")]
         public async Task<ActionResult<IEnumerable<string>>> GetUsedIncomeCategories()
@@ -177,12 +167,29 @@ namespace Budgenix.API.Controllers
                 .Where(i => i.UserId == userId && i.Date.Month == lastMonth.Month && i.Date.Year == lastMonth.Year)
                 .SumAsync(i => (decimal?)i.Amount) ?? 0;
 
-            var upcomingRecurring = await _context.RecurringItems
-                .Where(r => r.UserId == userId &&
-                            r.Type == "Income" &&
-                            r.IsActive &&
-                            r.StartDate <= firstOfMonth.AddMonths(1).AddDays(-1))
-                .SumAsync(r => (decimal?)r.Amount) ?? 0;
+            var recurringItems = await _context.RecurringItems
+                .Where(r => r.UserId == userId && r.Type == RecurringItemType.Income && r.IsActive)
+                .ToListAsync();
+
+
+            var nextItemWithDate = recurringItems
+                .Select(r => new
+                {
+                    Item = r,
+                    NextDate = _recurringService.GetNextOccurrenceDate(r, DateTime.Today)
+                })
+                .Where(x => x.NextDate != null)
+                .OrderBy(x => x.NextDate)
+                .FirstOrDefault();
+
+            var nextRecurring = nextItemWithDate == null
+                ? null
+                : new UpcomingRecurringDto
+                {
+                    NextDate = nextItemWithDate.NextDate.Value.ToString("o"),
+                    Amount = nextItemWithDate.Item.Amount
+                };
+
 
             var daysInMonth = DateTime.DaysInMonth(year, month);
             var dailyTotals = new decimal[daysInMonth];
@@ -198,13 +205,29 @@ namespace Budgenix.API.Controllers
                 dailyTotals[entry.Day - 1] = entry.Total;
             }
 
+            var responsePayload = new
+            {
+                totalIncome,
+                lastMonthIncome,
+                upcomingRecurring = nextRecurring,
+                dailyTotals
+            };
+
+            Console.WriteLine("Income Overview Response:");
+            Console.WriteLine(JsonSerializer.Serialize(responsePayload, new JsonSerializerOptions
+            {
+                WriteIndented = true
+            }));
+
+
             return Ok(new
             {
                 totalIncome,
                 lastMonthIncome,
-                upcomingRecurring,
+                upcomingRecurring = nextRecurring,
                 dailyTotals
             });
+
         }
 
         [HttpGet("monthly-summary")]

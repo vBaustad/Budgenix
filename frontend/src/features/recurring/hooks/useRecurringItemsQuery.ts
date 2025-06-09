@@ -1,13 +1,13 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchRecurringExpenses } from '../services/recurringService';
-import { RecurringExpenseDto } from '@/types/finance/recurring';
+import { RecurringItemDto } from '@/types/finance/recurring';
 
 export const RECURRING_QUERY_KEY = ['recurring-expenses'];
 
 export function useRecurringItemsQuery() {
   const queryClient = useQueryClient();
 
-  const query = useQuery<RecurringExpenseDto[], Error>({
+  const query = useQuery<RecurringItemDto[], Error>({
     queryKey: RECURRING_QUERY_KEY,
     queryFn: fetchRecurringExpenses,
     staleTime: 1000 * 60 * 5, // optional: 5 minutes

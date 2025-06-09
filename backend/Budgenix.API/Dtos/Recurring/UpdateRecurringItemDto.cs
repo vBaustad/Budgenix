@@ -26,8 +26,7 @@ namespace Budgenix.Dtos.Recurring
         public bool IsActive { get; set; }
 
         [Required]
-        [RegularExpression("Income|Expense", ErrorMessage = "Type must be either 'Income' or 'Expense'.")]
-        public string Type { get; set; } = "Expense";
+        public RecurringItemType Type { get; set; }
 
         public Guid? CategoryId { get; set; }
     }
