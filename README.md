@@ -26,11 +26,12 @@ Budgenix is designed to be modular, flexible, and user-friendly — from recurri
 ### Core Features
 
 - 🧩 Modular architecture (React + ASP.NET Core)
-- 🔁 Powerful recurring engine for both income and expenses
+- 🔁 Recurring item support for income and expenses
 - 📆 Grouping by month, year, or category
-- 📊 Income & expense insights and trend visualizations
-- 🖥️ Mobile-ready, dark mode enabled
-- 🌍 Currency selection with persistence and inline formatting
+- 📊 Insights and visualizations for spending/income trends
+- 🖥️ Responsive UI with light/dark mode
+- 🌍 Currency selection (user-based) with inline formatting
+- 🧠 Dynamic insights and rule-based suggestions
 
 ---
 
@@ -69,6 +70,7 @@ Budgenix is designed to be modular, flexible, and user-friendly — from recurri
 ### ✅ RecurringController
 
 - `GET /api/recurring/upcoming`
+- `POST /api/recurring`
 - `PUT /api/recurring/{id}`
 - `DELETE /api/recurring/{id}`
 - `POST /api/recurring/{id}/trigger`
@@ -76,14 +78,14 @@ Budgenix is designed to be modular, flexible, and user-friendly — from recurri
 
 ### ✅ CategoriesController
 
-- Default + user-defined category management
+- Default + user-defined category support
 
 ---
 
 ## 🧪 Testing
 
-- `xUnit` for backend: DTO mapping, filters, logic
-- React component testing planned
+- `xUnit` for backend: DTO validation, logic, and query filtering
+- React component testing (planned)
 
 ---
 
@@ -91,29 +93,42 @@ Budgenix is designed to be modular, flexible, and user-friendly — from recurri
 
 ### Context & Hooks
 
-- `ExpensesContext`, `IncomesContext` — centralized state using React Query
-- `CurrencyContext` — currency preference, updates, and formatting
-- `UserContext` — JWT-based user data
-- `DateFilterContext` — month/year selectors for filters and overview
+- `ExpensesContext`, `IncomesContext` – shared state via React Query
+- `CurrencyContext` – user currency preference with live formatting
+- `UserContext` – JWT user info and profile
+- `RecurringContext` – recurring item management
+- `DateFilterContext` – global month/year filtering
 
 ### Pages & Components
 
-- ✅ Expense and Income pages
-- ✅ Add/Edit forms with recurring support
-- ✅ Grouped list rendering (month, year, category)
-- ✅ Pie chart for expenses, bar chart for incomes
-- ✅ Insight panel with rules and auto-generated suggestions
-- ✅ Auth forms: Login / Signup / Logout
-- ✅ Currency-aware inputs and formatting
+- ✅ Income Page
+  - Add/edit income
+  - Category selection
+  - Optional recurring support
+  - Grouped by month/year/category
+  - Bar chart visualization
+- ✅ Expense Page
+  - Add/edit expense
+  - Recurring item support
+  - Grouped views
+  - Pie chart visualization
+- ✅ Shared Forms
+  - Currency-aware inputs
+  - Smart date handling
+- ✅ Insight System
+  - InsightCard components
+  - Rules like "Spending spike", "Low income coverage", "Savings stall"
+- ✅ Auth
+  - Login / Signup / Logout with state persistence
 
 ---
 
 ## 📊 UI Highlights
 
-- 📅 Monthly/Yearly/Category groupings
-- 📈 Recharts-based visualizations (bar/pie)
-- 💬 InsightCard with dynamic rule-based content
-- 🌓 Dark/light theme via DaisyUI
+- 📅 Dynamic groupings (monthly, yearly, by category)
+- 📈 Recharts for bar/pie insights
+- 🧠 Auto-generated insights and suggestions
+- 🌓 DaisyUI dark/light mode
 - 📱 Mobile responsive layout
 
 ---
@@ -122,28 +137,28 @@ Budgenix is designed to be modular, flexible, and user-friendly — from recurri
 
 ### ✅ Recently Completed
 
-- ✅ Income system with overview and recurring support
-- ✅ Bar chart for income category breakdown by month
-- ✅ Insight rules for income (e.g., insufficient to cover recurring)
-- ✅ Backend currency formatting per user
-- ✅ React Query migration for shared data handling
-- ✅ Grouping, filtering, pagination for income
+- ✅ Complete recurring support in both income and expenses
+- ✅ Grouped lists with dynamic labels and DataTable display
+- ✅ CreateRecurringItem integration in form submit logic
+- ✅ Filtering and sorting in grouped lists
+- ✅ Shared currency context and formatting
+- ✅ React Query-based caching + performance improvements
 
 ### 🔨 In Progress
 
-- 💡 Budget tracking & goal progress
-- 📅 Vacation & wishlist planners
-- 💳 Stripe subscription billing
+- 🧮 Budget tracking page (set monthly limits per category)
+- 📅 Vacation & wishlist financial planners
+- 💳 Stripe billing and Pro tier access
 
 ### 💡 Future Ideas
 
-- 🤝 Shared household data
-- 🧠 AI-powered budget assistant
-- 📲 PWA/mobile app support
-- 📤 CSV import/export
+- 🤝 Shared household & user roles
+- 🧠 AI-powered suggestions (e.g., “cut X to meet goal”)
+- 📤 Export/Import via CSV
+- 📲 PWA and native app wrappers
 
 ---
 
 ## 🧠 Philosophy
 
-> Budgenix is built for real financial control. Not just logging — but planning, predicting, and adjusting. The system grows with your needs — clean, extensible, and empowering.
+> Budgenix is built for real financial control — not just for logging, but for planning, adapting, and growing your financial habits. Whether you're tracking your daily coffee or saving for a wedding, Budgenix is here to make it easy, visual, and insightful.
