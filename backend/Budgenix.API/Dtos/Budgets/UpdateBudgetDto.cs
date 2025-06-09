@@ -32,5 +32,6 @@ namespace Budgenix.Dtos.Budgets
         [StringLength(500, ErrorMessage = "Notes can't be longer than 500 characters")]
         public string? Notes { get; set; }
 
+        public bool IsActive { get; set; } = true;
     }
 }

@@ -6,26 +6,30 @@ import {
   ReactNode,
 } from 'react';
 import { useRecurringItemsQuery } from '@/features/recurring/hooks/useRecurringItemsQuery';
-import { RecurringExpenseDto } from '@/types/finance/recurring';
+import { RecurringItemDto } from '@/types/finance/recurring';
 
 type RecurringContextType = {
-  recurringExpenses: RecurringExpenseDto[];
+  recurringItems: RecurringItemDto[];
+  recurringExpenses: RecurringItemDto[];
+  recurringIncomes: RecurringItemDto[];
   loadingRecurring: boolean;
   refreshRecurring: () => Promise<void>;
-  selectedRecurringItem: RecurringExpenseDto | null;
-  setSelectedRecurringItem: (item: RecurringExpenseDto | null) => void;
-  monthlyRecurringTotal: number;
-  lastTriggeredRecurring: RecurringExpenseDto | null;
-  lastSkippedRecurring: RecurringExpenseDto | null;
+  selectedRecurringItem: RecurringItemDto | null;
+  setSelectedRecurringItem: (item: RecurringItemDto | null) => void;
+  monthlyRecurringExpenseTotal: number;
+  monthlyRecurringIncomeTotal: number;
+  lastTriggeredRecurringExpense: RecurringItemDto | null;
+  lastSkippedRecurringExpense: RecurringItemDto | null;
+  lastTriggeredRecurringIncome: RecurringItemDto | null;
 };
 
 const RecurringContext = createContext<RecurringContextType | undefined>(undefined);
 
 export function RecurringProvider({ children }: { children: ReactNode }) {
-  const [selectedRecurringItem, setSelectedRecurringItem] = useState<RecurringExpenseDto | null>(null);
+  const [selectedRecurringItem, setSelectedRecurringItem] = useState<RecurringItemDto | null>(null);
 
   const {
-    data: recurringExpenses = [],
+    data: recurringItems = [],
     isLoading: loadingRecurring,
     refetch,
   } = useRecurringItemsQuery();
@@ -34,7 +38,17 @@ export function RecurringProvider({ children }: { children: ReactNode }) {
     await refetch();
   };
 
-  const monthlyRecurringTotal = useMemo(
+  const recurringExpenses = useMemo(
+    () => recurringItems.filter(item => item.type === 'Expense'),
+    [recurringItems]
+  );
+
+  const recurringIncomes = useMemo(
+    () => recurringItems.filter(item => item.type === 'Income'),
+    [recurringItems]
+  );
+
+  const monthlyRecurringExpenseTotal = useMemo(
     () =>
       recurringExpenses
         .filter(e => e.isActive)
@@ -42,41 +56,62 @@ export function RecurringProvider({ children }: { children: ReactNode }) {
     [recurringExpenses]
   );
 
-  const lastTriggeredRecurring = useMemo(
+  const lastTriggeredRecurringExpense = useMemo(
     () =>
       [...recurringExpenses]
         .filter(e => e.lastTriggeredDate)
-        .sort(
-          (a, b) =>
-            new Date(b.lastTriggeredDate!).getTime() -
-            new Date(a.lastTriggeredDate!).getTime()
+        .sort((a, b) =>
+          new Date(b.lastTriggeredDate!).getTime() -
+          new Date(a.lastTriggeredDate!).getTime()
         )[0] ?? null,
     [recurringExpenses]
   );
 
-  const lastSkippedRecurring = useMemo(
+  const lastSkippedRecurringExpense = useMemo(
     () =>
       [...recurringExpenses]
         .filter(e => e.lastSkippedDate)
-        .sort(
-          (a, b) =>
-            new Date(b.lastSkippedDate!).getTime() -
-            new Date(a.lastSkippedDate!).getTime()
+        .sort((a, b) =>
+          new Date(b.lastSkippedDate!).getTime() -
+          new Date(a.lastSkippedDate!).getTime()
         )[0] ?? null,
     [recurringExpenses]
   );
+
+  const lastTriggeredRecurringIncome = useMemo(
+    () =>
+      [...recurringIncomes]
+        .filter(e => e.lastTriggeredDate)
+        .sort((a, b) =>
+          new Date(b.lastTriggeredDate!).getTime() -
+          new Date(a.lastTriggeredDate!).getTime()
+        )[0] ?? null,
+    [recurringIncomes]
+  );
+
+  const monthlyRecurringIncomeTotal = useMemo(
+  () =>
+    recurringIncomes
+      .filter(e => e.isActive)
+      .reduce((sum, e) => sum + e.amount, 0),
+  [recurringIncomes]
+);
 
   return (
     <RecurringContext.Provider
       value={{
+        recurringItems,
         recurringExpenses,
+        recurringIncomes,
         loadingRecurring,
         refreshRecurring,
         selectedRecurringItem,
         setSelectedRecurringItem,
-        monthlyRecurringTotal,
-        lastTriggeredRecurring,
-        lastSkippedRecurring,
+        monthlyRecurringExpenseTotal,
+        monthlyRecurringIncomeTotal,
+        lastTriggeredRecurringExpense,
+        lastSkippedRecurringExpense,
+        lastTriggeredRecurringIncome,
       }}
     >
       {children}

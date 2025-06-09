@@ -1,22 +1,22 @@
-import { RecurringExpenseDto } from '@/types/finance/recurring';
+import { RecurringItemDto } from '@/types/finance/recurring';
 import { formatDate } from '@/utils/formatting';
 import { AppIcons } from '@/components/icons/AppIcons';
 
 type Props = {
-  recurringExpenses: RecurringExpenseDto[];
+  recurringItems: RecurringItemDto[];
   monthlyTotal: number;
-  lastTriggered?: RecurringExpenseDto;
-  lastSkipped?: RecurringExpenseDto;
+  lastTriggered?: RecurringItemDto | null;
+  lastSkipped?: RecurringItemDto | null;
 };
 
+
 export default function RecurringSummary({
-  recurringExpenses,
+  recurringItems,
   monthlyTotal,
   lastTriggered,
   lastSkipped,
 }: Props) {
-
-  const activeCount = recurringExpenses.filter(e => e.isActive).length;
+  const activeCount = recurringItems.filter(e => e.isActive).length;
 
   return (
     <div className="w-full bg-base-100 border border-base-200 rounded-xl shadow-sm p-4 space-y-4">

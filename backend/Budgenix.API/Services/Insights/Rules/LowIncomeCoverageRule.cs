@@ -1,5 +1,6 @@
 ﻿using Budgenix.Data;
 using Budgenix.Dtos.Insights;
+using Budgenix.Models.Shared;
 using Microsoft.EntityFrameworkCore;
 
 namespace Budgenix.Services.Insights.Rules
@@ -23,7 +24,7 @@ namespace Budgenix.Services.Insights.Rules
 
             var upcomingRecurring = await context.RecurringItems
                 .Where(r => r.UserId == userId &&
-                            r.Type == "Expense" &&
+                            r.Type == RecurringItemType.Expense &&
                             r.IsActive &&
                             r.StartDate <= new DateTime(year, month, DateTime.DaysInMonth(year, month)))
                 .SumAsync(r => (decimal?)r.Amount) ?? 0;

@@ -86,13 +86,21 @@ namespace Budgenix.API.Controllers
             var userId = _userService.GetUserId();
 
             var budget = await _context.Budgets
-                .Include(b => b.Expenses)
+                .Include(b => b.Category)
                 .FirstOrDefaultAsync(b => b.Id == id && b.UserId == userId);
 
             if (budget == null)
                 return NotFound();
 
-            var totalSpent = budget.Expenses.Sum(e => e.Amount);
+            var start = budget.StartDate;
+            var end = budget.EndDate ?? DateTime.Today;
+
+            var totalSpent = await _context.Expenses
+                .Where(e => e.UserId == userId &&
+                            e.CategoryId == budget.CategoryId &&
+                            e.Date >= start &&
+                            e.Date <= end)
+                .SumAsync(e => (decimal?)e.Amount) ?? 0;
 
             var progressDto = new BudgetProgressDto
             {
@@ -105,22 +113,30 @@ namespace Budgenix.API.Controllers
             return Ok(progressDto);
         }
 
+
         [HttpGet("progress")]
         public async Task<ActionResult<IEnumerable<BudgetProgressDto>>> GetAllBudgetProgress()
         {
             var userId = _userService.GetUserId();
 
             var budgets = await _context.Budgets
-                .Include(b => b.Expenses)
                 .Include(b => b.Category)
                 .Where(b => b.UserId == userId)
                 .ToListAsync();
 
             var progressDtos = new List<BudgetProgressDto>();
 
-            foreach ( var budget in budgets)
+            foreach (var budget in budgets)
             {
-                var totalSpent = budget.Expenses.Sum(e => e.Amount);
+                var start = budget.StartDate;
+                var end = budget.EndDate ?? DateTime.Today;
+
+                var totalSpent = await _context.Expenses
+                    .Where(e => e.UserId == userId &&
+                                e.CategoryId == budget.CategoryId &&
+                                e.Date >= start &&
+                                e.Date <= end)
+                    .SumAsync(e => (decimal?)e.Amount) ?? 0;
 
                 var progress = new BudgetProgressDto
                 {
@@ -132,9 +148,10 @@ namespace Budgenix.API.Controllers
 
                 progressDtos.Add(progress);
             }
-            
+
             return Ok(progressDtos);
         }
+
 
         // =======================================
         // ==========     POST APIs      =========

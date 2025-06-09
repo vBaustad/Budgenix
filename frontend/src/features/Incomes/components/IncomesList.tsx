@@ -1,26 +1,26 @@
-import DataTable from '../../../components/common/tables/DataTable';
-import { Expense } from '../../../types/finance/expense';
-import { formatCurrency, formatDate, truncateText } from '../../../utils/formatting';
-import { useCurrency } from '../../../context/CurrencyContext';
+import DataTable from '@/components/common/tables/DataTable';
+import { Income } from '@/types/finance/income';
+import { formatCurrency, formatDate, truncateText } from '@/utils/formatting';
+import { useCurrency } from '@/context/CurrencyContext';
 
-export default function ExpensesList({ expenses }: { expenses: Expense[] }) {
+export default function IncomesList({ incomes }: { incomes: Income[] }) {
   const { currency } = useCurrency();
   const minRows = 15;
 
-  const openEditModal = (item: Expense) => {
-    // TODO: open edit modal
+  const openEditModal = (item: Income) => {
+    // TODO: Open edit modal
     console.log('Edit:', item);
   };
 
   const confirmDelete = (id: string) => {
-    // TODO: show confirm modal
+    // TODO: Show confirm modal
     console.log('Delete:', id);
   };
 
-  const paddedExpenses = [...expenses];
-  while (paddedExpenses.length < minRows) {
-    paddedExpenses.push({
-      id: `placeholder-${paddedExpenses.length}`,
+  const paddedIncomes = [...incomes];
+  while (paddedIncomes.length < minRows) {
+    paddedIncomes.push({
+      id: `placeholder-${paddedIncomes.length}`,
       name: '',
       description: '',
       amount: 0,
@@ -33,7 +33,7 @@ export default function ExpensesList({ expenses }: { expenses: Expense[] }) {
   return (
     <DataTable
       rowKey="id"
-      data={paddedExpenses}
+      data={paddedIncomes}
       columns={[
         {
           label: 'Date',
@@ -49,10 +49,10 @@ export default function ExpensesList({ expenses }: { expenses: Expense[] }) {
           sortable: true,
         },
         {
-          label: 'Description',
-          accessor: 'description',
+          label: "Description",
+          accessor: "description",
           format: truncateText,
-          width: '400px',
+          width: '350px',
           sortable: true,
         },
         {

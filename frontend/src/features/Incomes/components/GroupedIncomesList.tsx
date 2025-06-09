@@ -1,19 +1,18 @@
-import { GroupedExpenses } from '../../../types/finance/expense';
-import { formatCurrency, formatDate, truncateText } from '../../../utils/formatting';
-import DataTable from '../../../components/common/tables/DataTable';
-import { useCurrency } from '../../../context/CurrencyContext';
+import { formatCurrency, formatDate } from '@/utils/formatting';
+import DataTable from '@/components/common/tables/DataTable';
+import { useCurrency } from '@/context/CurrencyContext';
+import { GroupedIncomes } from '@/types/finance/income';
 
-type GroupedExpensesListProps = {
-  data: GroupedExpenses;
+type GroupedIncomesListProps = {
+  data: GroupedIncomes;
   groupBy: 'month' | 'year' | 'category';
 };
 
-export default function GroupedExpensesList({ data, groupBy }: GroupedExpensesListProps) {
+export default function GroupedIncomesList({ data, groupBy }: GroupedIncomesListProps) {
   const { currency } = useCurrency();
 
   const formatGroupLabel = (key: string | undefined): string => {
     if (!key) return 'Unknown';
-
     switch (groupBy) {
       case 'month': {
         const [year, month] = key.split('-');
@@ -27,17 +26,14 @@ export default function GroupedExpensesList({ data, groupBy }: GroupedExpensesLi
 
   return (
     <div className="flex flex-col gap-6">
-      {data.map(({ groupName, expenses }) => (
-        <div
-          key={groupName}
-          className="rounded-xl border border-l-4 border-primary bg-base-100 shadow-sm"
-        >
+      {data.map(({ groupName, incomes }) => (
+        <div key={groupName} className="rounded-xl border border-l-4 border-primary bg-base-100 shadow-sm">
           <h3 className="text-lg font-semibold text-base-content mb-2 mt-2 ml-2">
             {formatGroupLabel(groupName)}
           </h3>
           <DataTable
             rowKey="id"
-            data={expenses}
+            data={incomes}
             columns={[
               {
                 label: 'Date',
@@ -50,13 +46,6 @@ export default function GroupedExpensesList({ data, groupBy }: GroupedExpensesLi
                 label: 'Name',
                 accessor: 'name',
                 width: '200px',
-                sortable: true,
-              },
-              {
-                label: 'Description',
-                accessor: 'description',
-                format: truncateText,
-                width: '400px',
                 sortable: true,
               },
               {

@@ -27,7 +27,7 @@ import {
   SignUpPage,
 } from './pages/public'
 
-import { ExpensesProvider } from './context/ExpensesContext'
+import { ExpensesProvider } from './features/expenses/context/ExpensesContext'
 import { RecurringProvider } from './context/RecurringContext'
 import { InsightsProvider } from './context/InsightContext'
 import { DateFilterProvider } from './context/DateFilterContext'

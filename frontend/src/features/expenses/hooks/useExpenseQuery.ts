@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchExpenses } from '../services/expensesService';
-import { GroupByValue } from '@/context/ExpensesContext';
+import { GroupByValue } from '@/features/expenses/context/ExpensesContext';
 import { Expense, GroupedExpenses } from '@/types/finance/expense';
 
 type Params = {

@@ -11,7 +11,7 @@ import SectionShell from '@/components/layout/SectionShell';
 import { AppIcons } from '@/components/icons/AppIcons';
 import { GROUP_OPTIONS } from '@/features/expenses/constants/grouping';
 import RecurringSummary from '@/features/recurring/components/RecurringSummary';
-import { useExpenses } from '@/context/ExpensesContext';
+import { useExpenses } from '@/features/expenses/context/ExpensesContext';
 import { useRecurring } from '@/context/RecurringContext';
 import { useCategories } from '@/context/CategoryContext';
 import { t } from 'i18next';
@@ -31,16 +31,17 @@ export default function ExpensesPage() {
     handleAddExpense,    
   } = useExpenses();
 
-  const {
-    recurringExpenses,
-    loadingRecurring,
-    refreshRecurring,
-    selectedRecurringItem,
-    setSelectedRecurringItem,
-    monthlyRecurringTotal,
-    lastTriggeredRecurring,
-    lastSkippedRecurring,
-  } = useRecurring();
+const {
+  recurringExpenses,
+  loadingRecurring,
+  refreshRecurring,
+  selectedRecurringItem,
+  setSelectedRecurringItem,
+  monthlyRecurringExpenseTotal,
+  lastTriggeredRecurringExpense,
+  lastSkippedRecurringExpense,
+} = useRecurring();
+
 
   const { categories } = useCategories();
 
@@ -74,7 +75,7 @@ export default function ExpensesPage() {
             {/* LEFT: Recurring list */}
             <div className="w-full lg:w-1/2">
               <UpcomingRecurringList
-                recurringExpenses={recurringExpenses}
+                recurringItems={recurringExpenses}
                 loading={loadingRecurring}
                 onSelect={setSelectedRecurringItem}
               />
@@ -89,10 +90,10 @@ export default function ExpensesPage() {
                 />
               ) : (                
                 <RecurringSummary
-                  recurringExpenses={recurringExpenses}
-                  monthlyTotal={monthlyRecurringTotal}
-                  lastTriggered={lastTriggeredRecurring ?? undefined}
-                  lastSkipped={lastSkippedRecurring ?? undefined}
+                  recurringItems={recurringExpenses}
+                  monthlyTotal={monthlyRecurringExpenseTotal}
+                  lastTriggered={lastTriggeredRecurringExpense}
+                  lastSkipped={lastSkippedRecurringExpense}
                 />
               )}
             </div>

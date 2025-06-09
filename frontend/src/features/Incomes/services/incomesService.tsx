@@ -1,9 +1,13 @@
-import { Expense, GroupedExpenses, CreateExpenseDto } from "@/types/finance/expense";
+import {
+  Income,
+  GroupedIncomes,
+  CreateIncomeDto,
+  IncomeOverviewDto
+} from '@/types/finance/income';
 
-
-type FetchExpenseOptions = {
-  from?: string; 
-  to?: string; 
+type FetchIncomeOptions = {
+  from?: string;
+  to?: string;
   categories?: string[];
   sort?: string;
   groupBy?: 'month' | 'category' | 'year';
@@ -11,18 +15,9 @@ type FetchExpenseOptions = {
   take?: number;
 };
 
-type ExpensesOverviewResponse = {
-  totalSpent: number;
-  lastMonthSpent: number;
-  incomeReceived: number;
-  upcomingRecurring: number;
-  dailyTotals: number[];
-};
+const API_BASE_URL = '/api/incomes';
 
-const API_BASE_URL = '/api/expenses';
-
-
-export async function fetchExpenses(filters: FetchExpenseOptions = {}): Promise<Expense[] | GroupedExpenses> {
+export async function fetchIncomes(filters: FetchIncomeOptions = {}): Promise<Income[] | GroupedIncomes> {
   const params = new URLSearchParams();
 
   if (filters.from) params.append('from', filters.from);
@@ -39,14 +34,14 @@ export async function fetchExpenses(filters: FetchExpenseOptions = {}): Promise<
     credentials: 'include',
   });
 
-  if (!res.ok) throw new Error('Failed to fetch expenses');
+  if (!res.ok) throw new Error('Failed to fetch incomes');
   return await res.json();
 }
 
-export async function fetchExpensesOverview(
+export async function fetchIncomeOverview(
   month: number,
   year: number
-): Promise<ExpensesOverviewResponse> {
+): Promise<IncomeOverviewDto> {
   const params = new URLSearchParams({
     month: month.toString(),
     year: year.toString(),
@@ -57,52 +52,42 @@ export async function fetchExpensesOverview(
   });
 
   if (!res.ok) {
-    throw new Error('Failed to fetch overview data');
+    throw new Error('Failed to fetch income overview data');
   }
 
   return await res.json();
 }
 
-
-export function isGroupedExpenses(
-  data: Expense[] | GroupedExpenses
-): data is GroupedExpenses {
+export function isGroupedIncomes(
+  data: Income[] | GroupedIncomes
+): data is GroupedIncomes {
   return (
     Array.isArray(data) &&
     data.length > 0 &&
     typeof data[0] === 'object' &&
     data[0] !== null &&
     'groupName' in data[0] &&
-    'expenses' in data[0] &&
-    Array.isArray(data[0].expenses)
+    'incomes' in data[0] &&
+    Array.isArray(data[0].incomes)
   );
 }
 
-
-export async function createExpense(expense: CreateExpenseDto): Promise<Expense> {
-
-  console.log('Outgoing payload:', JSON.stringify(expense, null, 2));
-
-
+export async function createIncome(income: CreateIncomeDto): Promise<Income> {
   const response = await fetch(API_BASE_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      ...expense,
-      description: expense.description || '',
-    }),
+    body: JSON.stringify(income),
     credentials: 'include',
   });
 
   if (!response.ok) {
-    let message = 'Failed to create expense';
+    let message = 'Failed to create income';
     try {
       const error = await response.json();
       console.error('Validation Error:', error);
 
-      // Optional: grab a helpful error string
       if (error.errors) {
         const firstKey = Object.keys(error.errors)[0];
         message = `${firstKey}: ${error.errors[firstKey][0]}`;

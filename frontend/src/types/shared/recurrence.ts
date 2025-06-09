@@ -1,6 +1,5 @@
 export const RecurrenceFrequencyOptions = [
-    { value: 'None', label: 'None' },
-    { value: 'OneTime', label: 'One Time' },
+    { value: 'None', label: 'Not Recurring' },
     { value: 'Daily', label: 'Daily' },
     { value: 'Weekly', label: 'Weekly' },
     { value: 'BiWeekly', label: 'Bi-Weekly' },
@@ -10,8 +9,7 @@ export const RecurrenceFrequencyOptions = [
   ] as const;
   
   export const RecurrenceFrequencyLabels: Record<string, string> = {
-    None: 'None',
-    OneTime: 'One Time',
+    None: 'Not Recurring',
     Daily: 'Daily',
     Weekly: 'Weekly',
     BiWeekly: 'Bi-Weekly',
