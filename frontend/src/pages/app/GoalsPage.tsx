@@ -10,7 +10,7 @@ export default function GoalsPage() {
 
   return (
     <>
-      <div className="flex min-h-screen bg-base-100 text-base-content">        
+      <div className="flex min-h-screen text-base-content">        
         <div className="p-4">
           <h2 className="text-sm text-base-content/70 mb-4">{t('dashboard.welcome')}</h2>
           <p>{t('dashboard.description')}</p>

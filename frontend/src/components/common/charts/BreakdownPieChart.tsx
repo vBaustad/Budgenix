@@ -35,7 +35,7 @@ export default function BreakdownPieChart<T>({
     });
 
     return Array.from(map.entries()).map(([label, value]) => ({ label, value }));
-  }, [data, groupBy, getValue, userCurrency]); // <- added userCurrency here
+  }, [data, groupBy, getValue, userCurrency]);
 
   return (
     <div className="flex w-full h-[600px] justify-between">

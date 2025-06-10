@@ -10,6 +10,7 @@ using Budgenix.Helpers.Query;
 using Microsoft.AspNetCore.Authorization;
 using Budgenix.Models.Shared;
 using Microsoft.Extensions.Localization;
+using Budgenix.Helpers;
 
 namespace Budgenix.API.Controllers
 {
@@ -92,8 +93,7 @@ namespace Budgenix.API.Controllers
             if (budget == null)
                 return NotFound();
 
-            var start = budget.StartDate;
-            var end = budget.EndDate ?? DateTime.Today;
+            var (start, end) = RecurrenceHelper.GetRecurrencePeriod(DateTime.Today, budget.Recurrence);
 
             var totalSpent = await _context.Expenses
                 .Where(e => e.UserId == userId &&
@@ -108,10 +108,12 @@ namespace Budgenix.API.Controllers
                 Name = budget.Name,
                 AllocatedAmount = budget.AllocatedAmount,
                 TotalSpent = totalSpent,
+                Recurrence = budget.Recurrence,
             };
 
             return Ok(progressDto);
         }
+
 
 
         [HttpGet("progress")]
@@ -128,8 +130,7 @@ namespace Budgenix.API.Controllers
 
             foreach (var budget in budgets)
             {
-                var start = budget.StartDate;
-                var end = budget.EndDate ?? DateTime.Today;
+                var (start, end) = RecurrenceHelper.GetRecurrencePeriod(DateTime.Today, budget.Recurrence);
 
                 var totalSpent = await _context.Expenses
                     .Where(e => e.UserId == userId &&
@@ -144,6 +145,7 @@ namespace Budgenix.API.Controllers
                     Name = budget.Name,
                     AllocatedAmount = budget.AllocatedAmount,
                     TotalSpent = totalSpent,
+                    Recurrence = budget.Recurrence,
                 };
 
                 progressDtos.Add(progress);

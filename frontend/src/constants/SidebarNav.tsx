@@ -12,7 +12,7 @@ import {
   
   export const sidebarNav = [
     {
-      section: 'sidebar.main',
+      section: '',
       items: [
         { label: 'sidebar.dashboard', path: '/dashboard', icon: HomeIcon },
         { label: 'sidebar.budgets', path: '/budgets', icon: WalletIcon },
@@ -32,7 +32,8 @@ import {
       section: 'sidebar.system',
       items: [
         { label: 'sidebar.settings', path: '/settings', icon: Cog6ToothIcon },
-        { label: 'sidebar.logout', action: 'logout', icon: ArrowRightStartOnRectangleIcon },
+        { label: 'sidebar.logout', action: 'logout' as const, icon: ArrowRightStartOnRectangleIcon },
+
       ],
     },
   ]

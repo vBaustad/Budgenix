@@ -19,6 +19,7 @@ const routeTitles: Record<string, string> = {
 export default function Topbar() {
   const { pathname } = useLocation();
   const { t } = useTranslation();
+
   const titleKey = routeTitles[pathname] || '';
   const title = t(titleKey);
 
@@ -31,23 +32,28 @@ export default function Topbar() {
   });
 
   return (
-    <div className="h-14 flex justify-between bg-base-200 border-b border-base-300">
-      <div className="flex items-center p-4 gap-4">
-        <h1 className="text-xl font-bold">{title}</h1>
-        {isExpensesPage && (
-          <DatePickerControls
-            currentMonth={currentMonth}
-            selectedMonth={selectedMonth}
-            setSelectedMonth={setSelectedMonth}
-            selectedYear={selectedYear}
-            setSelectedYear={setSelectedYear}
-          />
-        )}
-      </div>
-      <div className="flex items-center justify-end gap-6 text-sm font-medium text-base-content pr-4">
-        <CurrencyDropdown />
-        <ThemeDropdown />
-      </div>
+  <div className="h-14 flex justify-between items-center bg-[var(--color-gradient-start)] border-b border-base-content/20 text-base-content px-4 z-10">
+    {/* LEFT: Title and Actions */}
+    <div className="flex items-center gap-x-4">
+      <h1 className="text-xl font-bold">{title}</h1>
+
+      {isExpensesPage && (
+        <DatePickerControls
+          currentMonth={currentMonth}
+          selectedMonth={selectedMonth}
+          setSelectedMonth={setSelectedMonth}
+          selectedYear={selectedYear}
+          setSelectedYear={setSelectedYear}
+        />
+      )}
     </div>
+
+    {/* RIGHT: Controls */}
+    <div className="flex items-center gap-6 text-sm font-medium">
+      <CurrencyDropdown />
+      <ThemeDropdown />
+    </div>
+  </div>
+
   );
 }

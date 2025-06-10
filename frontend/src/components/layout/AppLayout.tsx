@@ -10,13 +10,13 @@ export default function AppLayout() {
             <Sidebar />
 
             {/* Main section */}
-            <div className="flex-1 lg:pl-72 bg-base-100">
+            <div className="flex-1 lg:pl-62 bg-budgenix-gradient">
                 {/* Fixed Topbar */}
-                <div className="fixed top-0 right-0 left-0 lg:left-72 z-40">
+                <div className="fixed top-0 right-0 left-0 lg:pl-64 z-40">
                     <Topbar />
                 </div>
                 {/* Scrollable content below topbar */}
-                <main className="pt-14 min-h-screen overflow-y-auto">
+                <main className="pt-14 min-h-screen overflow-y-auto bg-budgenix-gradient transition-all">
                     <Outlet /> {/* Here your pages render */}
                 </main>
             </div>
