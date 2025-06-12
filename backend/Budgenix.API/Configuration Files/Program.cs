@@ -39,7 +39,6 @@ builder.Services.AddDbContext<BudgenixDbContext>(options =>
 
 Console.WriteLine($"🔌 DB: {connectionString}");
 
-
 // Add services to the container.
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
