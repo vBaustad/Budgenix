@@ -24,36 +24,33 @@ export default function Topbar() {
   const title = t(titleKey);
 
   const isExpensesPage = pathname === '/expenses';
+
   const { selectedMonth, setSelectedMonth, selectedYear, setSelectedYear } = useDateFilter();
 
-  const currentMonth = new Date(selectedYear, selectedMonth - 1).toLocaleString(undefined, {
-    month: 'long',
-    year: 'numeric',
-  });
-
   return (
-  <div className="h-14 flex justify-between items-center bg-[var(--color-gradient-start)] border-b border-base-content/20 text-base-content px-4 z-10">
-    {/* LEFT: Title and Actions */}
-    <div className="flex items-center gap-x-4">
-      <h1 className="text-xl font-bold">{title}</h1>
+    <div className="bg-base-300 border-b border-base-content/20 text-base-content z-30">
+      {/* Topbar Header */}
+      <div className="h-16 flex justify-between items-center px-4 sm:px-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:gap-6 gap-1">
+          <h1 className="text-xl font-bold">{title}</h1>
 
-      {isExpensesPage && (
-        <DatePickerControls
-          currentMonth={currentMonth}
-          selectedMonth={selectedMonth}
-          setSelectedMonth={setSelectedMonth}
-          selectedYear={selectedYear}
-          setSelectedYear={setSelectedYear}
-        />
-      )}
+          {isExpensesPage && (
+            <div className="flex items-center gap-2 text-sm text-base-content/80">
+              <DatePickerControls
+                selectedMonth={selectedMonth}
+                setSelectedMonth={setSelectedMonth}
+                selectedYear={selectedYear}
+                setSelectedYear={setSelectedYear}
+              />
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center gap-4 sm:gap-6 text-sm font-medium">
+          <CurrencyDropdown />
+          <ThemeDropdown />
+        </div>
+      </div>
     </div>
-
-    {/* RIGHT: Controls */}
-    <div className="flex items-center gap-6 text-sm font-medium">
-      <CurrencyDropdown />
-      <ThemeDropdown />
-    </div>
-  </div>
-
   );
 }

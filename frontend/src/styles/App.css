@@ -35,10 +35,10 @@
   --color-success: #22C55E;
   --color-success-content: #FFFFFF;
 
-  --color-warning: #F4B8B8; /* Light coral */
+  --color-warning: #FACC15; /* Softer yellow error tone */
   --color-warning-content: #2D2A26;
 
-  --color-error: #FACC15; /* Softer yellow error tone */
+  --color-error: #D86363; /* Warm clay red */
   --color-error-content: #2D2A26;
 }
 

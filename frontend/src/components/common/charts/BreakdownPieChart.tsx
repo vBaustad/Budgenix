@@ -35,7 +35,7 @@ export default function BreakdownPieChart<T>({
     });
 
     return Array.from(map.entries()).map(([label, value]) => ({ label, value }));
-  }, [data, groupBy, getValue, userCurrency]);
+  }, [data, groupBy, getValue]);
 
   return (
     <div className="flex w-full h-[600px] justify-between">
@@ -63,7 +63,7 @@ export default function BreakdownPieChart<T>({
             label={({ name }) => name}
             labelLine
           >
-            {chartData.map((entry, index) => (
+            {chartData.map((_, index) => (
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
           </Pie>

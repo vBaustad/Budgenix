@@ -8,9 +8,14 @@ import {
     ChartBarIcon,
     Cog6ToothIcon,
     ArrowRightStartOnRectangleIcon,
+    AdjustmentsHorizontalIcon,
+    UserIcon,
   } from '@heroicons/react/24/outline'
   
-  export const sidebarNav = [
+  import type { SidebarSection } from '@/types/shared/sidebar';
+
+
+  export const sidebarNav: SidebarSection[] = [
     {
       section: '',
       items: [
@@ -31,10 +36,12 @@ import {
     {
       section: 'sidebar.system',
       items: [
-        { label: 'sidebar.settings', path: '/settings', icon: Cog6ToothIcon },
-        { label: 'sidebar.logout', action: 'logout' as const, icon: ArrowRightStartOnRectangleIcon },
-
-      ],
-    },
+        { label: 'sidebar.settings', icon: Cog6ToothIcon, collapsible: true, children: [
+          { label: 'sidebar.settings.user', path: '/settings/user', icon: UserIcon },
+          { label: 'sidebar.settings.app', path: '/settings/app', icon: AdjustmentsHorizontalIcon },
+        ]},
+        { label: 'sidebar.logout', action: 'logout', icon: ArrowRightStartOnRectangleIcon },
+      ]
+    }
   ]
   
