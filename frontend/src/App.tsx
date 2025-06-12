@@ -1,35 +1,82 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import './styles/app.css'
+import './styles/components.css'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { AuthProvider } from './context/AuthContext'
+import { UserProvider } from './context/UserContext'
+import { CurrencyProvider } from './context/CurrencyContext'
+import { CategoryProvider } from './context/CategoryContext'
+import { Toaster } from 'react-hot-toast';
+import PrivateRoute from './components/routing/PrivateRoute'
+import AppLayout from './components/layout/AppLayout'
+import BaseLayout from './features/public/components/BaseLayout';
+
+import {
+  DashboardPage,
+  BudgetsPage,
+  ExpensesPage,
+  IncomePage,
+  GoalsPage,
+  VacationModePage,
+  ReportsPage,
+  SettingsPage,
+} from './pages/app'
+
+import {
+  LandingPage,
+  LoginPage,
+  SignUpPage,
+} from './pages/public'
+
+import { ExpensesProvider } from './features/expenses/context/ExpensesContext'
+import { RecurringProvider } from './context/RecurringContext'
+import { InsightsProvider } from './context/InsightContext'
+import { DateFilterProvider } from './context/DateFilterContext'
+import { IncomeProvider } from './features/Incomes/context/IncomesContext'
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <AuthProvider>
+      <UserProvider>
+        <CurrencyProvider>
+          <CategoryProvider>
+            <DateFilterProvider>
+              <IncomeProvider>
+                <ExpensesProvider>
+                  <RecurringProvider>
+                    <InsightsProvider> 
+                      <Router>
+                        <Toaster position="top-right" />
+                        <Routes>
+                          {/* Public Routes */}
+                          <Route path="/" element={<BaseLayout><LandingPage /></BaseLayout>} />
+                          <Route path="/login" element={<BaseLayout><LoginPage /></BaseLayout>} />
+                          <Route path="/signup" element={<BaseLayout><SignUpPage /></BaseLayout>} />
+
+                          {/* Private Routes */}
+                          <Route element={<AppLayout />}>
+                            <Route element={<PrivateRoute />}>
+                              <Route path="/dashboard" element={<DashboardPage />} />
+                              <Route path="/budgets" element={<BudgetsPage />} />
+                              <Route path="/expenses" element={<ExpensesPage />} />
+                              <Route path="/income" element={<IncomePage />} />
+                              <Route path="/goals" element={<GoalsPage />} />
+                              <Route path="/vacation-mode" element={<VacationModePage />} />
+                              <Route path="/reports" element={<ReportsPage />} />
+                              <Route path="/settings" element={<SettingsPage />} />
+                            </Route>
+                          </Route>
+                        </Routes>
+                      </Router>
+                    </InsightsProvider>
+                  </RecurringProvider>
+                </ExpensesProvider>
+              </IncomeProvider>
+            </DateFilterProvider>
+          </CategoryProvider>
+        </CurrencyProvider>
+      </UserProvider>
+    </AuthProvider>
+  );
 }
 
-export default App
+export default App;
