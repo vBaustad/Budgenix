@@ -1,4 +1,4 @@
-# 💰 Budgenix
+# 💰 Budgenix 
 
 **Budgenix** is a modern personal finance app that helps you track spending, manage income, plan budgets, and automate recurring items — with a focus on clarity, insight, and speed. From solo users to shared households, Budgenix is built to scale.
 
