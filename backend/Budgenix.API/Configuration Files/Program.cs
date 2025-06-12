@@ -51,7 +51,19 @@ builder.Services.AddTransient<NextOccurrenceResolver>();
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 // Add DbContext
 builder.Services.AddDbContext<BudgenixDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    var env = builder.Environment.EnvironmentName;
+
+    if (env == "Development")
+    {
+        options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
+    }
+    else
+    {
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    }
+});
+
 
 // Add Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
