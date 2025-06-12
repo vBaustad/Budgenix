@@ -61,7 +61,7 @@ const {
 
 
   return (
-    <div className="flex bg-base-200 flex-col p-2">
+    <div className="flex flex-col p-2">
 
       <ExpensesOverview />   
            

@@ -93,7 +93,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
       <InputField name="name" value={form.name} onChange={handleChange} placeholder="Name" />
       <InputField name="amount" type="number" value={form.amount.toString()} onChange={handleChange} showCurrency={true}/>
-      <InputField name="description" value={form.description} onChange={handleChange} placeholder="Description"/>      
+      <InputField name="description" value={form.description ?? ''} onChange={handleChange} placeholder="Description"/>      
       <SelectField name="frequency" value={form.frequency} onChange={handleChange} options={[...RecurrenceFrequencyOptions]}/>
       {/* <InputField name="startDate" type="date" value={form.startDate.slice(0, 10)} onChange={handleChange} placeholder="Start Date" /> */}
       {/* <InputField name="endDate" type="date" value={form.endDate ? form.endDate.slice(0, 10) : ''} onChange={handleChange} label="End Date (optional)" /> */}

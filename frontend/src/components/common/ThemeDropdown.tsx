@@ -30,6 +30,8 @@ const darkThemes = [
   "coffee",
 ];
 
+const customThemes = ["budgenixLightGreen", "budgenixLightOrange"];
+
 const funThemes = [
   "retro",
   "cyberpunk",
@@ -107,6 +109,29 @@ export function ThemeDropdown() {
             </button>
           ))}
         </div>
+
+        {/*Custom Themes*/}
+        <div>
+        <h3 className="font-bold text-sm text-base-content mb-2">
+          Custom
+        </h3>
+        {customThemes.map((t) => (
+          <button
+            key={t}
+            onClick={() => setTheme(t)}
+            className={`flex items-center gap-2 mb-1 ${
+              theme === t ? "font-bold" : ""
+            }`}
+          >
+            <span
+              data-theme={t}
+              className="w-4 h-4 rounded-full bg-primary border border-base-content"
+            ></span>
+            {t}
+          </button>
+        ))}
+      </div>
+
 
         {/* Fun themes column */}
         <div>
