@@ -26,11 +26,7 @@ public class InsightService : IInsightService
         {
             var result = await rule.EvaluateAsync(_context, userId, month, year);
             if (result != null && result.Any())
-            {
-                foreach (var insight in result)
-                {
-                    Console.WriteLine($"[INSIGHT] {insight.Category} - {insight.Title}");
-                }
+            {                
                 insights.AddRange(result);
             }
 
