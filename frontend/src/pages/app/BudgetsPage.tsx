@@ -1,21 +1,29 @@
-// import { useEffect } from "react";
-import { useTranslation } from "react-i18next";
+import { useBudgets } from '@/features/budgets/context/BudgetsContext';
+import { useTranslation } from 'react-i18next';
+import BudgetGrid from '@/features/budgets/components/BudgetGrid';
+import { useState } from 'react';
+import AddBudgetModal from '@/features/budgets/components/AddBudgetModal';
+import BudgetOverview from '@/features/budgets/components/BudgetsOverview';
 
 export default function BudgetsPage() {
   const { t } = useTranslation();
-
-  // useEffect(() => {
-  //     document.title = "Manually set title";
-  // }, []);
+  const { budgets, isLoading } = useBudgets();
+  const [showBudgetModal, setShowBudgetModal] = useState(false);
 
   return (
-    <>
-      <div className="flex min-h-screen bg-base-100 text-base-content">        
-        <div className="p-4">
-          <h2 className="text-sm text-base-content/70 mb-4">{t('dashboard.welcome')}</h2>
-          <p>{t('dashboard.description')}</p>
-        </div>
-      </div>
-    </>
+    <div className="min-h-screen p-6 relative">
+      {isLoading ? (
+        <div className="text-center text-base-content">{t('shared.loading')}</div>
+      ) : (
+        <>
+          <BudgetOverview budgets={budgets} />
+          <BudgetGrid budgets={budgets} onAddClick={() => setShowBudgetModal(true)} />
+        </>
+      )}
+
+      {showBudgetModal && (
+        <AddBudgetModal onClose={() => setShowBudgetModal(false)} />
+      )}
+    </div>
   );
 }

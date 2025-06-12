@@ -61,10 +61,10 @@ export default function IncomePage() {
   };
     
   return (
-    <div className="flex bg-base-200 flex-col p-2">
+    <div className="flex flex-col p-2">
       <IncomeOverview />
 
-      <div className="flex flex-col lg:flex-row gap-4">
+      <div className="flex flex-col lg:flex-row">
         <SectionShell title="Add Income" icon={AppIcons.add}>
           <div className="flex flex-col lg:flex-row gap-4">
             {/* Left: Add Income Form */}
@@ -73,7 +73,7 @@ export default function IncomePage() {
             </div>
 
             {/* Right: Overview summary */}
-            <div className="lg:w-1/2 bg-base-100 border border-base-200 rounded-xl shadow-sm p-4">
+            <div className="lg:w-1/2 bg-base-100 border border-base-200 text-base-content rounded-xl shadow-sm p-4">
               <h3 className="text-lg font-semibold mb-4">Income Overview</h3>
 
               {overviewLoading ? (
@@ -139,7 +139,7 @@ export default function IncomePage() {
         </SectionShell>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-4">
+      <div className="flex flex-col lg:flex-row">
          <SectionShell
             title={t('incomes.allIncomes')}
             icon={AppIcons.list}

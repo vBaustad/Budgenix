@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Budgenix.Models.Shared;
+using System.ComponentModel.DataAnnotations;
 
 namespace Budgenix.Dtos.Budgets
 {
@@ -17,6 +18,9 @@ namespace Budgenix.Dtos.Budgets
         public decimal RemainingAmount => AllocatedAmount - TotalSpent;
 
         public double PercentUsed => AllocatedAmount == 0 ? 0 : (double)(TotalSpent / AllocatedAmount) * 100;
+
+        public RecurrenceTypeEnum Recurrence { get; set; }
+
 
         public bool IsOverBudget => TotalSpent > AllocatedAmount;
     }

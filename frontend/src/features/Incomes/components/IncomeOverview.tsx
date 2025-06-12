@@ -41,7 +41,7 @@ export default function IncomeOverview() {
   const diffPercent = Math.min((incomeThisMonth / (lastMonthIncome || 1)) * 100, 200);
 
   return (
-    <div className="flex flex-col lg:flex-row justify-between gap-2 p-2">
+    <div className="flex flex-col lg:flex-row justify-between gap-4 p-2">
       {/* LEFT Overview */}
       <div className="w-full flex flex-col gap-2">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -93,7 +93,7 @@ export default function IncomeOverview() {
 
       {/* RIGHT: Insights */}
       <div className="w-full flex">
-        <div className="flex-1 bg-base-100 rounded-2xl shadow-md">
+        <div className="flex-1 bg-base-200 rounded-2xl shadow-md">
           {!isCurrentMonth ? (
             <p className="text-sm text-base-content/70 p-4">
               Insights are only available for the current month.

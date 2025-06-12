@@ -1,18 +1,103 @@
 @import "tailwindcss";
-@plugin "daisyui"{
-    themes: all;
-    root: ":root";
-    include: ;
-    exclude: ;
-    prefix: ;
-    logs: true;
+@plugin "daisyui";
+
+@plugin "daisyui/theme" {
+  name: "budgenixLightGreen";
+  default: false;
+  prefersdark: false;
+  color-scheme: light;
+
+  /* Brighter warm base */
+  --color-base-100: #FDFBF7; /* Light linen */
+  --color-base-200: #F5F1EA; /* Soft oat */
+  --color-base-300: #E8DFD2; /* Warm parchment */
+  --color-base-content: #2A2927;
+
+  /* Gradient — subtle variation of base */
+  --color-gradient-start: #F5F1EA;
+  --color-gradient-end: #EDE6DA;
+
+  --color-primary: #4C7C59; /* Muted forest green */
+  --color-primary-content: #FFFFFF;
+
+  --color-secondary: #E1D4C4; /* Softer beige */
+  --color-secondary-content: #2D2A26;
+
+  --color-accent: #A8B998; /* Pale olive green */
+  --color-accent-content: #1F1F1F;
+
+  --color-neutral: #2A2E37;
+  --color-neutral-content: #E4E4E4;
+
+  --color-info: #60A5FA;
+  --color-info-content: #FFFFFF;
+
+  --color-success: #22C55E;
+  --color-success-content: #FFFFFF;
+
+  --color-warning: #FACC15; /* Softer yellow error tone */
+  --color-warning-content: #2D2A26;
+
+  --color-error: #D86363; /* Warm clay red */
+  --color-error-content: #2D2A26;
 }
 
-.logo-font {
-    font-family: 'Poppins', sans-serif;
-  }
 
-  /* Hide number input arrows in Chrome, Safari, Edge */
+/* Budgenix Light Orange Theme */
+@plugin "daisyui/theme" {
+  name: "budgenixLightOrange";
+  default: false;
+  prefersdark: false;
+  color-scheme: light;
+
+  --color-base-100: #FAF8F3;
+  --color-base-200: #F1EDE6;
+  --color-base-300: #D8CEC3;
+  --color-base-content: #2D2A26;
+
+  --color-primary: #CE7B4F; /* Warm clay orange */
+  --color-primary-content: #FFFFFF;
+
+  --color-secondary: #F0D9C4; /* Creamy beige */
+  --color-secondary-content: #2D2A26;
+
+  --color-accent: #F2B279; /* Soft apricot */
+  --color-accent-content: #1F1F1F;
+
+  --color-neutral: #2A2E37;
+  --color-neutral-content: #E4E4E4;
+
+  --color-info: #60A5FA;
+  --color-info-content: #FFFFFF;
+
+  --color-success: #22C55E;
+  --color-success-content: #FFFFFF;
+
+  --color-warning: #FCA5A5;
+  --color-warning-content: #2D2A26;
+
+  --color-error: #FCD34D;
+  --color-error-content: #2D2A26;
+}
+
+
+
+.bg-budgenix-gradient {
+  background-image: linear-gradient(
+    to bottom right,
+    var(--color-gradient-start),
+    var(--color-gradient-end)
+  );
+}
+
+
+
+/* Utility Fonts */
+.logo-font {
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Hide number input arrows in Chrome, Safari, Edge */
 input[type='number']::-webkit-outer-spin-button,
 input[type='number']::-webkit-inner-spin-button {
   -webkit-appearance: none;
@@ -22,4 +107,24 @@ input[type='number']::-webkit-inner-spin-button {
 /* Hide number input arrows in Firefox */
 input[type='number'] {
   -moz-appearance: textfield;
+}
+
+/* Tailwind Utilities */
+@tailwind utilities;
+
+@utilities {
+  .animate-fade-in-up {
+    animation: var(--animation-fade-in-up);
+  }
+
+  .animate-wiggle {
+    animation: var(--animation-wiggle);
+  }
+
+  .animate-spin-slow {
+    animation: var(--animation-spin-slow);
+  }
+
+  @keyframes fade-in-up var(--keyframes-fade-in-up);
+  @keyframes wiggle var(--keyframes-wiggle);
 }

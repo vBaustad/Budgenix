@@ -31,6 +31,21 @@ export const getDefaultLocaleForCurrency = (currency: string): string => {
   }
 };
 
+export function getRecurrenceLabel(value: string): string {
+  switch (value) {
+    case 'Daily': return 'Daily';
+    case 'Weekly': return 'Weekly';
+    case 'BiWeekly': return 'Bi-Weekly';
+    case 'Monthly': return 'Monthly';
+    case 'Quarterly': return 'Quarterly';
+    case 'Yearly': return 'Yearly';
+    case 'None': return 'One-time';
+    default: return 'Unknown';
+  }
+}
+
+
+
 
 
 export const formatCurrency = (

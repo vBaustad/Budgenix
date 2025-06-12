@@ -1,8 +1,6 @@
-// src/components/DatePickerControls.tsx
 import { AppIcons } from '../icons/AppIcons';
 
 type Props = {
-  currentMonth: string;
   selectedMonth: number;
   setSelectedMonth: (val: number) => void;
   selectedYear: number;
@@ -10,37 +8,53 @@ type Props = {
 };
 
 export function DatePickerControls({
-  currentMonth,
   selectedMonth,
   setSelectedMonth,
   selectedYear,
   setSelectedYear,
 }: Props) {
+  const monthNames = Array.from({ length: 12 }, (_, i) =>
+    new Date(0, i).toLocaleString(undefined, { month: 'long' })
+  );
+
+  const handlePrev = () => {
+    if (selectedMonth === 1) {
+      setSelectedMonth(12);
+      setSelectedYear(selectedYear - 1);
+    } else {
+      setSelectedMonth(selectedMonth - 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (selectedMonth === 12) {
+      setSelectedMonth(1);
+      setSelectedYear(selectedYear + 1);
+    } else {
+      setSelectedMonth(selectedMonth + 1);
+    }
+  };
+
   return (
-    <div className="flex items-center gap-2">
-      <p className="text-sm text-base-content/70 flex items-center gap-1">
-        <AppIcons.calendar className="w-4 h-4 opacity-70" />
-        {currentMonth}
-      </p>
-      <select
-        className="select select-xs select-bordered"
-        value={selectedMonth}
-        onChange={(e) => setSelectedMonth(Number(e.target.value))}
+    <div className="flex items-center gap-1 text-sm text-base-content/80">
+      <button
+        className="btn btn-xs btn-ghost"
+        onClick={handlePrev}
+        aria-label="Previous month"
       >
-        {Array.from({ length: 12 }, (_, i) => (
-          <option key={i + 1} value={i + 1}>
-            {new Date(0, i).toLocaleString(undefined, { month: 'long' })}
-          </option>
-        ))}
-      </select>
-      <input
-        type="number"
-        min={2000}
-        max={2099}
-        className="input input-xs input-bordered w-20"
-        value={selectedYear}
-        onChange={(e) => setSelectedYear(Number(e.target.value))}
-      />
+        <AppIcons.left className="w-4 h-4" />
+      </button>
+      <span className="flex items-center gap-1 font-medium rounded hover:bg-base-100 transition">
+        <AppIcons.calendar className="w-4 h-4 opacity-60" />
+        {monthNames[selectedMonth - 1]} {selectedYear}
+      </span>
+      <button
+        className="btn btn-xs btn-ghost"
+        onClick={handleNext}
+        aria-label="Next month"
+      >
+        <AppIcons.right className="w-4 h-4" />
+      </button>
     </div>
   );
 }
