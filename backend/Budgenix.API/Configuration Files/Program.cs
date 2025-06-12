@@ -51,6 +51,7 @@ builder.Services.AddTransient<NextOccurrenceResolver>();
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 // Add DbContext
 builder.Services.AddDbContext<BudgenixDbContext>(options =>
+
 {
     var env = builder.Environment.EnvironmentName;
 
