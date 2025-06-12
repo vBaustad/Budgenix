@@ -25,7 +25,7 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Publish backend
-        run: dotnet publish ./backend -c Release -o ./publish
+        run: dotnet publish ./backend/Budgenix.API/Budgenix.API.csproj -c Release -o ./publish
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
