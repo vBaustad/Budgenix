@@ -31,7 +31,6 @@ builder.Configuration
 Console.WriteLine("Connection String (Forced Load): " + builder.Configuration.GetConnectionString("DefaultConnection"));
 
 
-
 // Add services to the container.
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
