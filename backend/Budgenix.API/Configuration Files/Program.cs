@@ -24,7 +24,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Manually load appsettings.json from Configuration Files folder
 builder.Configuration
     .SetBasePath(Directory.GetCurrentDirectory())
-    .AddJsonFile("Configuration Files/appsettings.json", optional: false, reloadOnChange: true);
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
+    .AddEnvironmentVariables();
 
 Console.WriteLine("Connection String (Forced Load): " + builder.Configuration.GetConnectionString("DefaultConnection"));
 
