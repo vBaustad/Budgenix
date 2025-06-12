@@ -19,9 +19,14 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install dependencies
-        run: npm install
+      - name: Install dependencies with retry and mirror fallback
+        run: |
+          npm config set registry https://registry.npmmirror.com
+          for i in 1 2 3; do
+            npm install && break || sleep 10
+          done
         working-directory: frontend
+
 
       - name: Build project
         run: npm run build
