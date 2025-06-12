@@ -1,4 +1,4 @@
-using Budgenix.Data;
+﻿using Budgenix.Data;
 using Budgenix.Helpers;
 using Budgenix.Mapping;
 using Budgenix.Models.Users;
@@ -21,14 +21,23 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Manually load appsettings.json from Configuration Files folder
+
+// Load config from environment (e.g. appsettings.Development.json, secrets, Azure settings, etc.)
 builder.Configuration
     .SetBasePath(Directory.GetCurrentDirectory())
-    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile("Configuration Files/appsettings.json", optional: false, reloadOnChange: true)
     .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
+    .AddUserSecrets<Program>() // ✅ Enables user secrets
     .AddEnvironmentVariables();
 
-Console.WriteLine("Connection String (Forced Load): " + builder.Configuration.GetConnectionString("DefaultConnection"));
+// Access connection string
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+// Setup DB context
+builder.Services.AddDbContext<BudgenixDbContext>(options =>
+    options.UseSqlServer(connectionString));
+
+Console.WriteLine($"🔌 DB: {connectionString}");
 
 
 // Add services to the container.
@@ -50,21 +59,6 @@ builder.Services.AddInsightRules();
 
 builder.Services.AddTransient<NextOccurrenceResolver>();
 builder.Services.AddAutoMapper(typeof(MappingProfile));
-// Add DbContext
-builder.Services.AddDbContext<BudgenixDbContext>(options =>
-
-{
-    var env = builder.Environment.EnvironmentName;
-
-    if (env == "Development")
-    {
-        options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
-    }
-    else
-    {
-        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-    }
-});
 
 
 // Add Identity
