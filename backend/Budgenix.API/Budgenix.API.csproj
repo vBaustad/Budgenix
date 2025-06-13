@@ -29,7 +29,7 @@
 	<Content Update="Configuration Files\appsettings.json">
 		<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	</Content>
-	<Content Update="appsettings.Nonprod.json">
+	<Content Update="Configuration Files\appsettings.Nonprod.json">
 		<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	</Content>
 

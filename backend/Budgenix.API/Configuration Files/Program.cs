@@ -25,9 +25,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Load config from environment (e.g. appsettings.Development.json, secrets, Azure settings, etc.)
 builder.Configuration
     .SetBasePath(Directory.GetCurrentDirectory())
-    .AddJsonFile("Configuration Files/appsettings.json", optional: false, reloadOnChange: true)
-    .AddJsonFile($"Configuration Files/appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
-    .AddUserSecrets<Program>() // ✅ Enables user secrets
+    .AddJsonFile(Path.Combine("Configuration Files", "appsettings.json"), optional: false)
+    .AddJsonFile(Path.Combine($"Configuration Files",$"appsettings.{builder.Environment.EnvironmentName}.json"), optional: true)
+    .AddUserSecrets<Program>()
     .AddEnvironmentVariables();
 
 // Access connection string
