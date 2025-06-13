@@ -69,7 +69,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await apiFetch("/api/account/logout", { method: "POST" });
     setIsLoggedIn(false);
     await queryClient.clear();
-
   };
 
 
