@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { apiFetch } from '@/utils/api';
+import { useAuth } from '@/context/AuthContext';
 
 export type User = {
   id: string;
@@ -22,16 +23,17 @@ export type User = {
   currency: string;
 };
 
-const fetchUser = async (): Promise<User> => {
-  const res = await apiFetch('/api/account/me');
-  if (!res.ok) throw new Error('Failed to fetch user');
-  return await res.json();
-};
-
 export function useUserQuery() {
+  const { isLoggedIn, authChecked } = useAuth();
+
   return useQuery<User>({
     queryKey: ['user'],
-    queryFn: fetchUser,
-    staleTime: 1000 * 60 * 5,
+    queryFn: async () => {
+      return await apiFetch('/api/account/me');
+    },
+    enabled: authChecked && isLoggedIn,
+    staleTime: 0,  // force no caching for now
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   });
 }

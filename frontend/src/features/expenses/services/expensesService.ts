@@ -35,14 +35,22 @@ export async function fetchExpenses(filters: FetchExpenseOptions = {}): Promise<
   return await apiFetch(`${API_BASE_URL}?${params.toString()}`);
 }
 
-export async function fetchExpensesOverview(month: number, year: number): Promise<ExpensesOverviewResponse> {
-  const params = new URLSearchParams({
-    month: month.toString(),
-    year: year.toString(),
-  });
+export async function fetchExpensesOverview(
+  month: number,
+  year: number
+): Promise<ExpensesOverviewResponse> {
+  const params = new URLSearchParams({ month: String(month), year: String(year) });
+  const res = await apiFetch(`/api/expenses/overview?${params}`);
 
-  return await apiFetch(`${API_BASE_URL}/overview?${params.toString()}`);
+  return {
+    totalSpent: res.totalExpense,
+    lastMonthSpent: res.lastMonthExpense,
+    incomeReceived: res.incomeReceived,
+    upcomingRecurring: res.upcomingRecurring,
+    dailyTotals: res.dailyTotals,
+  };
 }
+
 
 export function isGroupedExpenses(data: Expense[] | GroupedExpenses): data is GroupedExpenses {
   return (

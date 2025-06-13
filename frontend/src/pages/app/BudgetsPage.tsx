@@ -9,7 +9,7 @@ export default function BudgetsPage() {
   const { t } = useTranslation();
   const { budgets, isLoading } = useBudgets();
   const [showBudgetModal, setShowBudgetModal] = useState(false);
-
+  
   return (
     <div className="min-h-screen p-6 relative">
       {isLoading ? (

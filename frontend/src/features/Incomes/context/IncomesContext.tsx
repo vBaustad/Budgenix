@@ -9,6 +9,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useDateFilter } from '@/context/DateFilterContext';
 import { GroupedIncomes, Income, IncomeOverviewDto } from '@/types/finance/income';
 import { apiFetch } from '@/utils/api';
+import { useAuth } from '@/context/AuthContext';
 
 type GroupByValue = 'month' | 'year' | 'category' | '';
 
@@ -29,6 +30,7 @@ type IncomeContextType = {
 const IncomeContext = createContext<IncomeContextType | undefined>(undefined);
 
 export const IncomeProvider = ({ children }: { children: ReactNode }) => {
+  const { isLoggedIn } = useAuth();
   const queryClient = useQueryClient();
   const { selectedMonth, selectedYear } = useDateFilter();
 
@@ -39,6 +41,7 @@ export const IncomeProvider = ({ children }: { children: ReactNode }) => {
     data: incomes = [],
     isLoading: loading,
   } = useQuery<Income[]>({
+    enabled: isLoggedIn,
     queryKey: ['incomes', selectedYear, selectedMonth, groupBy, selectedCategories],
     queryFn: async () => {
       const from = new Date(selectedYear, selectedMonth - 1, 1).toISOString();
@@ -49,8 +52,7 @@ export const IncomeProvider = ({ children }: { children: ReactNode }) => {
         params.append('categories', selectedCategories.join(','));
       }
 
-      const res = await apiFetch(`/api/incomes?${params.toString()}`);
-      return await res.json();
+      return await apiFetch(`/api/incomes?${params.toString()}`);
     },
   });
 
@@ -58,11 +60,10 @@ export const IncomeProvider = ({ children }: { children: ReactNode }) => {
     data: overview,
     isLoading: overviewLoading,
   } = useQuery<IncomeOverviewDto>({
+    enabled: isLoggedIn,
     queryKey: ['incomeOverview', selectedYear, selectedMonth],
-    queryFn: async () => {
-      const res = await apiFetch(`/api/incomes/overview?month=${selectedMonth}&year=${selectedYear}`);
-      return await res.json();
-    },
+    queryFn: async () =>
+      await apiFetch(`/api/incomes/overview?month=${selectedMonth}&year=${selectedYear}`),
   });
 
   const handleAddIncome = (income: Income) => {
@@ -86,7 +87,7 @@ export const IncomeProvider = ({ children }: { children: ReactNode }) => {
       let key = '';
       switch (groupBy) {
         case 'month':
-          key = new Date(income.date).toISOString().slice(0, 7); // yyyy-mm
+          key = new Date(income.date).toISOString().slice(0, 7);
           break;
         case 'year':
           key = new Date(income.date).getFullYear().toString();

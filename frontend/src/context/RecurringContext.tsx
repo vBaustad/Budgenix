@@ -7,6 +7,7 @@ import {
 } from 'react';
 import { useRecurringItemsQuery } from '@/features/recurring/hooks/useRecurringItemsQuery';
 import { RecurringItemDto } from '@/types/finance/recurring';
+import { useAuth } from '@/context/AuthContext';
 
 type RecurringContextType = {
   recurringItems: RecurringItemDto[];
@@ -26,13 +27,14 @@ type RecurringContextType = {
 const RecurringContext = createContext<RecurringContextType | undefined>(undefined);
 
 export function RecurringProvider({ children }: { children: ReactNode }) {
+  const { isLoggedIn } = useAuth();
   const [selectedRecurringItem, setSelectedRecurringItem] = useState<RecurringItemDto | null>(null);
 
   const {
     data: recurringItems = [],
     isLoading: loadingRecurring,
     refetch,
-  } = useRecurringItemsQuery();
+  } = useRecurringItemsQuery(isLoggedIn);
 
   const refreshRecurring = async () => {
     await refetch();
@@ -61,8 +63,7 @@ export function RecurringProvider({ children }: { children: ReactNode }) {
       [...recurringExpenses]
         .filter(e => e.lastTriggeredDate)
         .sort((a, b) =>
-          new Date(b.lastTriggeredDate!).getTime() -
-          new Date(a.lastTriggeredDate!).getTime()
+          new Date(b.lastTriggeredDate!).getTime() - new Date(a.lastTriggeredDate!).getTime()
         )[0] ?? null,
     [recurringExpenses]
   );
@@ -72,8 +73,7 @@ export function RecurringProvider({ children }: { children: ReactNode }) {
       [...recurringExpenses]
         .filter(e => e.lastSkippedDate)
         .sort((a, b) =>
-          new Date(b.lastSkippedDate!).getTime() -
-          new Date(a.lastSkippedDate!).getTime()
+          new Date(b.lastSkippedDate!).getTime() - new Date(a.lastSkippedDate!).getTime()
         )[0] ?? null,
     [recurringExpenses]
   );
@@ -83,19 +83,18 @@ export function RecurringProvider({ children }: { children: ReactNode }) {
       [...recurringIncomes]
         .filter(e => e.lastTriggeredDate)
         .sort((a, b) =>
-          new Date(b.lastTriggeredDate!).getTime() -
-          new Date(a.lastTriggeredDate!).getTime()
+          new Date(b.lastTriggeredDate!).getTime() - new Date(a.lastTriggeredDate!).getTime()
         )[0] ?? null,
     [recurringIncomes]
   );
 
   const monthlyRecurringIncomeTotal = useMemo(
-  () =>
-    recurringIncomes
-      .filter(e => e.isActive)
-      .reduce((sum, e) => sum + e.amount, 0),
-  [recurringIncomes]
-);
+    () =>
+      recurringIncomes
+        .filter(e => e.isActive)
+        .reduce((sum, e) => sum + e.amount, 0),
+    [recurringIncomes]
+  );
 
   return (
     <RecurringContext.Provider
@@ -121,7 +120,6 @@ export function RecurringProvider({ children }: { children: ReactNode }) {
 
 export function useRecurring() {
   const context = useContext(RecurringContext);
-  if (!context)
-    throw new Error('useRecurring must be used within RecurringProvider');
+  if (!context) throw new Error('useRecurring must be used within RecurringProvider');
   return context;
 }

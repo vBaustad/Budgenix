@@ -9,18 +9,22 @@ import { apiFetch } from "../utils/api"; // adjust the path as needed
 
 type AuthContextType = {
   isLoggedIn: boolean;
+  authChecked: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   theme: string;
   setTheme: (theme: string) => void;
 };
 
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false); 
+
   const [theme, setThemeState] = useState(() => {
-    return localStorage.getItem("theme") ?? "halloween";
+    return localStorage.getItem("theme") ?? "budgenixLightGreen";
   });
 
   const applyTheme = (newTheme: string) => {
@@ -31,7 +35,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     applyTheme(theme);
+
+    const checkSession = async () => {
+      try {
+        await apiFetch('/api/account/me');
+        setIsLoggedIn(true);
+      } catch {
+        setIsLoggedIn(false);
+      } finally {
+        setAuthChecked(true);
+      }
+    };
+
+    checkSession();
   }, []);
+
+
 
   const login = async (email: string, password: string) => {
     await apiFetch("/api/account/login", {
@@ -43,10 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
-    await apiFetch("/api/account/logout", {
-      method: "POST",
-    });
-
+    await apiFetch("/api/account/logout", { method: "POST" });
     setIsLoggedIn(false);
   };
 
@@ -54,6 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider
       value={{
         isLoggedIn,
+        authChecked,
         login,
         logout,
         theme,
@@ -64,6 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     </AuthContext.Provider>
   );
 }
+
 
 export function useAuth() {
   const context = useContext(AuthContext);
