@@ -24,6 +24,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [authChecked, setAuthChecked] = useState(false); 
 
+
+  const navigate = useNavigate();
+
   const [theme, setThemeState] = useState(() => {
     return localStorage.getItem("theme") ?? "budgenixLightGreen";
   });
@@ -66,6 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await apiFetch("/api/account/logout", { method: "POST" });
     setIsLoggedIn(false);
     await queryClient.clear();
+
   };
 
 
