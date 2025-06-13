@@ -8,6 +8,7 @@ import {
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useDateFilter } from '@/context/DateFilterContext';
 import { GroupedIncomes, Income, IncomeOverviewDto } from '@/types/finance/income';
+import { apiFetch } from '@/utils/api';
 
 type GroupByValue = 'month' | 'year' | 'category' | '';
 
@@ -48,8 +49,7 @@ export const IncomeProvider = ({ children }: { children: ReactNode }) => {
         params.append('categories', selectedCategories.join(','));
       }
 
-      const res = await fetch(`/api/incomes?${params.toString()}`);
-      if (!res.ok) throw new Error('Failed to fetch incomes');
+      const res = await apiFetch(`/api/incomes?${params.toString()}`);
       return await res.json();
     },
   });
@@ -60,8 +60,7 @@ export const IncomeProvider = ({ children }: { children: ReactNode }) => {
   } = useQuery<IncomeOverviewDto>({
     queryKey: ['incomeOverview', selectedYear, selectedMonth],
     queryFn: async () => {
-      const res = await fetch(`/api/incomes/overview?month=${selectedMonth}&year=${selectedYear}`);
-      if (!res.ok) throw new Error('Failed to fetch income overview');
+      const res = await apiFetch(`/api/incomes/overview?month=${selectedMonth}&year=${selectedYear}`);
       return await res.json();
     },
   });

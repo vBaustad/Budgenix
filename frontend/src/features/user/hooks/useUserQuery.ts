@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { apiFetch } from '@/utils/api';
 
 export type User = {
   id: string;
@@ -21,14 +22,11 @@ export type User = {
   currency: string;
 };
 
-
 const fetchUser = async (): Promise<User> => {
-  const res = await fetch('/api/account/me', { credentials: 'include' });
+  const res = await apiFetch('/api/account/me');
   if (!res.ok) throw new Error('Failed to fetch user');
-  const data = await res.json();
-  return data;
+  return await res.json();
 };
-
 
 export function useUserQuery() {
   return useQuery<User>({
