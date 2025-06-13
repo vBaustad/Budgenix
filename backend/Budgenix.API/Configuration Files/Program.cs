@@ -143,6 +143,7 @@ var app = builder.Build();
 // Localization
 var localizationOptions = app.Services.GetService<IOptions<RequestLocalizationOptions>>()?.Value;
 app.UseRequestLocalization(localizationOptions);
+app.UseCors("AllowFrontend");
 
 // Seed default data
 try
