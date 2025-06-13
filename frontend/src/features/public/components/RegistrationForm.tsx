@@ -6,6 +6,7 @@ import { PasswordIcon, UserIcon, EmailIcon } from '@/components/common/forms/ico
 import { countryOptions } from '@/constants/countries';
 import SelectField from '@/components/common/forms/SelectField';
 import { useTranslation } from 'react-i18next';
+import { apiFetch } from '@/utils/api';
 
 export type SubscriptionType = typeof tiers[number]['id'];
 
@@ -103,21 +104,23 @@ export default function RegistrationForm({ selectedPlan, frequency }: Registrati
         billingCycle: frequency.value === 'monthly' ? 'Monthly' : 'Annually'
       };
 
-      const response = await fetch('/api/account/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(payload),
-      });
+      try {
+        await apiFetch('/api/account/register', {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        alert(errorData.message || t('register.errors.generic'));
-        return;
+        alert(t('register.success'));
+        window.location.href = '/dashboard';
+      } catch (err) {
+        console.error('Registration failed:', err);
+        alert(
+          err instanceof Error && err.message
+            ? err.message
+            : t('register.errors.generic')
+        );
       }
 
-      alert(t('register.success'));
-      window.location.href = '/dashboard';
     } catch (err) {
       console.error('Network error:', err);
       alert(t('register.errors.network'));
