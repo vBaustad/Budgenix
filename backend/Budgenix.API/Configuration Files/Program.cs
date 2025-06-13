@@ -132,6 +132,13 @@ try
 }
 catch (Exception seedingEx)
 {
+    using (var scope = app.Services.CreateScope())
+    {
+        var context = scope.ServiceProvider.GetRequiredService<BudgenixDbContext>();
+        SeedData.Initialize(context);
+        Console.WriteLine("✅ Database seeded successfully.");
+    }
+
     var logPath = Path.Combine(Directory.GetCurrentDirectory(), "startup-seeding-error.log");
     File.WriteAllText(logPath, seedingEx.ToString());
     Console.WriteLine("💥 Error during DB seeding.");
@@ -150,10 +157,10 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-
 try
 {
     Console.WriteLine("🚀 Starting Budgenix.API...");
+
 
     app.Run();
 }
@@ -165,4 +172,3 @@ catch (Exception ex)
     Console.WriteLine("💥 Startup exception: " + ex.Message);
     throw;
 }
-
