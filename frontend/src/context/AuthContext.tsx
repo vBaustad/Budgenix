@@ -5,6 +5,7 @@ import {
   useEffect,
   ReactNode,
 } from "react";
+import { apiFetch } from "../utils/api"; // adjust the path as needed
 
 type AuthContextType = {
   isLoggedIn: boolean;
@@ -33,22 +34,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string) => {
-    const res = await fetch("/api/account/login", {
+    await apiFetch("/api/account/login", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
       body: JSON.stringify({ email, password }),
     });
 
-    if (!res.ok) throw new Error(await res.text());
     setIsLoggedIn(true);
   };
 
   const logout = async () => {
-    await fetch("/api/account/logout", {
+    await apiFetch("/api/account/logout", {
       method: "POST",
-      credentials: "include",
     });
+
     setIsLoggedIn(false);
   };
 

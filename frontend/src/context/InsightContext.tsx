@@ -6,6 +6,7 @@ import {
   useRef,
 } from 'react';
 import { InsightDto } from '@/types/insights/insight';
+import { apiFetch } from '@/utils/api'; // Adjust path if needed
 
 type PeriodKey = string; // e.g., '2025-05'
 
@@ -30,9 +31,7 @@ export function InsightsProvider({ children }: { children: ReactNode }) {
 
     setLoading(true);
     try {
-      const res = await fetch(`/api/insights?month=${month}&year=${year}`, { credentials: 'include' });
-      if (!res.ok) throw new Error('Failed to fetch insights');
-      const data = await res.json();
+      const data = await apiFetch(`/api/insights?month=${month}&year=${year}`);
       setInsightsMap(prev => new Map(prev).set(key, data));
       fetchedPeriods.current.add(key);
     } catch (err) {

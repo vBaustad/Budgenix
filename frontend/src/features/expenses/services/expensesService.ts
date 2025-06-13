@@ -1,9 +1,9 @@
-import { Expense, GroupedExpenses, CreateExpenseDto } from "@/types/finance/expense";
-
+import { Expense, GroupedExpenses, CreateExpenseDto } from '@/types/finance/expense';
+import { apiFetch } from '@/utils/api';
 
 type FetchExpenseOptions = {
-  from?: string; 
-  to?: string; 
+  from?: string;
+  to?: string;
   categories?: string[];
   sort?: string;
   groupBy?: 'month' | 'category' | 'year';
@@ -21,52 +21,30 @@ type ExpensesOverviewResponse = {
 
 const API_BASE_URL = '/api/expenses';
 
-
 export async function fetchExpenses(filters: FetchExpenseOptions = {}): Promise<Expense[] | GroupedExpenses> {
   const params = new URLSearchParams();
 
   if (filters.from) params.append('from', filters.from);
   if (filters.to) params.append('to', filters.to);
-  if (filters.categories?.length) {
-    params.append('categories', filters.categories.join(','));
-  }
+  if (filters.categories?.length) params.append('categories', filters.categories.join(','));
   if (filters.sort) params.append('sort', filters.sort);
   if (filters.groupBy) params.append('groupBy', filters.groupBy);
   if (filters.skip) params.append('skip', filters.skip.toString());
   if (filters.take) params.append('take', filters.take.toString());
 
-  const res = await fetch(`${API_BASE_URL}?${params.toString()}`, {
-    credentials: 'include',
-  });
-
-  if (!res.ok) throw new Error('Failed to fetch expenses');
-  return await res.json();
+  return await apiFetch(`${API_BASE_URL}?${params.toString()}`);
 }
 
-export async function fetchExpensesOverview(
-  month: number,
-  year: number
-): Promise<ExpensesOverviewResponse> {
+export async function fetchExpensesOverview(month: number, year: number): Promise<ExpensesOverviewResponse> {
   const params = new URLSearchParams({
     month: month.toString(),
     year: year.toString(),
   });
 
-  const res = await fetch(`${API_BASE_URL}/overview?${params.toString()}`, {
-    credentials: 'include',
-  });
-
-  if (!res.ok) {
-    throw new Error('Failed to fetch overview data');
-  }
-
-  return await res.json();
+  return await apiFetch(`${API_BASE_URL}/overview?${params.toString()}`);
 }
 
-
-export function isGroupedExpenses(
-  data: Expense[] | GroupedExpenses
-): data is GroupedExpenses {
+export function isGroupedExpenses(data: Expense[] | GroupedExpenses): data is GroupedExpenses {
   return (
     Array.isArray(data) &&
     data.length > 0 &&
@@ -78,43 +56,31 @@ export function isGroupedExpenses(
   );
 }
 
-
 export async function createExpense(expense: CreateExpenseDto): Promise<Expense> {
-
-  console.log('Outgoing payload:', JSON.stringify(expense, null, 2));
-
-
-  const response = await fetch(API_BASE_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      ...expense,
-      description: expense.description || '',
-    }),
-    credentials: 'include',
-  });
-
-  if (!response.ok) {
-    let message = 'Failed to create expense';
-    try {
-      const error = await response.json();
-      console.error('Validation Error:', error);
-
-      // Optional: grab a helpful error string
-      if (error.errors) {
-        const firstKey = Object.keys(error.errors)[0];
-        message = `${firstKey}: ${error.errors[firstKey][0]}`;
-      } else if (error.title) {
-        message = error.title;
+  try {
+    return await apiFetch(API_BASE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...expense,
+        description: expense.description || '',
+      }),
+    });
+  } catch (err: unknown) {
+    // Reproduce the original enhanced error handling
+    if (err instanceof Response) {
+      try {
+        const error = await err.json();
+        if (error?.errors) {
+          const firstKey = Object.keys(error.errors)[0];
+          throw new Error(`${firstKey}: ${error.errors[firstKey][0]}`);
+        } else if (error?.title) {
+          throw new Error(error.title);
+        }
+      } catch (parseErr) {
+        console.error('Error parsing error response:', parseErr);
       }
-    } catch (e) {
-      console.error('Error parsing error response:', e);
     }
-
-    throw new Error(message);
+    throw new Error('Failed to create expense');
   }
-
-  return await response.json();
 }

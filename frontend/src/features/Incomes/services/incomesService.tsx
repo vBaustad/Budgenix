@@ -1,3 +1,4 @@
+import { apiFetch } from '@/utils/api';
 import {
   Income,
   GroupedIncomes,
@@ -30,11 +31,7 @@ export async function fetchIncomes(filters: FetchIncomeOptions = {}): Promise<In
   if (filters.skip) params.append('skip', filters.skip.toString());
   if (filters.take) params.append('take', filters.take.toString());
 
-  const res = await fetch(`${API_BASE_URL}?${params.toString()}`, {
-    credentials: 'include',
-  });
-
-  if (!res.ok) throw new Error('Failed to fetch incomes');
+  const res = await apiFetch(`${API_BASE_URL}?${params.toString()}`);
   return await res.json();
 }
 
@@ -47,14 +44,7 @@ export async function fetchIncomeOverview(
     year: year.toString(),
   });
 
-  const res = await fetch(`${API_BASE_URL}/overview?${params.toString()}`, {
-    credentials: 'include',
-  });
-
-  if (!res.ok) {
-    throw new Error('Failed to fetch income overview data');
-  }
-
+  const res = await apiFetch(`${API_BASE_URL}/overview?${params.toString()}`);
   return await res.json();
 }
 
@@ -73,13 +63,12 @@ export function isGroupedIncomes(
 }
 
 export async function createIncome(income: CreateIncomeDto): Promise<Income> {
-  const response = await fetch(API_BASE_URL, {
+  const response = await apiFetch(API_BASE_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(income),
-    credentials: 'include',
   });
 
   if (!response.ok) {
