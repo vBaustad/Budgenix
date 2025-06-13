@@ -174,6 +174,9 @@ catch (Exception seedingEx)
 app.UseSwagger();
 app.UseSwaggerUI();
 
+app.UseSwagger();
+app.UseSwaggerUI();
+
 app.UseCors("AllowFrontend");
 app.UseHttpsRedirection();
 app.UseAuthentication();
