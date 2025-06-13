@@ -26,7 +26,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Configuration
     .SetBasePath(Directory.GetCurrentDirectory())
     .AddJsonFile("Configuration Files/appsettings.json", optional: false, reloadOnChange: true)
-    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
+    .AddJsonFile($"Configuration Files/appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
     .AddUserSecrets<Program>() // ✅ Enables user secrets
     .AddEnvironmentVariables();
 
