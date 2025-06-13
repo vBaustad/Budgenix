@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { sidebarNav } from '../../constants/SidebarNav';
 import BudgenixLogo from '../../assets/Logo/BudgenixLogo.png';
@@ -87,6 +87,14 @@ type SidebarContentProps = {
 };
 
 function SidebarContent({ t, logout, isActive }: SidebarContentProps) {
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login', { replace: true });
+  };
+
+
   return (
     <>
       {sidebarNav.map((section: SidebarSection) => (
@@ -111,7 +119,7 @@ function SidebarContent({ t, logout, isActive }: SidebarContentProps) {
                 return (
                   <li key={item.label}>
                     <button
-                      onClick={logout}
+                      onClick={handleLogout}
                       className="flex items-center w-full gap-2 px-2 py-2 rounded-md transition hover:bg-primary-content/10 text-primary-content/90"
                     >
                       <item.icon className="w-4 h-4 shrink-0" />
