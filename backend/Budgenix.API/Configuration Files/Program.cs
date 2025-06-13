@@ -131,17 +131,16 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend", policy =>
     {
         policy
-            .SetIsOriginAllowed(origin =>
-                new[] {
-                    "https://demo.vebjornbaustad.no",
-                    "http://localhost:5173"
-                }.Contains(origin))
+            .WithOrigins(
+                "https://demo.vebjornbaustad.no",
+                "http://localhost:5173"
+            )
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
-
     });
 });
+
 
 
 var app = builder.Build();
