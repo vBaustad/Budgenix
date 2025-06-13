@@ -26,20 +26,16 @@ builder.Configuration
     .SetBasePath(Directory.GetCurrentDirectory())
     .AddJsonFile(Path.Combine("Configuration Files", "appsettings.json"), optional: false)
     .AddJsonFile(Path.Combine("Configuration Files", $"appsettings.{builder.Environment.EnvironmentName}.json"), optional: true)
-
     .AddUserSecrets<Program>()
     .AddEnvironmentVariables();
 
 // Access connection string
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-
 // Setup DB context
 builder.Services.AddDbContext<BudgenixDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-
-Console.WriteLine($"🔌 DB: {connectionString}");
 
 // Add services
 builder.Services.AddControllers().AddJsonOptions(options =>
@@ -57,7 +53,6 @@ builder.Services.AddScoped<IInsightService, InsightService>();
 builder.Services.AddInsightRules();
 builder.Services.AddTransient<NextOccurrenceResolver>();
 builder.Services.AddAutoMapper(typeof(MappingProfile));
-
 
 // Add Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
@@ -155,16 +150,19 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-// 👇 Catch any fatal startup exceptions and write to log
+
 try
 {
-    Console.WriteLine("🚀 Starting application...");
+    Console.WriteLine("🚀 Starting Budgenix.API...");
+
     app.Run();
 }
 catch (Exception ex)
 {
-    var logPath = Path.Combine(Directory.GetCurrentDirectory(), "startup-error.log");
+    var logPath = Path.Combine(Directory.GetCurrentDirectory(), "logs", "startup-error.txt");
+    Directory.CreateDirectory(Path.GetDirectoryName(logPath)!);
     File.WriteAllText(logPath, ex.ToString());
-    Console.WriteLine($"💥 Fatal startup error: {ex.Message}");
+    Console.WriteLine("💥 Startup exception: " + ex.Message);
     throw;
 }
+
