@@ -19,6 +19,7 @@ obj/
 **/appsettings.Development.json
 **/appsettings.Production.json
 **/appsettings.Nonprod.json
+**/appsettings.json
 
 ## Dotnet-specific
 project.lock.json

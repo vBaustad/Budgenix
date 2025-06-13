@@ -213,13 +213,7 @@ namespace Budgenix.API.Controllers
                 dailyTotals
             };
 
-            Console.WriteLine("Income Overview Response:");
-            Console.WriteLine(JsonSerializer.Serialize(responsePayload, new JsonSerializerOptions
-            {
-                WriteIndented = true
-            }));
-
-
+            
             return Ok(new
             {
                 totalIncome,
