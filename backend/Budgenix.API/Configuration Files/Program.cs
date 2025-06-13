@@ -143,6 +143,7 @@ var app = builder.Build();
 // Localization
 var localizationOptions = app.Services.GetService<IOptions<RequestLocalizationOptions>>()?.Value;
 app.UseRequestLocalization(localizationOptions);
+app.UseCors("AllowFrontend");
 
 // Seed default data
 try
@@ -174,10 +175,7 @@ catch (Exception seedingEx)
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.UseSwagger();
-app.UseSwaggerUI();
 
-app.UseCors("AllowFrontend");
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
