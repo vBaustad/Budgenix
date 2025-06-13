@@ -26,15 +26,18 @@ builder.Configuration
     .SetBasePath(Directory.GetCurrentDirectory())
     .AddJsonFile(Path.Combine("Configuration Files", "appsettings.json"), optional: false)
     .AddJsonFile(Path.Combine("Configuration Files", $"appsettings.{builder.Environment.EnvironmentName}.json"), optional: true)
+
     .AddUserSecrets<Program>()
     .AddEnvironmentVariables();
 
 // Access connection string
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
+
 // Setup DB context
 builder.Services.AddDbContext<BudgenixDbContext>(options =>
     options.UseSqlServer(connectionString));
+
 
 Console.WriteLine($"🔌 DB: {connectionString}");
 
@@ -54,6 +57,7 @@ builder.Services.AddScoped<IInsightService, InsightService>();
 builder.Services.AddInsightRules();
 builder.Services.AddTransient<NextOccurrenceResolver>();
 builder.Services.AddAutoMapper(typeof(MappingProfile));
+
 
 // Add Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
