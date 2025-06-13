@@ -1,74 +1,68 @@
 # 💰 Budgenix 
 
-**Budgenix** is a modern personal finance app that helps you track spending, manage income, plan budgets, and automate recurring items — with a focus on clarity, insight, and speed. From solo users to shared households, Budgenix is built to scale.
+**Budgenix** is a modern personal finance app designed to help you track spending, manage income, plan budgets, and achieve financial goals — all with clarity, speed, and insight. Whether you're solo or managing a household, Budgenix is built to scale.
 
 ---
 
 ## 🚀 Tech Stack
 
-| Layer       | Technology                  |
-|-------------|-----------------------------|
-| Frontend    | React + TypeScript + Vite   |
-| Styling     | Tailwind CSS + DaisyUI      |
-| Charts      | Recharts                    |
-| Backend     | ASP.NET Core Web API (C#)   |
-| ORM         | Entity Framework Core       |
-| Database    | SQLite (local dev)          |
-| Auth        | JWT + ASP.NET Identity      |
-| Testing     | xUnit (.NET)                |
+| Layer       | Technology                |
+|-------------|--------------------------|
+| Frontend    | React + TypeScript + Vite |
+| Styling     | Tailwind CSS + DaisyUI    |
+| Charts      | Recharts                  |
+| Backend     | ASP.NET Core Web API (C#) |
+| ORM         | Entity Framework Core     |
+| Database    | SQLite (local dev)        |
+| Auth        | JWT + ASP.NET Identity    |
+| Testing     | xUnit (.NET)              |
 
 ---
 
-## 📦 Project Overview
+## 📦 Core Features
 
-Budgenix is designed to be modular, flexible, and user-friendly — from recurring item engines to category insights and chart visualizations.
-
-### Core Features
-
-- 🧩 Modular architecture (React + ASP.NET Core)
-- 🔁 Recurring item support for income and expenses
-- 📆 Grouping by month, year, or category
-- 📊 Insights and visualizations for spending/income trends
-- 🖥️ Responsive UI with light/dark mode
-- 🌍 Currency selection (user-based) with inline formatting
-- 🧠 Dynamic insights and rule-based suggestions
+- 🔁 **Recurring items** for both income and expenses
+- 📊 **Dynamic dashboards** with real-time charts, stats, and insights
+- 🧠 **Smart insights** (e.g. spending spikes, savings stall, low income coverage)
+- 📆 **Flexible grouping** (by month, year, or category)
+- 💸 **User currency preferences** with inline formatting and live updates
+- 🎯 **Category budgets** with progress tracking
+- 🌟 **Savings goals** (targets, wishlists, planners)
+- 🧩 **Modular architecture** (React + ASP.NET Core)
+- 🌍 **Responsive UI** with dark/light mode
+- 📈 **Rich data visualizations** (bar, pie, trend charts)
 
 ---
 
 ## 🔐 Auth & User System
 
-- JWT login/signup with persistent session
-- ASP.NET Identity for secure user management
-- Tier-based access: Free / Pro / Pro+ (coming)
-- Currency preference stored per user
-- Household/multi-user support (planned)
+- Secure JWT login/signup/logout
+- ASP.NET Identity for user management
+- User-based settings (currency, preferences)
+- Tier access (Free / Pro / Pro+ coming soon)
+- Household sharing + multi-user roles (planned)
 
 ---
 
-## ✨ Backend API Endpoints
+## 🛠 API Overview
 
-### ✅ ExpensesController
-
+### Expenses
 - `GET /api/expenses`
 - `GET /api/expenses?groupBy=month|year|category`
 - `GET /api/expenses/overview?month=&year=`
-- `GET /api/expenses/total`
 - `POST /api/expenses`
 - `PUT /api/expenses/{id}`
 - `DELETE /api/expenses/{id}`
 
-### ✅ IncomesController
-
+### Incomes
 - `GET /api/incomes`
 - `GET /api/incomes/overview?month=&year=`
 - `GET /api/incomes/summary?months=6`
-- `GET /api/incomes/total`
 - `POST /api/incomes`
 - `PUT /api/incomes/{id}`
 - `DELETE /api/incomes/{id}`
 
-### ✅ RecurringController
-
+### Recurring
 - `GET /api/recurring/upcoming`
 - `POST /api/recurring`
 - `PUT /api/recurring/{id}`
@@ -76,89 +70,62 @@ Budgenix is designed to be modular, flexible, and user-friendly — from recurri
 - `POST /api/recurring/{id}/trigger`
 - `POST /api/recurring/{id}/skip`
 
-### ✅ CategoriesController
+### Budgets
+- Category-based budgets
+- Allocations + progress
 
-- Default + user-defined category support
-
----
-
-## 🧪 Testing
-
-- `xUnit` for backend: DTO validation, logic, and query filtering
-- React component testing (planned)
+### Insights
+- API-driven dynamic suggestions (e.g. spending spikes, budget near limits)
 
 ---
 
-## 🧩 Frontend Highlights
+## 💻 Frontend Highlights
 
-### Context & Hooks
-
-- `ExpensesContext`, `IncomesContext` – shared state via React Query
-- `CurrencyContext` – user currency preference with live formatting
-- `UserContext` – JWT user info and profile
-- `RecurringContext` – recurring item management
-- `DateFilterContext` – global month/year filtering
-
-### Pages & Components
-
-- ✅ Income Page
-  - Add/edit income
-  - Category selection
-  - Optional recurring support
-  - Grouped by month/year/category
-  - Bar chart visualization
-- ✅ Expense Page
-  - Add/edit expense
-  - Recurring item support
-  - Grouped views
-  - Pie chart visualization
-- ✅ Shared Forms
-  - Currency-aware inputs
-  - Smart date handling
-- ✅ Insight System
-  - InsightCard components
-  - Rules like "Spending spike", "Low income coverage", "Savings stall"
-- ✅ Auth
-  - Login / Signup / Logout with state persistence
+- 🔗 **Context-driven architecture**
+  - `ExpensesContext`, `IncomesContext`, `CurrencyContext`, `UserContext`, `RecurringContext`, `DateFilterContext`
+- 📊 **Dashboard**
+  - Stat cards, progress bars, insights
+- 📈 **Charts**
+  - Spending/income trends (bar, pie)
+- 🧠 **Insights**
+  - Rule-based auto-suggestions
+- 📅 **Smart forms**
+  - Currency-aware, date-friendly
+- 🌈 **Dark/light mode**
 
 ---
 
-## 📊 UI Highlights
+## 📊 UI Components
 
-- 📅 Dynamic groupings (monthly, yearly, by category)
-- 📈 Recharts for bar/pie insights
-- 🧠 Auto-generated insights and suggestions
-- 🌓 DaisyUI dark/light mode
-- 📱 Mobile responsive layout
+- `DashboardCard` — animated stats with currency + progress
+- `InsightCard` — dynamic rule-based suggestions
+- `Quick Actions` — one-click add income/expense/budget/goal
+- `SpendingTrendChart` — interactive daily/monthly/yearly charts
+- `Grouped lists` — expenses/incomes by category or date
 
 ---
 
 ## 🛣 Roadmap
 
-### ✅ Recently Completed
+### What Budgenix offers today:
+- Recurring item automation
+- Category budgets and tracking
+- Savings goals and planners
+- Smart insights + dynamic dashboard
+- User-specific currency and live formatting
+- Visual trends + secure auth
 
-- ✅ Complete recurring support in both income and expenses
-- ✅ Grouped lists with dynamic labels and DataTable display
-- ✅ CreateRecurringItem integration in form submit logic
-- ✅ Filtering and sorting in grouped lists
-- ✅ Shared currency context and formatting
-- ✅ React Query-based caching + performance improvements
-
-### 🔨 In Progress
-
-- 🧮 Budget tracking page (set monthly limits per category)
-- 📅 Vacation & wishlist financial planners
-- 💳 Stripe billing and Pro tier access
-
-### 💡 Future Ideas
-
-- 🤝 Shared household & user roles
-- 🧠 AI-powered suggestions (e.g., “cut X to meet goal”)
-- 📤 Export/Import via CSV
-- 📲 PWA and native app wrappers
+### Coming soon:
+- Vacation & wishlist financial planners
+- Tier access with Pro features
+- Household sharing + roles
+- Stripe billing integration
+- CSV import/export
+- PWA + native app support
 
 ---
 
-## 🧠 Philosophy
+## 💡 Philosophy
 
-> Budgenix is built for real financial control — not just for logging, but for planning, adapting, and growing your financial habits. Whether you're tracking your daily coffee or saving for a wedding, Budgenix is here to make it easy, visual, and insightful.
+> **Budgenix helps you do more than track your money — it helps you plan, act, and grow.**  
+> Whether it's coffee or a wedding fund, Budgenix makes managing your finances visual, smart, and powerful.
