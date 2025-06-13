@@ -1,35 +1,32 @@
+import { apiFetch } from '@/utils/api';
 import { Expense } from "@/types/finance/expense";
 import { CreateRecurringItemDto, RecurringItemDto } from '@/types/finance/recurring';
 
 const RECURRING_API_BASE = '/api/recurring';
 
 export async function fetchUpcomingRecurring(): Promise<{
-    id: string;
-    name: string;
-    amount: number;
-    startDate: string;
-    frequency: string;
-    nextOccurrenceDate: string;
-  }[]> {
-    const res = await fetch(`${RECURRING_API_BASE}/recurring`, { credentials: 'include' });
-    if (!res.ok) throw new Error('Failed to fetch recurring items');
-    return res.json();
-  }
-  
-  
+  id: string;
+  name: string;
+  amount: number;
+  startDate: string;
+  frequency: string;
+  nextOccurrenceDate: string;
+}[]> {
+  const res = await apiFetch(`${RECURRING_API_BASE}/recurring`);
+  return res.json();
+}
+
 export async function fetchRecurringExpenses(): Promise<RecurringItemDto[]> {
-  const res = await fetch(`${RECURRING_API_BASE}/upcoming`, { credentials: 'include' });
-  if (!res.ok) throw new Error('Failed to fetch upcoming recurring expenses');
+  const res = await apiFetch(`${RECURRING_API_BASE}/upcoming`);
   return res.json();
 }
 
 export async function createRecurringItem(data: CreateRecurringItemDto): Promise<RecurringItemDto> {
-  const res = await fetch('/api/recurring', {
+  const res = await apiFetch(RECURRING_API_BASE, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    credentials: 'include',
     body: JSON.stringify(data),
   });
 
@@ -54,12 +51,11 @@ export async function updateRecurringItem(item: RecurringItemDto): Promise<void>
     categoryId: item.categoryId,
   };
 
-  const res = await fetch(`/api/recurring/${item.id}`, {
+  const res = await apiFetch(`${RECURRING_API_BASE}/${item.id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
     },
-    credentials: 'include',
     body: JSON.stringify(payload),
   });
 
@@ -70,9 +66,8 @@ export async function updateRecurringItem(item: RecurringItemDto): Promise<void>
 }
 
 export async function triggerRecurringItem(id: string): Promise<Expense> {
-  const res = await fetch(`/api/recurring/${id}/trigger`, {
+  const res = await apiFetch(`${RECURRING_API_BASE}/${id}/trigger`, {
     method: 'POST',
-    credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
   });
 
@@ -85,9 +80,8 @@ export async function triggerRecurringItem(id: string): Promise<Expense> {
 }
 
 export async function skipRecurringItem(id: string): Promise<void> {
-  const res = await fetch(`/api/recurring/${id}/skip`, {
+  const res = await apiFetch(`${RECURRING_API_BASE}/${id}/skip`, {
     method: 'POST',
-    credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
   });
 
@@ -97,11 +91,9 @@ export async function skipRecurringItem(id: string): Promise<void> {
   }
 }
 
-
 export async function deleteRecurringItem(id: string): Promise<void> {
-  const res = await fetch(`${RECURRING_API_BASE}/${id}`, {
+  const res = await apiFetch(`${RECURRING_API_BASE}/${id}`, {
     method: 'DELETE',
-    credentials: 'include',
   });
 
   if (!res.ok) {

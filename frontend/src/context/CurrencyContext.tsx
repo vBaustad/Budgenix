@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useUser } from './UserContext';
+import { apiFetch } from '../utils/api'; // adjust the path as needed
 
 type CurrencyContextType = {
   currency: string;
@@ -24,13 +25,10 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user?.currency]);
 
-
   const { mutate: updateCurrency } = useMutation({
     mutationFn: async (newCurrency: string) => {
-      await fetch('/api/account/me/currency', {
+      await apiFetch('/api/account/me/currency', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify({ currency: newCurrency }),
       });
     },
@@ -46,6 +44,5 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
     </CurrencyContext.Provider>
   );
 }
-
 
 export const useCurrency = () => useContext(CurrencyContext);
