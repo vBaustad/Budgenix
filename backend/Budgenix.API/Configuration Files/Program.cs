@@ -135,6 +135,7 @@ builder.Services.AddCors(options =>
                 "https://demo.vebjornbaustad.no",
                 "http://localhost:5173"
             )
+
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
