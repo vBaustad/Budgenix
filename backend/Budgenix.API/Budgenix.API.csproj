@@ -26,9 +26,12 @@
     <Folder Include="Migrations\" />
   </ItemGroup>
 
-<ItemGroup>
-	<Content Update="Configuration Files\appsettings.json">
-		<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	</Content>
-</ItemGroup>
+	<ItemGroup>
+		<Content Update="Configuration Files\appsettings.json">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+		<Content Update="Configuration Files\appsettings.Nonprod.json">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
 </Project>
