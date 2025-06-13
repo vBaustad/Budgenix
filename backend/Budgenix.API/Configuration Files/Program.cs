@@ -36,6 +36,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<BudgenixDbContext>(options =>
     options.UseSqlServer(connectionString));
 
+
 // Add services
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
@@ -149,9 +150,11 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
+
 try
 {
     Console.WriteLine("🚀 Starting Budgenix.API...");
+
     app.Run();
 }
 catch (Exception ex)
