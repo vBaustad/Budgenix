@@ -28,6 +28,7 @@ import {
   Receipt,
   Coins,
   PiggyBank,
+  Landmark,
 
   // Charts / Analytics
   FileBarChart,
@@ -130,6 +131,7 @@ export const AppIcons = {
   goal: Target,
   categories: Layers,
   complete: CheckCircle2,
+  landmark: Landmark,
 
   // Organization
   tag: Tag,

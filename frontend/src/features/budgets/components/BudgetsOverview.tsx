@@ -1,3 +1,4 @@
+import { useCurrency } from '@/context/CurrencyContext';
 import { BudgetProgressItem } from '@/types/finance/budget';
 import { formatCurrency } from '@/utils/formatting';
 import { ArrowDownIcon, ArrowUpIcon, WalletIcon } from 'lucide-react';
@@ -11,14 +12,14 @@ export default function BudgetOverview({ budgets }: Props) {
   const totalSpent = budgets.reduce((sum, b) => sum + b.totalSpent, 0);
   const totalRemaining = totalAllocated - totalSpent;
   const isOverBudget = totalRemaining < 0;
-
+  const { currency } = useCurrency();
   return (
     <div className="mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 bg-base-100 p-6 rounded-xl shadow items-center">
       <div className="flex items-center gap-4">
         <WalletIcon className="w-6 h-6 text-primary" />
         <div>
           <div className="text-sm text-base-content/70">Allocated</div>
-          <div className="text-xl font-semibold">{formatCurrency(totalAllocated)}</div>
+          <div className="text-xl font-semibold">{formatCurrency(totalAllocated, currency)}</div>
         </div>
       </div>
 
@@ -26,7 +27,7 @@ export default function BudgetOverview({ budgets }: Props) {
         <ArrowUpIcon className="w-6 h-6 text-warning" />
         <div>
           <div className="text-sm text-base-content/70">Spent</div>
-          <div className="text-xl font-semibold">{formatCurrency(totalSpent)}</div>
+          <div className="text-xl font-semibold">{formatCurrency(totalSpent, currency)}</div>
         </div>
       </div>
 
@@ -35,7 +36,7 @@ export default function BudgetOverview({ budgets }: Props) {
         <div>
           <div className="text-sm text-base-content/70">Remaining</div>
           <div className={`text-xl font-semibold ${isOverBudget ? 'text-error' : ''}`}>
-            {formatCurrency(totalRemaining)}
+            {formatCurrency(totalRemaining, currency)}
           </div>
         </div>
       </div>

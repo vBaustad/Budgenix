@@ -6,7 +6,8 @@ import {
   useRef,
 } from 'react';
 import { InsightDto } from '@/types/insights/insight';
-import { apiFetch } from '@/utils/api'; // Adjust path if needed
+import { apiFetch } from '@/utils/api';
+import { useAuth } from '@/context/AuthContext';
 
 type PeriodKey = string; // e.g., '2025-05'
 
@@ -19,6 +20,7 @@ type InsightsContextType = {
 const InsightsContext = createContext<InsightsContextType | undefined>(undefined);
 
 export function InsightsProvider({ children }: { children: ReactNode }) {
+  const { isLoggedIn } = useAuth();
   const [insightsMap, setInsightsMap] = useState<Map<PeriodKey, InsightDto[]>>(new Map());
   const [loading, setLoading] = useState(false);
   const fetchedPeriods = useRef<Set<PeriodKey>>(new Set());
@@ -27,7 +29,7 @@ export function InsightsProvider({ children }: { children: ReactNode }) {
 
   const refreshInsights = async (month: number, year: number) => {
     const key = getKey(month, year);
-    if (fetchedPeriods.current.has(key)) return;
+    if (!isLoggedIn || fetchedPeriods.current.has(key)) return;
 
     setLoading(true);
     try {
@@ -35,7 +37,7 @@ export function InsightsProvider({ children }: { children: ReactNode }) {
       setInsightsMap(prev => new Map(prev).set(key, data));
       fetchedPeriods.current.add(key);
     } catch (err) {
-      console.error('[InsightsContext] Failed:', err);
+      console.error('[InsightsContext] Failed to fetch insights:', err);
     } finally {
       setLoading(false);
     }

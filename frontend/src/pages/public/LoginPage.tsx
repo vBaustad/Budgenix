@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 
 export default function LoginPage() {
   const { t } = useTranslation();
-  const { login, isLoggedIn } = useAuth();
+  const { isLoggedIn, authChecked, login } = useAuth();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
@@ -15,10 +15,10 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isLoggedIn) {
+    if (authChecked && isLoggedIn) {
       navigate("/dashboard", { replace: true });
     }
-  }, [isLoggedIn, navigate]);
+  }, [authChecked, isLoggedIn, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,7 +34,7 @@ export default function LoginPage() {
     }
   };
 
-  if (isLoggedIn) return null;
+  if (authChecked && isLoggedIn) return null;
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-base-200">
