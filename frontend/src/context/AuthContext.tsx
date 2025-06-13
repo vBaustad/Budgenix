@@ -25,8 +25,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [authChecked, setAuthChecked] = useState(false); 
 
-  const navigate = useNavigate();
 
+  const navigate = useNavigate();
 
   const [theme, setThemeState] = useState(() => {
     return localStorage.getItem("theme") ?? "budgenixLightGreen";
