@@ -1,3 +1,4 @@
+import { useAuth } from '@/context/AuthContext';
 import { apiFetch } from '@/utils/api';
 import { useQuery } from '@tanstack/react-query';
 
@@ -9,11 +10,14 @@ export type MonthlyIncomeSummary = {
 };
 
 export function useIncomeMonthlySummary(months: number = 6) {
+  const { isLoggedIn } = useAuth();
+
   return useQuery<MonthlyIncomeSummary[]>({
     queryKey: ['incomeMonthlySummary', months],
     queryFn: async () => {
-      const res = await apiFetch(`/api/incomes/monthly-summary?months=${months}`);
-      return res.json();
+      return await apiFetch(`/api/incomes/monthly-summary?months=${months}`);
     },
+    enabled: isLoggedIn,
   });
 }
+

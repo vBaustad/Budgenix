@@ -6,6 +6,7 @@ using Budgenix.Dtos.Budgets;
 using Budgenix.Models.Categories;
 using Budgenix.Dtos.Categories;
 using Budgenix.Dtos.Recurring;
+using Budgenix.Dtos.Goals;
 
 namespace Budgenix.Mapping
 {
@@ -46,6 +47,11 @@ namespace Budgenix.Mapping
             CreateMap<RecurringItem, RecurringItemDto>()
                 .ForMember(dest => dest.NextOccurrenceDate,
                     opt => opt.MapFrom<NextOccurrenceResolver>());
+
+            //Goals mapping
+            CreateMap<Goal, GoalDto>();
+            CreateMap<CreateGoalDto, Goal>();
+            CreateMap<UpdateGoalDto, Goal>();
 
 
 

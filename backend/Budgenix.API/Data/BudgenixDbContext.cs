@@ -18,6 +18,7 @@ namespace Budgenix.Data
         public DbSet<Budget> Budgets { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<RecurringItem> RecurringItems { get; set; }
+        public DbSet<Goal> Goals { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -47,6 +48,12 @@ namespace Budgenix.Data
                 .WithMany(u => u.RecurringItems)
                 .HasForeignKey(r => r.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Goal>()
+            .HasOne(g => g.User)
+            .WithMany(u => u.Goals)
+            .HasForeignKey(g => g.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<RecurringItem>()
                 .Property(r => r.Type)

@@ -45,6 +45,8 @@ export default function ExpensesOverview() {
   const spendingUp = spendingDiff > 0;
   const spendingPercent = Math.min((totalSpent / (lastMonthSpent || 1)) * 100, 200);
 
+  console.log("overviewLoading", overviewLoading);
+  console.log("🔍 overview", overview);
 
 
   return (
