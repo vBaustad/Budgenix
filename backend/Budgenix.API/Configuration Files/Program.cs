@@ -36,8 +36,6 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<BudgenixDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-Console.WriteLine($"🔌 DB: {connectionString}");
-
 // Add services
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
