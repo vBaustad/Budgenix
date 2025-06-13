@@ -130,6 +130,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
+
         policy
             .SetIsOriginAllowed(origin =>
                 new[] {
@@ -139,7 +140,6 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
-
     });
 });
 
