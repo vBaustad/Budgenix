@@ -130,10 +130,16 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("https://demo.vebjornbaustad.no")
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials();
+
+        policy
+            .SetIsOriginAllowed(origin =>
+                new[] {
+                    "https://demo.vebjornbaustad.no",
+                    "http://localhost:5173"
+                }.Contains(origin))
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
 
@@ -175,10 +181,6 @@ catch (Exception seedingEx)
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.UseSwagger();
-app.UseSwaggerUI();
-
-app.UseCors("AllowFrontend");
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
