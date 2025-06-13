@@ -5,8 +5,7 @@ import {
   useEffect,
   ReactNode,
 } from "react";
-import { apiFetch } from "../utils/api"; // adjust the path as needed
-import { useNavigate } from "react-router-dom";
+import { apiFetch } from "../utils/api";
 import { queryClient } from "@/lib/queryClient";
 
 type AuthContextType = {
@@ -24,9 +23,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [authChecked, setAuthChecked] = useState(false); 
-
-
-  const navigate = useNavigate();
 
   const [theme, setThemeState] = useState(() => {
     return localStorage.getItem("theme") ?? "budgenixLightGreen";
@@ -69,8 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     await apiFetch("/api/account/logout", { method: "POST" });
     setIsLoggedIn(false);
-    await queryClient.clear(); 
-    navigate("/login", { replace: true });
+    await queryClient.clear();
   };
 
 
