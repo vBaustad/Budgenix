@@ -26,7 +26,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Configuration
     .SetBasePath(Directory.GetCurrentDirectory())
     .AddJsonFile("Configuration Files/appsettings.json", optional: false, reloadOnChange: true)
+
     .AddJsonFile($"Configuration Files/appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
+
     .AddUserSecrets<Program>() // ✅ Enables user secrets
     .AddEnvironmentVariables();
 
@@ -37,8 +39,8 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<BudgenixDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-Console.WriteLine($"🔌 DB: {connectionString}");
 
+Console.WriteLine($"🔌 DB: {connectionString}");
 
 // Add services to the container.
 builder.Services.AddControllers().AddJsonOptions(options =>
