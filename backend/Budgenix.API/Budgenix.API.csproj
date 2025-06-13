@@ -33,9 +33,6 @@
 	<Content Update="Configuration Files\appsettings.Nonprod.json">
 		<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	</Content>
-	<Content Include="web.config">
-		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	</Content>
 </ItemGroup>
 
 </Project>
