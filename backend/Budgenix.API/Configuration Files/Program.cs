@@ -21,12 +21,11 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
-// Load config from environment (e.g. appsettings.Development.json, secrets, Azure settings, etc.)
+// Load config from environment
 builder.Configuration
     .SetBasePath(Directory.GetCurrentDirectory())
     .AddJsonFile(Path.Combine("Configuration Files", "appsettings.json"), optional: false)
-    .AddJsonFile(Path.Combine($"Configuration Files",$"appsettings.{builder.Environment.EnvironmentName}.json"), optional: true)
+    .AddJsonFile(Path.Combine("Configuration Files", $"appsettings.{builder.Environment.EnvironmentName}.json"), optional: true)
     .AddUserSecrets<Program>()
     .AddEnvironmentVariables();
 
@@ -39,8 +38,7 @@ builder.Services.AddDbContext<BudgenixDbContext>(options =>
 
 Console.WriteLine($"🔌 DB: {connectionString}");
 
-
-// Add services to the container.
+// Add services
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
@@ -53,20 +51,15 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<RecurringItemService>();
 builder.Services.AddScoped<IInsightService, InsightService>();
-
 builder.Services.AddInsightRules();
-
-
 builder.Services.AddTransient<NextOccurrenceResolver>();
 builder.Services.AddAutoMapper(typeof(MappingProfile));
-
 
 // Add Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<BudgenixDbContext>()
     .AddDefaultTokenProviders();
 
-// Configure Identity options if needed
 builder.Services.Configure<IdentityOptions>(options =>
 {
     options.Password.RequireDigit = true;
@@ -76,6 +69,7 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequireLowercase = false;
 });
 
+// Localization
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 builder.Services.Configure<RequestLocalizationOptions>(options =>
 {
@@ -85,7 +79,7 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
     options.SupportedUICultures = supportedCultures;
 });
 
-// Add Authentication
+// Authentication
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -118,23 +112,34 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<JwtTokenService>();
 
 var app = builder.Build();
 
+// Localization
 var localizationOptions = app.Services.GetService<IOptions<RequestLocalizationOptions>>()?.Value;
 app.UseRequestLocalization(localizationOptions);
 
-// Seed DB with default categories
-using (var scope = app.Services.CreateScope())
+// Seed default data
+try
 {
-    var context = scope.ServiceProvider.GetRequiredService<BudgenixDbContext>();
-    SeedData.Initialize(context);
+    using (var scope = app.Services.CreateScope())
+    {
+        var context = scope.ServiceProvider.GetRequiredService<BudgenixDbContext>();
+        SeedData.Initialize(context);
+        Console.WriteLine("✅ Database seeded successfully.");
+    }
+}
+catch (Exception seedingEx)
+{
+    var logPath = Path.Combine(Directory.GetCurrentDirectory(), "startup-seeding-error.log");
+    File.WriteAllText(logPath, seedingEx.ToString());
+    Console.WriteLine("💥 Error during DB seeding.");
+    throw;
 }
 
-// Configure the HTTP request pipeline.
+// HTTP pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -146,7 +151,16 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-
-app.Run();
-
-
+// 👇 Catch any fatal startup exceptions and write to log
+try
+{
+    Console.WriteLine("🚀 Starting application...");
+    app.Run();
+}
+catch (Exception ex)
+{
+    var logPath = Path.Combine(Directory.GetCurrentDirectory(), "startup-error.log");
+    File.WriteAllText(logPath, ex.ToString());
+    Console.WriteLine($"💥 Fatal startup error: {ex.Message}");
+    throw;
+}
