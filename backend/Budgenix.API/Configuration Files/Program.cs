@@ -151,16 +151,17 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-// 👇 Catch any fatal startup exceptions and write to log
 try
 {
-    Console.WriteLine("🚀 Starting application...");
+    Console.WriteLine("🚀 Starting Budgenix.API...");
     app.Run();
 }
 catch (Exception ex)
 {
-    var logPath = Path.Combine(Directory.GetCurrentDirectory(), "startup-error.log");
+    var logPath = Path.Combine(Directory.GetCurrentDirectory(), "logs", "startup-error.txt");
+    Directory.CreateDirectory(Path.GetDirectoryName(logPath)!);
     File.WriteAllText(logPath, ex.ToString());
-    Console.WriteLine($"💥 Fatal startup error: {ex.Message}");
+    Console.WriteLine("💥 Startup exception: " + ex.Message);
     throw;
 }
+
