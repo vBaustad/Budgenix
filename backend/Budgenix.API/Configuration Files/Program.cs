@@ -1,4 +1,5 @@
-﻿using Budgenix.Data;
+﻿using Budgenix.API.Services;
+using Budgenix.Data;
 using Budgenix.Helpers;
 using Budgenix.Mapping;
 using Budgenix.Models.Users;
@@ -122,6 +123,10 @@ builder.Services.AddAuthentication(options =>
         }
     };
 });
+
+//Stripe
+builder.Services.AddSingleton<StripeService>();
+
 
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<JwtTokenService>();

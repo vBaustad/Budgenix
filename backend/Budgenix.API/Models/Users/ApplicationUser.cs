@@ -48,10 +48,19 @@ namespace Budgenix.Models.Users
 
         public DateTime? SubscriptionStartDate { get; set; }  // Optional: if tracking when sub began
         public DateTime? SubscriptionEndDate { get; set; }    // Optional: if you track end/expiry
+        public DateTime? SubscriptionGracePeriodEnd { get; set; }
 
         [MaxLength(20)]
         public BillingCycleEnum BillingCycle { get; set; }   // e.g., "Monthly" / "Annually" - Optional
 
+        [MaxLength(100)]
+        public string? StripeCustomerId { get; set; }   // Optional
+
+        [MaxLength(100)]
+        public string? PayPalSubscriptionId { get; set; }  // Optional
+        public DateTime? SubscriptionLastPaymentDate { get; set; }
+
+        //Referrals
         [MaxLength(50)]
         public string? ReferralCodeUsed { get; set; }  // code the user entered
 
@@ -59,15 +68,6 @@ namespace Budgenix.Models.Users
         public string? ReferralCode { get; set; }  // unique referral code for this user
 
         public string? GrantedByUserId { get; set; }  // user ID of who granted tier manually
-
-        // Optional: Stripe or PayPal identifiers (for billing links)
-
-        [MaxLength(100)]
-        public string? StripeCustomerId { get; set; }   // Optional
-
-        [MaxLength(100)]
-        public string? PayPalSubscriptionId { get; set; }  // Optional
-
 
         // Household/group sharing (optional)
 
@@ -79,7 +79,6 @@ namespace Budgenix.Models.Users
         public DateTime? TrialEndDate { get; set; }
         public decimal? DiscountPercent { get; set; }  // e.g. 20% off
         public DateTime? DiscountEndDate { get; set; }
-
 
         //Financial
         public string PreferredCurrency { get; set; } = "USD"; // Default fallback
