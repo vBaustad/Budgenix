@@ -80,7 +80,6 @@ namespace Budgenix.Models.Users
         public decimal? DiscountPercent { get; set; }  // e.g. 20% off
         public DateTime? DiscountEndDate { get; set; }
 
-
         //Financial
         public string PreferredCurrency { get; set; } = "USD"; // Default fallback
 
