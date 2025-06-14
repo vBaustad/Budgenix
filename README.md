@@ -77,6 +77,34 @@
 ### Insights
 - API-driven dynamic suggestions (e.g. spending spikes, budget near limits)
 
+### Stripe & Subscription
+- `POST /api/stripe/create-checkout-session`
+- `POST /api/stripe/webhook`
+- `GET /api/stripe/checkout-session/{sessionId}`
+
+---
+
+## 🕒 Subscription & Recurring Job Processing
+
+Budgenix includes background-safe logic for:
+
+- **Subscription grace period cleanup**
+  - Marks subscriptions inactive if a user's grace period expires (e.g. after failed payments)
+  - Sets `SubscriptionIsActive = false` and records end date
+- **Recurring item automation**
+  - Automatically triggers due recurring incomes/expenses
+  - Generates entries (e.g. expenses/incomes) on schedule
+
+### Triggering jobs
+
+⚠ These jobs are currently designed to be triggered by schedulers, such as:
+- Azure Functions (Timer Trigger)
+- Azure WebJobs
+- Hangfire / Quartz.NET
+- Cron jobs (if self-hosted)
+
+➡ *No scheduler is wired up yet — this is planned for future deployment.*
+
 ---
 
 ## 💻 Frontend Highlights

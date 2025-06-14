@@ -7,7 +7,6 @@ namespace Budgenix.Models.Users
     {
         Free,
         Hobby,
-        Pro,
-        ProPlus
+        Pro
     }
 }

@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { tiers } from '@/constants/plans';
 import InputField from '@/components/common/forms/InputField';
 import PaymentSelector from './PaymentSelector';
-import { PasswordIcon, UserIcon, EmailIcon } from '@/components/common/forms/icons/InputIcons';
-import { countryOptions } from '@/constants/countries';
 import SelectField from '@/components/common/forms/SelectField';
-import { useTranslation } from 'react-i18next';
+import { countryOptions } from '@/constants/countries';
 import { apiFetch } from '@/utils/api';
 
 export type SubscriptionType = typeof tiers[number]['id'];
@@ -35,6 +35,8 @@ type RegistrationFormData = {
 
 export default function RegistrationForm({ selectedPlan, frequency }: RegistrationFormProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState<RegistrationFormData>({
     userName: '',
     firstName: '',
@@ -53,6 +55,7 @@ export default function RegistrationForm({ selectedPlan, frequency }: Registrati
     billingCycle: ''
   });
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const isPaidPlan = selectedPlan.price[frequency.value] !== '$0';
 
   useEffect(() => {
@@ -63,7 +66,6 @@ export default function RegistrationForm({ selectedPlan, frequency }: Registrati
         script.src = `https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&vault=true&intent=subscription`;
         script.async = true;
         document.body.appendChild(script);
-
         return () => {
           document.body.removeChild(script);
         };
@@ -71,28 +73,31 @@ export default function RegistrationForm({ selectedPlan, frequency }: Registrati
     }
   }, [isPaidPlan, formData.paymentMethod]);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: '' })); // clear error on change
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const fieldErrors: Record<string, string> = {};
 
-    if (formData.password !== formData.confirmPassword) {
-      alert(t('register.errors.passwordMismatch'));
-      return;
+    if (!formData.userName) fieldErrors.userName = 'Username is required';
+    if (!formData.firstName) fieldErrors.firstName = 'First name is required';
+    if (!formData.lastName) fieldErrors.lastName = 'Last name is required';
+    if (!formData.email) fieldErrors.email = 'Email is required';
+    if (!formData.password) fieldErrors.password = 'Password is required';
+    if (formData.password.length < 6) fieldErrors.password = 'Password must be at least 6 characters';
+    if (formData.password !== formData.confirmPassword) fieldErrors.confirmPassword = 'Passwords do not match';
+
+    if (isPaidPlan) {
+      if (!formData.addressLine1) fieldErrors.addressLine1 = 'Address is required for paid plans';
+      if (!formData.paymentMethod) fieldErrors.paymentMethod = 'Select a payment method';
     }
 
-    if (isPaidPlan && !formData.addressLine1) {
-      alert(t('register.errors.addressRequired'));
-      return;
-    }
-
-    if (isPaidPlan && !formData.paymentMethod) {
-      alert(t('register.errors.paymentRequired'));
+    if (Object.keys(fieldErrors).length > 0) {
+      setErrors(fieldErrors);
       return;
     }
 
@@ -100,30 +105,20 @@ export default function RegistrationForm({ selectedPlan, frequency }: Registrati
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { confirmPassword, ...payload } = {
         ...formData,
-        subscriptionTier: formData.subscriptionTier,
         billingCycle: frequency.value === 'monthly' ? 'Monthly' : 'Annually'
       };
 
-      try {
-        await apiFetch('/api/account/register', {
-          method: 'POST',
-          body: JSON.stringify(payload),
-        });
+      await apiFetch('/api/account/register', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
 
-        alert(t('register.success'));
-        window.location.href = '/dashboard';
-      } catch (err) {
-        console.error('Registration failed:', err);
-        alert(
-          err instanceof Error && err.message
-            ? err.message
-            : t('register.errors.generic')
-        );
-      }
-
+      // Could replace this with toast notification
+      alert(t('register.successEmailSent'));
+      navigate('/login');
     } catch (err) {
-      console.error('Network error:', err);
-      alert(t('register.errors.network'));
+      console.error('Registration failed:', err);
+      alert(err instanceof Error ? err.message : t('register.errors.generic'));
     }
   };
 
@@ -136,57 +131,62 @@ export default function RegistrationForm({ selectedPlan, frequency }: Registrati
           type="text"
           value={formData.userName}
           onChange={handleChange}
-          required
-          icon={UserIcon}
         />
+        {errors.userName && <p className="text-error text-xs">{errors.userName}</p>}
+
         <div className="grid grid-cols-2 gap-4">
-          <InputField
-            placeholder={t('register.fields.firstName')}
-            name="firstName"
-            type="text"
-            value={formData.firstName}
-            onChange={handleChange}
-            required
-            icon={UserIcon}
-          />
-          <InputField
-            placeholder={t('register.fields.lastName')}
-            name="lastName"
-            type="text"
-            value={formData.lastName}
-            onChange={handleChange}
-            required
-            icon={UserIcon}
-          />
+          <div>
+            <InputField
+              placeholder={t('register.fields.firstName')}
+              name="firstName"
+              type="text"
+              value={formData.firstName}
+              onChange={handleChange}
+            />
+            {errors.firstName && <p className="text-error text-xs">{errors.firstName}</p>}
+          </div>
+          <div>
+            <InputField
+              placeholder={t('register.fields.lastName')}
+              name="lastName"
+              type="text"
+              value={formData.lastName}
+              onChange={handleChange}
+            />
+            {errors.lastName && <p className="text-error text-xs">{errors.lastName}</p>}
+          </div>
         </div>
+
         <InputField
           placeholder={t('register.fields.email')}
           name="email"
           type="email"
           value={formData.email}
           onChange={handleChange}
-          required
-          icon={EmailIcon}
         />
+        {errors.email && <p className="text-error text-xs">{errors.email}</p>}
+
         <div className="grid grid-cols-2 gap-4">
-          <InputField
-            placeholder={t('register.fields.password')}
-            name="password"
-            type="password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-            icon={PasswordIcon}
-          />
-          <InputField
-            placeholder={t('register.fields.confirmPassword')}
-            name="confirmPassword"
-            type="password"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            required
-            icon={PasswordIcon}
-          />
+          <div>
+            <InputField
+              placeholder={t('register.fields.password')}
+              name="password"
+              type="password"
+              value={formData.password}
+              onChange={handleChange}
+            />
+            {errors.password && <p className="text-error text-xs">{errors.password}</p>}
+          </div>
+          <div>
+            <InputField
+              placeholder={t('register.fields.confirmPassword')}
+              name="confirmPassword"
+              type="password"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+            />
+            {errors.confirmPassword && <p className="text-error text-xs">{errors.confirmPassword}</p>}
+          </div>
         </div>
       </div>
 
@@ -198,17 +198,17 @@ export default function RegistrationForm({ selectedPlan, frequency }: Registrati
               name="addressLine1"
               value={formData.addressLine1}
               onChange={handleChange}
-              required
-              icon={UserIcon}
             />
+            {errors.addressLine1 && <p className="text-error text-xs">{errors.addressLine1}</p>}
+
             <SelectField
               name="country"
               value={formData.country}
               onChange={handleChange}
-              required
               options={countryOptions}
               placeholder={t('register.fields.country')}
             />
+            {errors.country && <p className="text-error text-xs">{errors.country}</p>}
           </div>
 
           <div className="mt-6">
@@ -217,16 +217,7 @@ export default function RegistrationForm({ selectedPlan, frequency }: Registrati
               selected={formData.paymentMethod}
               onSelect={(method) => setFormData((prev) => ({ ...prev, paymentMethod: method }))}
             />
-            {formData.paymentMethod === 'paypal' && (
-              <div className="mt-4">
-                <div id="paypal-button-container"></div>
-              </div>
-            )}
-            {formData.paymentMethod === 'stripe' && (
-              <div className="mt-4 bg-base-300 p-4 rounded">
-                <p className="text-base-content/70 text-center">{t('register.stripePlaceholder')}</p>
-              </div>
-            )}
+            {errors.paymentMethod && <p className="text-error text-xs">{errors.paymentMethod}</p>}
           </div>
         </>
       )}
