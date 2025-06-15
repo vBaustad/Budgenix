@@ -20,16 +20,6 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-try
-{
-    var path = Path.Combine(Directory.GetCurrentDirectory(), "logs", "early-start.txt");
-    Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-    File.WriteAllText(path, $"Started at {DateTime.UtcNow:O}");
-}
-catch (Exception ex)
-{
-    File.WriteAllText("/home/LogFiles/early-crash.txt", $"Early crash: {ex}");
-}
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -38,7 +28,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Configuration
     .SetBasePath(Directory.GetCurrentDirectory())
     .AddJsonFile(Path.Combine("Configuration Files", "appsettings.json"), optional: false)
-    .AddJsonFile(Path.Combine("Configuration Files", $"appsettings.{builder.Environment.EnvironmentName}.json"), optional: true)
     .AddUserSecrets<Program>()
     .AddEnvironmentVariables();
 
