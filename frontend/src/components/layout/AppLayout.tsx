@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Outlet } from 'react-router-dom';
+import Topbar from './Topbar';
+import Sidebar from './Sidebar';
 
 export default function AppLayout() {
   const topbarRef = useRef<HTMLDivElement>(null);
@@ -17,15 +19,18 @@ export default function AppLayout() {
 
   return (
     <div className="flex">
-
+      <Sidebar />
+      <div className="flex-1 lg:pl-64 bg-budgenix-gradient">
+        <Topbar />   
 
         {/* Scrollable content with dynamic topbar offset */}
         <main
           className="transition-all overflow-y-auto min-h-screen bg-budgenix-gradient"
           style={{ paddingTop: `${topbarHeight}px` }}
         >
-          <Outlet />
+        <Outlet />
         </main>
       </div>
+    </div>
   );
 }
