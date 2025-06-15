@@ -62,7 +62,7 @@ export default function SignUpPage() {
           </fieldset>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4 w-full max-w-6xl mx-auto pt-24">
+        <div className="flex flex-wrap justify-center gap-8 w-full max-w-6xl mx-auto pt-24">
           {tiers.map((tier) => (
             <div
               key={tier.id}
@@ -70,7 +70,7 @@ export default function SignUpPage() {
                 navigate(`/signup?plan=${tier.id}`)
               }}
               className={`
-                cursor-pointer card shadow-2xl
+                cursor-pointer card shadow-2xl max-w-2xs w-full
                 ${selectedPlan.id === tier.id
                   ? 'ring-2 ring-primary'
                   : 'border border-base-content/20 hover:border-base-content hover:bg-base-200 transition'}

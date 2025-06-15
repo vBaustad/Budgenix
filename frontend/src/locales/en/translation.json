@@ -103,48 +103,38 @@
         "buyButton": "Buy plan",
         "mostPopular": "Most popular",
         "tiers": {
-            "free": {
+        "free": {
             "name": "Free",
             "description": "Basic budgeting features to get you started.",
             "features": {
-                "trackExpenses": "Track expenses",
-                "simpleBudgets": "Simple budgets",
-                "basicReports": "Basic reports"
+            "trackExpenses": "Track expenses",
+            "simpleBudgets": "Simple budgets",
+            "basicReports": "Basic reports",
+            "emailReminders": "Email reminders"
             }
-            },
-            "hobby": {
+        },
+        "hobby": {
             "name": "Hobby",
             "description": "Extra tools for personal finance enthusiasts.",
             "features": {
-                "recurringExpenses": "Recurring expenses",
-                "categoryGrouping": "Category grouping",
-                "exportCSV": "Export to CSV",
-                "emailSupport": "Email support"
+            "allFreeFeatures": "All Free features",
+            "recurringExpenses": "Recurring expenses",
+            "categoryGrouping": "Category grouping",
+            "exportCSV": "Export to CSV"
             }
-            },
-            "pro": {
+        },
+        "pro": {
             "name": "Pro",
             "description": "Advanced tools for serious budgeters.",
             "features": {
-                "allHobbyFeatures": "All Hobby features",
-                "advancedAnalytics": "Advanced analytics",
-                "savingsGoals": "Savings goals",
-                "multiDeviceSync": "Multi-device sync",
-                "prioritySupport": "Priority support"
-            }
-            },
-            "proplus": {
-            "name": "Pro+",
-            "description": "Full power, collaboration & VIP tools.",
-            "features": {
-                "allProFeatures": "All Pro features",
-                "sharedBudgets": "Shared budgets (households)",
-                "goalAutomation": "Goal tracking automation",
-                "investmentTracking": "Investment tracking",
-                "vipSupport": "VIP support"
-            }
+            "allHobbyFeatures": "All Hobby features",
+            "advancedAnalytics": "Advanced analytics",
+            "savingsGoals": "Savings goals",
+            "multiDeviceSync": "Multi-device sync"
             }
         }
+        }
+
     },
     "signup": {
         "title": "Choose Your Plan",

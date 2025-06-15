@@ -1,6 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import Sidebar from './Sidebar';
-import Topbar from './Topbar';
 import { Outlet } from 'react-router-dom';
 
 export default function AppLayout() {
@@ -19,15 +17,7 @@ export default function AppLayout() {
 
   return (
     <div className="flex">
-      {/* Sidebar */}
-      <Sidebar />
 
-      {/* Main content */}
-      <div className="flex-1 lg:pl-64 bg-budgenix-gradient">
-        {/* Topbar */}
-        <div ref={topbarRef} className="fixed top-0 right-0 lg:left-64 z-40">
-          <Topbar />
-        </div>
 
         {/* Scrollable content with dynamic topbar offset */}
         <main
@@ -37,6 +27,5 @@ export default function AppLayout() {
           <Outlet />
         </main>
       </div>
-    </div>
   );
 }

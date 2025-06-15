@@ -18,14 +18,15 @@
 		<PrivateAssets>all</PrivateAssets>
 	</PackageReference>
 	<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.15" />
+	<PackageReference Include="SparkPost" Version="2.0.2" />
 	<PackageReference Include="Stripe.net" Version="48.2.0" />
 	<PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.1" />
 
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="logs\" />
     <Folder Include="Migrations\" />
+    <Folder Include="Constants\" />
   </ItemGroup>
 
 </Project>

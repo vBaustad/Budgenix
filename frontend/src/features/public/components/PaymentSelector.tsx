@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next';
 
 type PaymentSelectorProps = {
-  selected: 'paypal' | 'stripe' | undefined;
-  onSelect: (method: 'paypal' | 'stripe') => void;
+  selected: 'stripe' | undefined;
+  onSelect: (method: 'stripe') => void;
 };
 
 export default function PaymentSelector({ selected, onSelect }: PaymentSelectorProps) {
@@ -12,17 +12,14 @@ export default function PaymentSelector({ selected, onSelect }: PaymentSelectorP
     <div className="flex gap-4">
       <button
         type="button"
-        onClick={() => onSelect('paypal')}
-        className={`btn flex-1 ${selected === 'paypal' ? 'btn-primary' : 'btn-outline'}`}
-      >
-        {t('payment.paypal')}
-      </button>
-      <button
-        type="button"
         onClick={() => onSelect('stripe')}
-        className={`btn flex-1 ${selected === 'stripe' ? 'btn-primary' : 'btn-outline'}`}
+        className={`flex-1 py-2 rounded-md text-white font-semibold transition ${
+          selected === 'stripe'
+            ? 'bg-[#635BFF] shadow-lg' // Stripe's purple + active style
+            : 'bg-[#7F7FDA] hover:bg-[#635BFF]' // muted stripe color + hover
+        }`}
       >
-        {t('payment.creditCard')}
+        💳 {t('payment.creditCard')} (Stripe)
       </button>
     </div>
   );
