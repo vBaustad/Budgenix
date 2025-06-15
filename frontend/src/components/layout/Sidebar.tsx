@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -8,24 +8,24 @@ import { sidebarNav } from '../../constants/SidebarNav';
 import BudgenixLogo from '../../assets/Logo/BudgenixLogo.png';
 import { Dialog, DialogBackdrop, DialogPanel, TransitionChild } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
+import { useUser } from '@/context/UserContext';
 import type { SidebarItem, SidebarSection } from '@/types/shared/sidebar';
-import { useUserQuery } from '@/features/user/hooks/useUserQuery';
 
 function classNames(...classes: (string | undefined | null | false)[]) {
   return classes.filter(Boolean).join(' ');
 }
 
 export default function Sidebar() {
+  
+
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { t } = useTranslation();
   const { logout } = useAuth();
   const { pathname } = useLocation();
-  const { data: user, isLoading } = useUserQuery();
+  const { user, cachedUser } = useUser();
 
   const isActive = (path?: string) => pathname === path;
-
-  const getInitials = (first: string, last: string) =>
-    `${first?.[0] ?? ''}${last?.[0] ?? ''}`.toUpperCase();
 
   return (
     <>
@@ -44,11 +44,7 @@ export default function Sidebar() {
 
             <div className="flex flex-col grow gap-6 overflow-y-auto">
               <img src={BudgenixLogo} alt="Budgenix" className="h-8 w-auto" />
-              <SidebarContent
-                t={t}
-                logout={logout}
-                isActive={isActive}
-              />
+              <SidebarContent t={t} logout={logout} isActive={isActive} />
             </div>
           </DialogPanel>
         </div>
@@ -56,22 +52,7 @@ export default function Sidebar() {
 
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-primary text-primary-content px-4 py-6 text-sm font-medium">
-        {/* Profile */}
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-primary-content/20 flex items-center justify-center font-bold text-sm uppercase">
-            {isLoading || !user ? '–' : getInitials(user.firstName, user.lastName)}
-          </div>
-          <div className="leading-tight">
-            <div className="font-medium">
-              {isLoading || !user ? 'Loading...' : `${user.firstName} ${user.lastName}`}
-            </div>
-            <div className="text-xs text-primary-content/70 truncate">
-              {user?.email}
-            </div>
-          </div>
-        </div>
-
-        {/* Nav */}
+        <SidebarProfile user={user} cachedUser={cachedUser} />
         <nav className="flex-1 flex flex-col gap-8 pt-4 overflow-y-auto">
           <SidebarContent t={t} logout={logout} isActive={isActive} />
         </nav>
@@ -79,6 +60,51 @@ export default function Sidebar() {
     </>
   );
 }
+
+const SidebarProfile = React.memo(function SidebarProfile({
+  user,
+  cachedUser
+}: {
+  user: ReturnType<typeof useUser>['user'];
+  cachedUser: ReturnType<typeof useUser>['cachedUser'];
+}) {
+  const getInitials = (first: string, last: string) =>
+    `${first?.[0] ?? ''}${last?.[0] ?? ''}`.toUpperCase();
+
+  // Prefer live user, fallback to cachedUser
+  const displayUser = user ?? cachedUser;
+
+  if (!displayUser) {
+    return (
+      <div className="flex items-center gap-3 mb-2">
+        <div className="w-10 h-10 rounded-full bg-primary-content/20 flex items-center justify-center font-bold text-sm uppercase">
+          –
+        </div>
+        <div className="leading-tight">
+          <div className="font-medium">Loading...</div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-3 mb-2">
+      <div className="w-10 h-10 rounded-full bg-primary-content/20 flex items-center justify-center font-bold text-sm uppercase">
+        {getInitials(displayUser.firstName, displayUser.lastName)}
+      </div>
+      <div className="leading-tight">
+        <div className="font-medium">
+          {`${displayUser.firstName} ${displayUser.lastName}`}
+        </div>
+        <div className="text-xs text-primary-content/70 truncate">
+          {displayUser.email}
+        </div>
+      </div>
+    </div>
+  );
+});
+
+
 
 type SidebarContentProps = {
   t: (key: string) => string;
@@ -93,7 +119,6 @@ function SidebarContent({ t, logout, isActive }: SidebarContentProps) {
     await logout();
     navigate('/login', { replace: true });
   };
-
 
   return (
     <>
@@ -151,7 +176,6 @@ function SidebarContent({ t, logout, isActive }: SidebarContentProps) {
               return null;
             })}
           </ul>
-
         </div>
       ))}
     </>
@@ -176,11 +200,10 @@ function SidebarCollapsibleItem({
 
   if (!('children' in item)) return null;
 
-
   return (
     <li>
       <button
-        onClick={() => setOpen((prev: boolean) => !prev)}
+        onClick={() => setOpen((prev) => !prev)}
         className={classNames(
           'flex items-center justify-between w-full px-2 py-2 rounded-md transition',
           'hover:bg-primary-content/10 text-primary-content/90',
@@ -217,4 +240,3 @@ function SidebarCollapsibleItem({
     </li>
   );
 }
-

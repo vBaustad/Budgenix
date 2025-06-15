@@ -45,10 +45,6 @@ export default function ExpensesOverview() {
   const spendingUp = spendingDiff > 0;
   const spendingPercent = Math.min((totalSpent / (lastMonthSpent || 1)) * 100, 200);
 
-  console.log("overviewLoading", overviewLoading);
-  console.log("🔍 overview", overview);
-
-
   return (
     <div className="flex flex-col lg:flex-row justify-between gap-2 p-2">
       {/* LEFT SIDE: Overview */}      

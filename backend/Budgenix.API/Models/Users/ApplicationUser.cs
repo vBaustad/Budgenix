@@ -55,6 +55,8 @@ namespace Budgenix.Models.Users
 
         [MaxLength(100)]
         public string? StripeCustomerId { get; set; }   // Optional
+        [MaxLength(100)]
+        public string? StripeSubscriptionId { get; set; }  // Optional: link to active Stripe subscription
 
         [MaxLength(100)]
         public string? PayPalSubscriptionId { get; set; }  // Optional

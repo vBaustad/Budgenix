@@ -4,6 +4,7 @@ using Budgenix.Dtos.Users;
 using Budgenix.Helpers;
 using Budgenix.Models.Shared;
 using Budgenix.Models.Users;
+using Budgenix.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -18,12 +19,16 @@ namespace Budgenix.API.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly JwtTokenService _jwtTokenService;
         private readonly IStringLocalizer<SharedResource> _localizer;
+        private readonly IEmailService _emailService;
+        private readonly IConfiguration _config;
 
-        public AccountController(UserManager<ApplicationUser> userManager, JwtTokenService jwtTokenService, IStringLocalizer<SharedResource> localizer)
+        public AccountController(UserManager<ApplicationUser> userManager, JwtTokenService jwtTokenService, IEmailService emailService, IStringLocalizer<SharedResource> localizer, IConfiguration config)
         {
             _userManager = userManager;
+            _emailService = emailService;
             _jwtTokenService = jwtTokenService;
             _localizer = localizer;
+            _config = config;
         }
 
         [HttpPost("register")]
@@ -49,54 +54,34 @@ namespace Budgenix.API.Controllers
                 Email = dto.Email,
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
-
-                // Address fields (optional)
                 AddressLine1 = dto.AddressLine1,
                 AddressLine2 = dto.AddressLine2,
                 City = dto.City,
                 StateOrProvince = dto.StateOrProvince,
                 ZipOrPostalCode = dto.ZipOrPostalCode,
                 Country = dto.Country,
-
-                // Subscription details
                 SubscriptionTier = dto.SubscriptionTier,
-                SubscriptionIsActive = true,
-                SubscriptionStartDate = subscriptionStartDate,
-                SubscriptionEndDate = subscriptionEndDate,
+                SubscriptionIsActive = false,
                 BillingCycle = dto.BillingCycle,
-
-                //Referral
                 ReferralCode = $"{dto.UserName}-{Guid.NewGuid().ToString().Substring(0, 6)}",
-
-
-                // Payment IDs (optional)
-                StripeCustomerId = dto.StripeCustomerId,
-                PayPalSubscriptionId = dto.PayPalSubscriptionId
             };
 
-            var result = await _userManager.CreateAsync(user, dto.Password);
 
+            var result = await _userManager.CreateAsync(user, dto.Password);
             if (!result.Succeeded)
             {
                 return BadRequest(result.Errors);
             }
 
-            // generate confirmation token
-            var emailToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-
-            // create confirmation link (you’d replace localhost in prod)
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var confirmationLink = Url.Action(nameof(ConfirmEmail), "Account",
-                new { userId = user.Id, emailToken }, Request.Scheme);
+                new { userId = user.Id, token }, Request.Scheme);
 
-            // TODO: send confirmationLink via email
-            Console.WriteLine($"{_localizer["Auth_EmailConfirmationLink"]} {confirmationLink}");
-
-
+            await _emailService.SendEmailConfirmationAsync(user.Email, confirmationLink);
 
             return Ok(new
             {
-                message = _localizer["Auth_RegistrationSuccessful"],
-                confirmationLink // return it for testing; remove in prod
+                message = _localizer["Auth_RegistrationSuccessful"]
             });
         }
 
@@ -108,16 +93,13 @@ namespace Budgenix.API.Controllers
 
             token = Uri.UnescapeDataString(token);
 
-
             var result = await _userManager.ConfirmEmailAsync(user, token);
             if (!result.Succeeded) return BadRequest(_localizer["Auth_EmailConfirmationFailed"]);
 
-            // activate subscription only after email confirmed
+            // activate subscription
             user.SubscriptionIsActive = true;
             user.SubscriptionStartDate ??= DateTime.UtcNow;
-
             await _userManager.UpdateAsync(user);
-
 
             var jwtToken = _jwtTokenService.CreateToken(user);
 
@@ -125,19 +107,31 @@ namespace Budgenix.API.Controllers
             Response.Cookies.Append("authToken", jwtToken, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true, // Set to true if using HTTPS
+                Secure = true,
                 SameSite = SameSiteMode.Strict,
                 Expires = DateTimeOffset.UtcNow.AddDays(7)
             });
 
-            return Ok(_localizer["Auth_EmailConfirmed"]);
+            var baseUrl = _config["Frontend:BaseUrl"];
+            return Redirect($"{baseUrl}/dashboard");
         }
+
 
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDto dto)
         {
-            var user = await _userManager.FindByEmailAsync(dto.Email);
-            if(user == null || !await _userManager.CheckPasswordAsync(user, dto.Password))
+            ApplicationUser user = null;
+
+            // Try username first
+            user = await _userManager.FindByNameAsync(dto.Login);
+
+            // If not found, try email (basic check to reduce unnecessary email search)
+            if (user == null && dto.Login.Contains("@"))
+            {
+                user = await _userManager.FindByEmailAsync(dto.Login);
+            }
+
+            if (user == null || !await _userManager.CheckPasswordAsync(user, dto.Password))
             {
                 return Unauthorized(_localizer["Auth_InvalidEmailOrPw"]);
             }
@@ -149,12 +143,10 @@ namespace Budgenix.API.Controllers
 
             var token = _jwtTokenService?.CreateToken(user);
 
-            // Set token in HttpOnly cookie
             Response.Cookies.Append("authToken", token, new CookieOptions
             {
                 HttpOnly = true,
-                //Secure = true, // Set to true if using HTTPS
-                Secure=false,
+                Secure = false,  // Change to true for HTTPS
                 SameSite = SameSiteMode.Strict,
                 Expires = DateTimeOffset.UtcNow.AddDays(7)
             });
@@ -170,6 +162,7 @@ namespace Budgenix.API.Controllers
                 }
             });
         }
+
 
         [HttpPost("logout")]
         public IActionResult Logout()

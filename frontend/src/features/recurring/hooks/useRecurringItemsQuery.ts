@@ -5,7 +5,7 @@ import { RecurringItemDto } from '@/types/finance/recurring';
 export const RECURRING_QUERY_KEY = ['recurring-expenses'];
 
 export async function fetchRecurringExpenses(): Promise<RecurringItemDto[]> {
-  return await apiFetch('/api/recurring/upcoming');
+  return apiFetch('/api/recurring/upcoming');
 }
 
 export function useRecurringItemsQuery(enabled = true) {

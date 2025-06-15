@@ -53,14 +53,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 
 
-  const login = async (email: string, password: string) => {
+  const login = async (login: string, password: string) => {
     await apiFetch("/api/account/login", {
       method: "POST",
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ login, password }),
     });
 
     setIsLoggedIn(true);
   };
+
 
   const logout = async () => {
     await apiFetch("/api/account/logout", { method: "POST" });
