@@ -37,8 +37,8 @@ import {
       section: 'sidebar.system',
       items: [
         { label: 'sidebar.settings', icon: Cog6ToothIcon, collapsible: true, children: [
-          { label: 'sidebar.settings.user', path: '/settings/user', icon: UserIcon },
-          { label: 'sidebar.settings.app', path: '/settings/app', icon: AdjustmentsHorizontalIcon },
+          { label: 'sidebar.settings.user', path: '/settings#user', icon: UserIcon },
+          { label: 'sidebar.settings.app', path: '/settings#app', icon: AdjustmentsHorizontalIcon },
         ]},
         { label: 'sidebar.logout', action: 'logout', icon: ArrowRightStartOnRectangleIcon },
       ]
