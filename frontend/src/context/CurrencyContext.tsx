@@ -1,8 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useUser } from './UserContext';
 import { apiFetch } from '../utils/api';
-
+import { useUser } from './UserContext';
 type CurrencyContextType = {
   currency?: string; // nullable so consumer handles if missing
   setCurrency: (newCurrency: string) => void;
@@ -49,3 +48,4 @@ const { mutate: updateCurrency } = useMutation({
 }
 
 export const useCurrency = () => useContext(CurrencyContext);
+

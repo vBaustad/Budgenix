@@ -117,6 +117,10 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddSingleton<StripeService>();
 
 
+//Email
+builder.Services.AddSingleton<IEmailService, EmailService>();
+
+
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<JwtTokenService>();
 

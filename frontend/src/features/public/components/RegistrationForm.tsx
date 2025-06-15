@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { tiers } from '@/constants/plans';
 import InputField from '@/components/common/forms/InputField';
-import PaymentSelector from './PaymentSelector';
 import SelectField from '@/components/common/forms/SelectField';
 import { countryOptions } from '@/constants/countries';
 import { apiFetch } from '@/utils/api';
+import toast from 'react-hot-toast';
 
 export type SubscriptionType = typeof tiers[number]['id'];
 
@@ -36,6 +36,8 @@ type RegistrationFormData = {
 export default function RegistrationForm({ selectedPlan, frequency }: RegistrationFormProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const isPaidPlan = selectedPlan.price[frequency.value] !== '$0';
 
   const [formData, setFormData] = useState<RegistrationFormData>({
     userName: '',
@@ -50,28 +52,27 @@ export default function RegistrationForm({ selectedPlan, frequency }: Registrati
     stateOrProvince: '',
     zipOrPostalCode: '',
     country: '',
-    paymentMethod: undefined,
+    paymentMethod: isPaidPlan ? 'stripe' : undefined,
     subscriptionTier: selectedPlan.id,
     billingCycle: ''
   });
 
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const isPaidPlan = selectedPlan.price[frequency.value] !== '$0';
 
-  useEffect(() => {
-    if (isPaidPlan && formData.paymentMethod === 'paypal') {
-      const existingScript = document.querySelector('script[src^="https://www.paypal.com/sdk/js"]');
-      if (!existingScript) {
-        const script = document.createElement('script');
-        script.src = `https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&vault=true&intent=subscription`;
-        script.async = true;
-        document.body.appendChild(script);
-        return () => {
-          document.body.removeChild(script);
-        };
-      }
-    }
-  }, [isPaidPlan, formData.paymentMethod]);
+
+  // useEffect(() => {
+  //   if (isPaidPlan && formData.paymentMethod === 'paypal') {
+  //     const existingScript = document.querySelector('script[src^="https://www.paypal.com/sdk/js"]');
+  //     if (!existingScript) {
+  //       const script = document.createElement('script');
+  //       script.src = `https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&vault=true&intent=subscription`;
+  //       script.async = true;
+  //       document.body.appendChild(script);
+  //       return () => {
+  //         document.body.removeChild(script);
+  //       };
+  //     }
+  //   }
+  // }, [isPaidPlan, formData.paymentMethod]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -82,6 +83,7 @@ export default function RegistrationForm({ selectedPlan, frequency }: Registrati
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const fieldErrors: Record<string, string> = {};
+
 
     if (!formData.userName) fieldErrors.userName = 'Username is required';
     if (!formData.firstName) fieldErrors.firstName = 'First name is required';
@@ -97,13 +99,14 @@ export default function RegistrationForm({ selectedPlan, frequency }: Registrati
     }
 
     if (Object.keys(fieldErrors).length > 0) {
+      console.warn('[handleSubmit] Validation errors:', fieldErrors);
       setErrors(fieldErrors);
       return;
     }
 
     try {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { confirmPassword, ...payload } = {
+      const { confirmPassword, paymentMethod, ...payload } = {
         ...formData,
         billingCycle: frequency.value === 'monthly' ? 'Monthly' : 'Annually'
       };
@@ -113,14 +116,31 @@ export default function RegistrationForm({ selectedPlan, frequency }: Registrati
         body: JSON.stringify(payload),
       });
 
-      // Could replace this with toast notification
-      alert(t('register.successEmailSent'));
-      navigate('/login');
+      if (isPaidPlan && formData.paymentMethod === 'stripe') {
+        const checkoutData = await apiFetch('/api/stripe/create-checkout-session', {
+          method: 'POST',
+          body: JSON.stringify({
+            email: formData.email,
+            priceId: selectedPlan.priceId[frequency.value],
+          }),
+        });
+
+
+        if (checkoutData.url) {
+          window.location.href = checkoutData.url;
+        } else {
+          toast.error('Stripe checkout session could not be created');
+        }
+      } else {
+        toast.success('Registration successful! Please check your email to confirm your account.');
+        navigate('/login');
+      }
+
     } catch (err) {
-      console.error('Registration failed:', err);
-      alert(err instanceof Error ? err.message : t('register.errors.generic'));
+      toast.error(err instanceof Error ? err.message : t('register.errors.generic'));
     }
   };
+
 
   return (
     <form onSubmit={handleSubmit}>
@@ -211,22 +231,31 @@ export default function RegistrationForm({ selectedPlan, frequency }: Registrati
             {errors.country && <p className="text-error text-xs">{errors.country}</p>}
           </div>
 
-          <div className="mt-6">
+          {/* <div className="mt-6">
             <p className="text-base-content/70 mb-2">{t('register.paymentMethodLabel')}</p>
             <PaymentSelector
               selected={formData.paymentMethod}
               onSelect={(method) => setFormData((prev) => ({ ...prev, paymentMethod: method }))}
             />
             {errors.paymentMethod && <p className="text-error text-xs">{errors.paymentMethod}</p>}
-          </div>
+          </div> */}
         </>
       )}
 
-      <button type="submit" className="btn btn-primary w-full mt-6">
-        {selectedPlan.price[frequency.value] === '$0'
-          ? t('register.submitFree')
-          : t('register.submitPaid')}
+      <button
+        type="submit"
+        className={`w-full mt-6 py-3 rounded-md text-white font-semibold flex items-center justify-center gap-2 cursor-pointer ${
+          isPaidPlan ? 'bg-[#635BFF] hover:bg-[#5245d5]' : 'bg-primary hover:bg-primary-focus'
+        }`}
+      >
+        {isPaidPlan && <i className="fa-brands fa-cc-stripe"></i>}
+        {isPaidPlan 
+          ? 'Create Account and Pay with Stripe' 
+          : 'Create Account'
+        }
       </button>
+
+
     </form>
   );
 }
