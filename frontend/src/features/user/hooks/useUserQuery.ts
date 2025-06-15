@@ -26,14 +26,15 @@ export type User = {
 export function useUserQuery() {
   const { isLoggedIn, authChecked } = useAuth();
 
-  return useQuery<User>({
-    queryKey: ['user'],
-    queryFn: async () => {
-      return await apiFetch('/api/account/me');
-    },
-    enabled: authChecked && isLoggedIn,
-    staleTime: 0,  // force no caching for now
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
-  });
+return useQuery<User>({
+  queryKey: ['user'],
+  queryFn: async () => await apiFetch('/api/account/me'),
+  enabled: authChecked && isLoggedIn,
+  staleTime: 1000 * 60 * 10,
+  refetchOnWindowFocus: false,
+  refetchOnMount: false,
+});
+
 }
+
+

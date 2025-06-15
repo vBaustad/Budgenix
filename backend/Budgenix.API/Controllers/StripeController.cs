@@ -13,6 +13,8 @@ using Budgenix.Models.Shared;
 using Budgenix.Dtos.Stripe;
 using Newtonsoft.Json;
 using Microsoft.IdentityModel.Tokens;
+using Budgenix.API.Models.Users;
+using Budgenix.Models.Users;
 
 //FOR DEV: stripe listen --forward-to localhost:5035/api/stripe/webhook
 
@@ -46,34 +48,29 @@ namespace Budgenix.API.Controllers
         [HttpPost("create-checkout-session")]
         public async Task<IActionResult> CreateCheckoutSession([FromBody] CreateCheckoutSessionDto dto)
         {
-            if (string.IsNullOrWhiteSpace(dto.Email) || string.IsNullOrWhiteSpace(dto.PriceId))
-            {
-                return BadRequest(_localizer["Invalid request data"]);
-            }
-
             var options = new SessionCreateOptions
             {
-                PaymentMethodTypes = new List<string> { "card" },
-                Mode = "subscription",
-                LineItems = new List<SessionLineItemOptions>
-                    {
-                        new SessionLineItemOptions
-                        {
-                            Price = dto.PriceId,
-                            Quantity = 1
-                        }
-                    },
                 CustomerEmail = dto.Email,
-                SuccessUrl = "https://yourapp.com/success?session_id={CHECKOUT_SESSION_ID}",
-                CancelUrl = "https://yourapp.com/cancel"
+                PaymentMethodTypes = new List<string> { "card" },
+                LineItems = new List<SessionLineItemOptions>
+        {
+            new SessionLineItemOptions
+            {
+                Price = dto.PriceId,
+                Quantity = 1
+            }
+        },
+                Mode = "subscription",
+                SuccessUrl = _config["Stripe:SuccessUrl"],
+                CancelUrl = _config["Stripe:CancelUrl"]
             };
 
             var service = new SessionService();
             var session = await service.CreateAsync(options);
 
-            return Ok(new { sessionId = session.Id, url = session.Url });
-
+            return Ok(new { url = session.Url });
         }
+
 
         // ========== POST: Webhook endpoint ==========
         [HttpPost("webhook")]
@@ -208,6 +205,7 @@ namespace Budgenix.API.Controllers
         private async Task HandleCheckoutSessionCompleted(Event stripeEvent)
         {
             var fullJson = JsonConvert.SerializeObject(stripeEvent, Formatting.Indented);
+            Console.WriteLine($"Received Stripe checkout.session.completed: {fullJson}");
 
             var session = stripeEvent.Data.Object as Session;
             if (session == null)
@@ -218,32 +216,49 @@ namespace Budgenix.API.Controllers
 
             var customerId = session.Customer?.Id;
             var subscriptionId = session.Subscription?.Id;
-
             var email = session.CustomerEmail ?? session.CustomerDetails?.Email;
-            if (string.IsNullOrWhiteSpace(email))
+
+            ApplicationUser? user = null;
+
+            if (session.Metadata.TryGetValue("userId", out var userId))
             {
-                Console.WriteLine("No email found in checkout session.");
-                return;
+                user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            }
+            else if (!string.IsNullOrWhiteSpace(email))
+            {
+                user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
             }
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
             if (user == null)
             {
-                Console.WriteLine($"No user found with email: {email}");
+                Console.WriteLine($"No user found for Stripe session: email={email}, userId={userId}");
                 return;
             }
 
             user.StripeCustomerId = customerId;
+            user.StripeSubscriptionId = subscriptionId;
             user.SubscriptionIsActive = true;
             user.SubscriptionStartDate = DateTime.UtcNow;
 
-            // Optional: save subscription ID if you have a field for it
-            // user.StripeSubscriptionId = subscriptionId;
+            if (session.Metadata.TryGetValue("billingCycle", out var billingCycleStr))
+            {
+                if (Enum.TryParse<BillingCycleEnum>(billingCycleStr, true, out var billingCycle))
+                {
+                    user.BillingCycle = billingCycle;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(session.Currency))
+            {
+                user.PreferredCurrency = session.Currency.ToUpper();
+            }
 
             await _context.SaveChangesAsync();
 
-            Console.WriteLine($"User {email} marked as active subscription.");
+            Console.WriteLine($"User {user.Email} updated: active subscription, customerId {customerId}, billingCycle {user.BillingCycle}, currency {user.PreferredCurrency}");
         }
+
+
 
 
 
