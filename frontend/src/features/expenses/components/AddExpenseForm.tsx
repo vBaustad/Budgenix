@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Expense } from '@/types/finance/expense';
 import { RecurrenceFrequency, RecurrenceFrequencyOptions } from '@/types/shared/recurrence';
 import { RecurringItemType } from '@/types/finance/recurring';
-import { createExpense } from '../services/expensesService';
+import { useCreateExpense } from '../services/expensesService';
 import InputField from '@/components/common/forms/InputField';
 import SelectField from '@/components/common/forms/SelectField';
 import toast from 'react-hot-toast';
@@ -40,7 +40,10 @@ export default function AddExpenseForm({ onAdd, onRecurringChange }: Props) {
 
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+
+  const { mutateAsync: createExpense, isPending: loading } = useCreateExpense();
+  const { categories } = useCategories();
+  const { currency: userCurrency } = useCurrency();
 
   const isRecurring = form.recurrenceFrequency !== 'None';
 
@@ -52,7 +55,6 @@ export default function AddExpenseForm({ onAdd, onRecurringChange }: Props) {
     return selected > today;
   };
 
-
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
@@ -61,60 +63,53 @@ export default function AddExpenseForm({ onAdd, onRecurringChange }: Props) {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setLoading(true);
-  setError(null);
+    e.preventDefault();
+    setError(null);
 
-  try {
-    const { recurrenceFrequency, ...expenseData } = form;
-    const skipCreation = isFutureDate(form.date);
+    try {
+      const { recurrenceFrequency, ...expenseData } = form;
+      const skipCreation = isFutureDate(form.date);
 
-    if (!skipCreation) {
-      const newExpense = await createExpense(expenseData);
-      onAdd(newExpense);
-    }
-
-    if (isRecurring) {
-      await createRecurringItem({
-        name: form.name,
-        description: form.description || '',
-        amount: form.amount,
-        startDate: form.date,
-        frequency: recurrenceFrequency,
-        type: RecurringItemType.Expense,
-        categoryId: form.categoryId || undefined,
-        isActive: true,
-      });
-
-      if (onRecurringChange) {
-        await onRecurringChange();
+      if (!skipCreation) {
+        const newExpense = await createExpense(expenseData);
+        onAdd(newExpense);
       }
+
+      if (isRecurring) {
+        await createRecurringItem({
+          name: form.name,
+          description: form.description || '',
+          amount: form.amount,
+          startDate: form.date,
+          frequency: recurrenceFrequency,
+          type: RecurringItemType.Expense,
+          categoryId: form.categoryId || undefined,
+          isActive: true,
+        });
+
+        if (onRecurringChange) {
+          await onRecurringChange();
+        }
+      }
+
+      toast.success('Expense added successfully!');
+      setForm({
+        name: '',
+        description: '',
+        amount: 0,
+        date: new Date().toISOString().slice(0, 10),
+        categoryId: '',
+        notes: '',
+        recurrenceFrequency: 'None',
+      });
+    } catch (err: unknown) {
+      toast.error('Failed to add expense');
+      setError(err instanceof Error ? err.message : 'Something went wrong');
     }
-
-    toast.success('Expense added successfully!');
-    setForm({
-      name: '',
-      description: '',
-      amount: 0,
-      date: new Date().toISOString().slice(0, 10),
-      categoryId: '',
-      notes: '',
-      recurrenceFrequency: 'None',
-    });
-  } catch (err: unknown) {
-    toast.error('Failed to add expense');
-    setError(err instanceof Error ? err.message : 'Something went wrong');
-  } finally {
-    setLoading(false);
-  }
-};
-
-
-  const { categories } = useCategories();
-  const { currency: userCurrency } = useCurrency();
+  };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-4">
+    <div className="flex flex-col gap-4 p-2 w-full max-w-full overflow-hidden lg:flex-row lg:gap-2">
       <div className="lg:w-1/2">
         <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl">
           <div className="grid grid-cols-1 gap-4">
@@ -193,8 +188,10 @@ export default function AddExpenseForm({ onAdd, onRecurringChange }: Props) {
         </form>
       </div>
 
-      <div className="lg:w-1/2 bg-base-200 rounded-xl p-4 border border-dashed border-base-300 text-center text-base-content/50">
-        <p>💡 You could add something here...</p>
+      <div className="flex flex-col lg:w-1/2 lg:flex-row gap-4 w-full max-w-full overflow-hidden">
+        <div className="w-full bg-base-200 rounded-xl p-4 border border-dashed border-base-300 text-center text-base-content/50">
+          <p className="truncate">💡 You could add something here...</p>
+        </div>
       </div>
     </div>
   );

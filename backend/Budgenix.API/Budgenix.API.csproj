@@ -27,6 +27,8 @@
   <ItemGroup>
     <Folder Include="Migrations\" />
     <Folder Include="Constants\" />
+    <Folder Include="Services\Shared\" />
+
   </ItemGroup>
 
 </Project>

@@ -3,21 +3,20 @@ using Stripe;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Budgenix.API.Services
+namespace Budgenix.Services
 {
     public class StripeService
     {
         private readonly CustomerService _customerService;
-        private readonly SubscriptionService _subscriptionService;
+        private readonly Stripe.SubscriptionService _subscriptionService;
 
         public StripeService(IConfiguration config)
         {
-            // Set your Stripe secret key
             StripeConfiguration.ApiKey = config["Stripe:SecretKey"];
-
             _customerService = new CustomerService();
-            _subscriptionService = new SubscriptionService();
+            _subscriptionService = new Stripe.SubscriptionService();
         }
+
 
         public async Task<Customer> CreateCustomerAsync(string email, string name, AddressOptions address)
         {

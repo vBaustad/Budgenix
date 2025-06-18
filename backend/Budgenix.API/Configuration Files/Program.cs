@@ -1,45 +1,44 @@
-﻿using Budgenix.API.Services;
+﻿using Budgenix.Services;
+using Budgenix.Services.Dashboard;
+using Budgenix.Services.User;
 using Budgenix.Data;
 using Budgenix.Helpers;
 using Budgenix.Mapping;
 using Budgenix.Models.Users;
-using Budgenix.Services;
 using Budgenix.Services.Insights;
-using Budgenix.Services.Insights.Rules;
 using Budgenix.Services.Recurring;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Globalization;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-
-
+using Budgenix.Services.Finance;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Load config from environment
+// 🔹 Configure logging providers (optional: adjust as needed)
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+// Later: Add Application Insights or Serilog here if you want
+
+// Load config
 builder.Configuration
     .SetBasePath(Directory.GetCurrentDirectory())
     .AddJsonFile(Path.Combine("Configuration Files", "appsettings.json"), optional: false)
     .AddUserSecrets<Program>()
     .AddEnvironmentVariables();
 
-// Access connection string
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-// Setup DB context
 builder.Services.AddDbContext<BudgenixDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-
-// Add services
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
@@ -49,14 +48,18 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<RecurringItemService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IInsightService, InsightService>();
+builder.Services.AddScoped<IExpenseService, ExpenseService>();
+builder.Services.AddScoped<IIncomeService, IncomeService>();
+
 builder.Services.AddInsightRules();
 builder.Services.AddTransient<NextOccurrenceResolver>();
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
-// Add Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<BudgenixDbContext>()
     .AddDefaultTokenProviders();
@@ -70,7 +73,6 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequireLowercase = false;
 });
 
-// Localization
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 builder.Services.Configure<RequestLocalizationOptions>(options =>
 {
@@ -80,7 +82,6 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
     options.SupportedUICultures = supportedCultures;
 });
 
-// Authentication
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -113,37 +114,27 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-//Stripe
 builder.Services.AddSingleton<StripeService>();
-
-
-//Email
 builder.Services.AddSingleton<IEmailService, EmailService>();
-
-
-builder.Services.AddAuthorization();
 builder.Services.AddScoped<JwtTokenService>();
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy
-            .WithOrigins(
+        policy.WithOrigins(
                 "https://demo.vebjornbaustad.no",
                 "http://localhost:5173"
             )
-
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
-
     });
 });
 
-
-
 var app = builder.Build();
+
+var logger = app.Services.GetRequiredService<ILogger<Program>>();
 
 // Localization
 var localizationOptions = app.Services.GetService<IOptions<RequestLocalizationOptions>>()?.Value;
@@ -156,27 +147,19 @@ try
     using (var scope = app.Services.CreateScope())
     {
         var context = scope.ServiceProvider.GetRequiredService<BudgenixDbContext>();
+        var scopedLogger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+
         SeedData.Initialize(context);
-        Console.WriteLine("✅ Database seeded successfully.");
+        scopedLogger.LogInformation("✅ Database seeded successfully.");
     }
 }
 catch (Exception seedingEx)
 {
-    using (var scope = app.Services.CreateScope())
-    {
-        var context = scope.ServiceProvider.GetRequiredService<BudgenixDbContext>();
-        SeedData.Initialize(context);
-        Console.WriteLine("✅ Database seeded successfully.");
-    }
-
-    var logPath = Path.Combine(Directory.GetCurrentDirectory(), "startup-seeding-error.log");
-    File.WriteAllText(logPath, seedingEx.ToString());
-    Console.WriteLine("💥 Error during DB seeding.");
+    logger.LogError(seedingEx, "💥 Error during DB seeding.");
     throw;
 }
 
 // HTTP pipeline
-
 app.UseSwagger();
 app.UseSwaggerUI();
 
@@ -187,16 +170,11 @@ app.MapControllers();
 
 try
 {
-    Console.WriteLine("🚀 Starting Budgenix.API...");
-
-
+    logger.LogInformation("🚀 Starting Budgenix.API...");
     app.Run();
 }
 catch (Exception ex)
 {
-    var logPath = Path.Combine(Directory.GetCurrentDirectory(), "logs", "startup-error.txt");
-    Directory.CreateDirectory(Path.GetDirectoryName(logPath)!);
-    File.WriteAllText(logPath, ex.ToString());
-    Console.WriteLine("💥 Startup exception: " + ex.Message);
+    logger.LogCritical(ex, "💥 Unhandled exception during startup.");
     throw;
 }

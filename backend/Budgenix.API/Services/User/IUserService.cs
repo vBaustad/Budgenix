@@ -1,6 +1,6 @@
 ﻿using Budgenix.Models.Users;
 
-namespace Budgenix.Services
+namespace Budgenix.Services.User
 {
     public interface IUserService
     {

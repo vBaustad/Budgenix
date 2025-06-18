@@ -45,11 +45,12 @@ export default function GroupedExpensesList({ data, groupBy }: GroupedExpensesLi
                 format: formatDate,
                 width: '100px',
                 sortable: true,
+                showOnMobile: false
               },
               {
                 label: 'Name',
                 accessor: 'name',
-                width: '200px',
+                width: '150px',
                 sortable: true,
               },
               {

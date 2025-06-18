@@ -3,134 +3,81 @@ import {
   useContext,
   useState,
   useMemo,
+  useCallback,
   ReactNode,
 } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useDateFilter } from '@/context/DateFilterContext';
-import { GroupedIncomes, Income, IncomeOverviewDto } from '@/types/finance/income';
-import { apiFetch } from '@/utils/api';
-import { useAuth } from '@/context/AuthContext';
 
-type GroupByValue = 'month' | 'year' | 'category' | '';
+import { useIncomeOverview } from '@/features/Incomes/services/incomesService';
+import { IncomeOverviewDto } from '@/types/finance/income';
+
+export type GroupByValue = 'month' | 'year' | 'category' | '';
 
 type IncomeContextType = {
-  incomes: Income[];
-  groupedIncomes: GroupedIncomes;
-  loading: boolean;
   overview: IncomeOverviewDto | undefined;
   overviewLoading: boolean;
   groupBy: GroupByValue;
   selectedCategories: string[];
-  setGroupBy: (val: GroupByValue) => void;
+  setGroupBy: (value: GroupByValue) => void;
   setSelectedCategories: (ids: string[]) => void;
-  handleAddIncome: (income: Income) => void;
-  refreshOverview: (month: number, year: number) => void;
+  refreshOverview: () => Promise<void>;
 };
 
 const IncomeContext = createContext<IncomeContextType | undefined>(undefined);
 
-export const IncomeProvider = ({ children }: { children: ReactNode }) => {
-  const { isLoggedIn } = useAuth();
-  const queryClient = useQueryClient();
-  const { selectedMonth, selectedYear } = useDateFilter();
-
+export function IncomeProvider({
+  children,
+  month,
+  year,
+}: {
+  children: ReactNode;
+  month: number;
+  year: number;
+}) {
   const [groupBy, setGroupBy] = useState<GroupByValue>('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
   const {
-    data: incomes = [],
-    isLoading: loading,
-  } = useQuery<Income[]>({
-    enabled: isLoggedIn,
-    queryKey: ['incomes', selectedYear, selectedMonth, groupBy, selectedCategories],
-    queryFn: async () => {
-      const from = new Date(selectedYear, selectedMonth - 1, 1).toISOString();
-      const to = new Date(selectedYear, selectedMonth, 0).toISOString();
-      const params = new URLSearchParams({ from, to });
-      if (groupBy) params.append('groupBy', groupBy);
-      if (selectedCategories.length > 0) {
-        params.append('categories', selectedCategories.join(','));
-      }
-
-      return await apiFetch(`/api/incomes?${params.toString()}`);
-    },
-  });
-
-  const {
     data: overview,
     isLoading: overviewLoading,
-  } = useQuery<IncomeOverviewDto>({
-    enabled: isLoggedIn,
-    queryKey: ['incomeOverview', selectedYear, selectedMonth],
-    queryFn: async () =>
-      await apiFetch(`/api/incomes/overview?month=${selectedMonth}&year=${selectedYear}`),
-  });
+    refetch: refetchOverview,
+  } = useIncomeOverview();
 
-  const handleAddIncome = (income: Income) => {
-    queryClient.setQueryData<Income[]>(
-      ['incomes', selectedYear, selectedMonth, groupBy, selectedCategories],
-      (old = []) => [income, ...old]
-    );
-  };
+  const refreshOverview = useCallback(async () => {
+    if (month && year) {
+      await refetchOverview();
+    }
+  }, [refetchOverview, month, year]);
 
-  const refreshOverview = (month: number, year: number) => {
-    queryClient.invalidateQueries({ queryKey: ['incomeOverview', year, month] });
-    queryClient.invalidateQueries({ queryKey: ['incomes', year, month] });
-  };
-
-  const groupedIncomes = useMemo(() => {
-    if (!groupBy || !Array.isArray(incomes)) return [];
-
-    const map = new Map<string, Income[]>();
-
-    incomes.forEach((income) => {
-      let key = '';
-      switch (groupBy) {
-        case 'month':
-          key = new Date(income.date).toISOString().slice(0, 7);
-          break;
-        case 'year':
-          key = new Date(income.date).getFullYear().toString();
-          break;
-        case 'category':
-          key = income.categoryName ?? 'Uncategorized';
-          break;
-      }
-
-      if (!map.has(key)) map.set(key, []);
-      map.get(key)!.push(income);
-    });
-
-    return Array.from(map.entries()).map(([groupName, incomes]) => ({
-      groupName,
-      totalAmount: incomes.reduce((sum, i) => sum + i.amount, 0),
-      incomes,
-    }));
-  }, [incomes, groupBy]);
+  const value = useMemo(
+    () => ({
+      overview,
+      overviewLoading,
+      groupBy,
+      selectedCategories,
+      setGroupBy,
+      setSelectedCategories,
+      refreshOverview,
+    }),
+    [
+      overview,
+      overviewLoading,
+      groupBy,
+      selectedCategories,
+      refreshOverview,
+    ]
+  );
 
   return (
-    <IncomeContext.Provider
-      value={{
-        incomes,
-        groupedIncomes,
-        loading,
-        overview,
-        overviewLoading,
-        groupBy,
-        selectedCategories,
-        setGroupBy,
-        setSelectedCategories,
-        handleAddIncome,
-        refreshOverview,
-      }}
-    >
+    <IncomeContext.Provider value={value}>
       {children}
     </IncomeContext.Provider>
   );
-};
+}
 
-export function useIncomes() {
+export function useIncomesContext() {
   const context = useContext(IncomeContext);
-  if (!context) throw new Error('useIncomes must be used within IncomeProvider');
+  if (!context) {
+    throw new Error('useIncomesContext must be used within IncomeProvider');
+  }
   return context;
 }

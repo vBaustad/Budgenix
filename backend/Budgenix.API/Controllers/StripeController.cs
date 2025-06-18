@@ -5,7 +5,7 @@ using Stripe;
 using Stripe.Checkout;
 using System.IO;
 using System.Threading.Tasks;
-using Budgenix.API.Services;
+using Budgenix.Services;
 using Budgenix.Data;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;

@@ -36,40 +36,40 @@ export default function SectionShell({
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className={`w-full ${background} shadow-md p-2 rounded-2xl m-2 ${className}`}
+      className={`w-full max-w-full overflow-hidden ${background} shadow-md p-2 rounded-2xl ${className}`}
     >
-      <div className="flex items-center justify-between min-h-[2.5rem]">
-        <h2 className={`text-xl ${titleTextColor} font-semibold flex items-center gap-2`}>
+      <div className="flex flex-wrap items-center justify-between gap-2 min-h-[2.5rem]">
+        <h2 className={`text-xl ${titleTextColor} font-semibold flex items-center gap-2 min-w-0 truncate`}>
           {Icon && <Icon className={`w-5 h-5 ${iconColor}`} aria-hidden="true" />}
           <span>{title}</span>
         </h2>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {extraHeaderContent}
           {refreshable && (
-          <button
-            className={`btn btn-sm btn-ghost hover:bg-primary/10 hover:${titleTextColor}`}
-            onClick={() => window.location.reload()}
-            aria-label="Refresh section"
-            title="Refresh"
-          >
-            <RefreshCcw className="w-4 h-4" />
-          </button>
-        )}
-        {minimizable && (
-          <button
-            className="btn btn-sm btn-ghost hover:bg-primary/10 hover:text-primary"
-            onClick={() => setIsMinimized((prev: boolean) => !prev)}
-            aria-label={isMinimized ? 'Expand section' : 'Minimize section'}
-            title={isMinimized ? 'Expand' : 'Minimize'}
-          >
-            {isMinimized ? <AppIcons.down /> : <AppIcons.up />}
-          </button>
-        )}
+            <button
+              className={`btn btn-sm btn-ghost hover:bg-primary/10 hover:${titleTextColor}`}
+              onClick={() => window.location.reload()}
+              aria-label="Refresh section"
+              title="Refresh"
+            >
+              <RefreshCcw className="w-4 h-4" />
+            </button>
+          )}
+          {minimizable && (
+            <button
+              className="btn btn-sm btn-ghost hover:bg-primary/10 hover:text-primary"
+              onClick={() => setIsMinimized((prev: boolean) => !prev)}
+              aria-label={isMinimized ? 'Expand section' : 'Minimize section'}
+              title={isMinimized ? 'Expand' : 'Minimize'}
+            >
+              {isMinimized ? <AppIcons.down /> : <AppIcons.up />}
+            </button>
+          )}
         </div>
-        
       </div>
 
       <div>{children}</div>
     </motion.section>
+
   );
 }

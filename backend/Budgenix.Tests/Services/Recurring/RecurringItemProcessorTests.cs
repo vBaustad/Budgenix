@@ -5,12 +5,12 @@ using Budgenix.Data;
 using Budgenix.Models.Finance;
 using Budgenix.Models.Shared;
 using Budgenix.Models.Users;
-using Budgenix.Services;
 using Budgenix.Services.Recurring;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 using Microsoft.Extensions.Localization;
 using Moq;
+using Budgenix.API.Services.User;
 
 
 namespace Budgenix.Tests.Services.Recurring

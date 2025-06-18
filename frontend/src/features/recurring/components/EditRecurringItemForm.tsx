@@ -88,7 +88,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
 
   return (
-    <form onSubmit={handleSubmit} className="bg-base-100 p-4 rounded-xl border shadow space-y-4">
+    <form onSubmit={handleSubmit} className="bg-base-100 p-4 rounded-xl border shadow space-y-4 w-full max-w-full overflow-hidden">
       <h3 className="text-lg font-semibold text-primary">Edit Recurring</h3>
 
       <InputField name="name" value={form.name} onChange={handleChange} placeholder="Name" />

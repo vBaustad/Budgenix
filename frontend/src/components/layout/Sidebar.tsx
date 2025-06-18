@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { sidebarNav } from '../../constants/SidebarNav';
 import BudgenixLogo from '../../assets/Logo/BudgenixLogo.png';
@@ -15,11 +15,13 @@ function classNames(...classes: (string | undefined | null | false)[]) {
   return classes.filter(Boolean).join(' ');
 }
 
-export default function Sidebar() {
-  
-
-
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+export default function Sidebar({
+  sidebarOpen,
+  setSidebarOpen,
+}: {
+  sidebarOpen: boolean;
+  setSidebarOpen: (open: boolean) => void;
+}) {
   const { t } = useTranslation();
   const { logout } = useAuth();
   const { pathname } = useLocation();
@@ -30,21 +32,26 @@ export default function Sidebar() {
   return (
     <>
       {/* Mobile Sidebar */}
-      <Dialog open={sidebarOpen} onClose={setSidebarOpen} className="lg:hidden z-50 relative">
+      <Dialog open={sidebarOpen} onClose={setSidebarOpen} className="relative z-50 lg:hidden">
         <DialogBackdrop className="fixed inset-0 bg-base-300/80 transition-opacity" />
         <div className="fixed inset-0 flex">
-          <DialogPanel className="relative flex flex-1 max-w-xs bg-primary p-6 ring-1 ring-primary-content/10">
+          <DialogPanel className="relative flex w-full max-w-xs flex-1 transform bg-primary p-4 ring-1 ring-primary-content/10 transition duration-300 ease-in-out">
             <TransitionChild>
               <div className="absolute top-0 left-full flex w-16 justify-center pt-5">
-                <button onClick={() => setSidebarOpen(false)} className="-m-2.5 p-2.5">
-                  <XMarkIcon className="size-6 text-primary-content" />
+                <button type="button" onClick={() => setSidebarOpen(false)} className="-m-2.5 p-2.5">
+                  <span className="sr-only">Close sidebar</span>
+                  <XMarkIcon aria-hidden="true" className="size-6 text-primary-content" />
                 </button>
               </div>
             </TransitionChild>
 
-            <div className="flex flex-col grow gap-6 overflow-y-auto">
-              <img src={BudgenixLogo} alt="Budgenix" className="h-8 w-auto" />
-              <SidebarContent t={t} logout={logout} isActive={isActive} />
+            <div className="flex grow flex-col gap-4 overflow-y-auto">
+              <div className="flex h-16 items-center">
+                <img src={BudgenixLogo} alt="Budgenix" className="h-8 w-auto" />
+              </div>
+              <nav className="flex-1 flex flex-col gap-4">
+                <SidebarContent t={t} logout={logout} isActive={isActive} setSidebarOpen={setSidebarOpen} />
+              </nav>
             </div>
           </DialogPanel>
         </div>
@@ -71,7 +78,6 @@ const SidebarProfile = React.memo(function SidebarProfile({
   const getInitials = (first: string, last: string) =>
     `${first?.[0] ?? ''}${last?.[0] ?? ''}`.toUpperCase();
 
-  // Prefer live user, fallback to cachedUser
   const displayUser = user ?? cachedUser;
 
   if (!displayUser) {
@@ -104,20 +110,20 @@ const SidebarProfile = React.memo(function SidebarProfile({
   );
 });
 
-
-
 type SidebarContentProps = {
   t: (key: string) => string;
   logout: () => void;
   isActive: (path?: string) => boolean;
+  setSidebarOpen?: (open: boolean) => void;
 };
 
-function SidebarContent({ t, logout, isActive }: SidebarContentProps) {
+function SidebarContent({ t, logout, isActive, setSidebarOpen }: SidebarContentProps) {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
     await logout();
     navigate('/login', { replace: true });
+    setSidebarOpen?.(false);
   };
 
   return (
@@ -136,6 +142,7 @@ function SidebarContent({ t, logout, isActive }: SidebarContentProps) {
                     item={item}
                     isActive={isActive}
                     t={t}
+                    setSidebarOpen={setSidebarOpen}
                   />
                 );
               }
@@ -157,8 +164,9 @@ function SidebarContent({ t, logout, isActive }: SidebarContentProps) {
               if ('path' in item) {
                 return (
                   <li key={item.label}>
-                    <a
-                      href={item.path}
+                    <Link
+                      to={item.path}
+                      onClick={() => setSidebarOpen?.(false)}
                       className={classNames(
                         'flex items-center gap-2 px-2 py-2 rounded-md transition',
                         isActive(item.path)
@@ -168,7 +176,7 @@ function SidebarContent({ t, logout, isActive }: SidebarContentProps) {
                     >
                       <item.icon className="w-4 h-4 shrink-0" />
                       {t(item.label)}
-                    </a>
+                    </Link>
                   </li>
                 );
               }
@@ -186,10 +194,12 @@ function SidebarCollapsibleItem({
   item,
   isActive,
   t,
+  setSidebarOpen,
 }: {
   item: SidebarItem;
   isActive: (path?: string) => boolean;
   t: (key: string) => string;
+  setSidebarOpen?: (open: boolean) => void;
 }) {
   const isInitiallyOpen =
     'children' in item && Array.isArray(item.children)
@@ -221,8 +231,9 @@ function SidebarCollapsibleItem({
         <ul className="mt-1 ml-6 space-y-1">
           {item.children.map((child) => (
             <li key={child.label}>
-              <a
-                href={child.path}
+              <Link
+                to={child.path}
+                onClick={() => setSidebarOpen?.(false)}
                 className={classNames(
                   'flex items-center gap-2 px-2 py-1 rounded-md text-sm transition',
                   isActive(child.path)
@@ -232,7 +243,7 @@ function SidebarCollapsibleItem({
               >
                 <child.icon className="w-4 h-4 shrink-0" />
                 {t(child.label)}
-              </a>
+              </Link>
             </li>
           ))}
         </ul>

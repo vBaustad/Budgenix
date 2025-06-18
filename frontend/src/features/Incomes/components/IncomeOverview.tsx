@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { AppIcons } from '@/components/icons/AppIcons';
 import { StatCard } from '@/components/common/cards/StatCard';
 import ProgressCard from '@/components/common/cards/ProgressCard';
@@ -8,8 +7,9 @@ import { useDateFilter } from '@/context/DateFilterContext';
 import { useInsights } from '@/features/expenses/hooks/useInsights';
 import { InsightCategories } from '@/types/insights/insight';
 import InsightCard from '@/features/expenses/components/InsightCard';
-import { useIncomes } from '../context/IncomesContext';
+import { useIncomesContext } from '../context/IncomesContext';
 import IncomeMonthlyChart from './IncomeMonthlyChart';
+import { useEffect } from 'react';
 
 export default function IncomeOverview() {
   const now = new Date();
@@ -24,11 +24,11 @@ export default function IncomeOverview() {
     overview,
     overviewLoading,
     refreshOverview,
-  } = useIncomes(); // assuming this returns same shape as expenses overview
+  } = useIncomesContext();
 
   useEffect(() => {
-    refreshOverview(selectedMonth, selectedYear);
-  }, [selectedMonth, selectedYear]);
+    refreshOverview();
+  }, [refreshOverview, selectedMonth, selectedYear]);
 
   const { insights, loading: insightsLoading } = useInsights(selectedMonth, selectedYear);
   const filteredInsights = insights.filter(i => i.category === InsightCategories.Income);
@@ -41,9 +41,9 @@ export default function IncomeOverview() {
   const diffPercent = Math.min((incomeThisMonth / (lastMonthIncome || 1)) * 100, 200);
 
   return (
-    <div className="flex flex-col lg:flex-row justify-between gap-4 p-2">
+    <div className="flex flex-col gap-4 w-full max-w-full overflow-hidden lg:flex-row">
       {/* LEFT Overview */}
-      <div className="w-full flex flex-col gap-2">
+      <div className="w-full lg:w-1/2 flex flex-col gap-2">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <StatCard
             icon={<AppIcons.income className="w-4 h-4" />}
@@ -52,7 +52,7 @@ export default function IncomeOverview() {
               overviewLoading ? 'Loading...' : formatCurrency(incomeThisMonth, userCurrency)
             }
             valueColor={overviewLoading ? 'text-base-content/40' : 'text-success'}
-          />         
+          />
 
           <ProgressCard
             label="Compared to last month"
@@ -92,8 +92,8 @@ export default function IncomeOverview() {
       </div>
 
       {/* RIGHT: Insights */}
-      <div className="w-full flex">
-        <div className="flex-1 bg-base-200 rounded-2xl shadow-md">
+      <div className="w-full lg:w-1/2 flex flex-col">
+        <div className="bg-base-100 rounded-2xl shadow-md p-4 h-full">
           {!isCurrentMonth ? (
             <p className="text-sm text-base-content/70 p-4">
               Insights are only available for the current month.

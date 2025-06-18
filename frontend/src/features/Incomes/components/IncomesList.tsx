@@ -39,28 +39,29 @@ export default function IncomesList({ incomes }: { incomes: Income[] }) {
           label: 'Date',
           accessor: 'date',
           format: formatDate,
-          width: '100px',
+          width: 'w-[80px]',
           sortable: true,
         },
         {
           label: 'Name',
           accessor: 'name',
-          width: '200px',
+          width: 'w-[120px] sm:w-[130px] lg:w-[200px]',
           sortable: true,
         },
         {
-          label: "Description",
-          accessor: "description",
+          label: 'Description',
+          accessor: 'description',
           format: truncateText,
-          width: '350px',
+          width: 'w-[150px] sm:w-[180px] lg:w-[240px]',
           sortable: true,
+          showOnMobile: false,
         },
         {
           label: 'Amount',
           accessor: 'amount',
           align: 'right',
           format: (val) => formatCurrency(val, currency),
-          width: '100px',
+          width: 'w-[80px] sm:w-[100px]',
           sortable: true,
         },
         {
@@ -73,10 +74,12 @@ export default function IncomesList({ incomes }: { incomes: Income[] }) {
             ) : (
               <span className="text-base-content/40">–</span>
             ),
-          width: '150px',
-          sortable: true
+          width: 'w-[100px] sm:w-[150px]',
+          sortable: true,
+          showOnMobile: false,
         },
       ]}
+
       actionHandlers={{
         onEdit: openEditModal,
         onDelete: (row) => confirmDelete(row.id),
