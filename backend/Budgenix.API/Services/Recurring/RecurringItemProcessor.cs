@@ -1,4 +1,5 @@
-﻿using Budgenix.Data;
+﻿using Budgenix.Services.User;
+using Budgenix.Data;
 using Budgenix.Models.Shared;
 
 namespace Budgenix.Services.Recurring

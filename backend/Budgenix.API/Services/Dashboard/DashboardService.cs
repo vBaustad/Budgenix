@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 
-namespace Budgenix.Services
+namespace Budgenix.Services.Dashboard
 {
     public interface IDashboardService
     {
@@ -46,8 +46,8 @@ namespace Budgenix.Services
 
                 var expenses = await _context.Expenses
                     .Where(e => e.UserId == userId &&
-                        ((e.Date.Month == month && e.Date.Year == year) ||
-                         (e.Date.Month == lastMonth.Month && e.Date.Year == lastMonth.Year)))
+                        (e.Date.Month == month && e.Date.Year == year ||
+                         e.Date.Month == lastMonth.Month && e.Date.Year == lastMonth.Year))
                     .Include(e => e.Category)
                     .ToListAsync();
 

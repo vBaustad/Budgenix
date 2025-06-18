@@ -13,9 +13,9 @@ export const StatCard = ({
   valueColor = 'text-base-content',
   diff,
 }: StatCardProps) => (
-  <div className="rounded-xl p-4 shadow-md bg-base-100 space-y-2 animate-fade-in-up transition-all duration-300">
-    <div className="flex items-center justify-between">
-      <div className="flex items-center gap-2 text-sm font-medium text-base-content">
+  <div className="rounded-xl p-4 shadow-md bg-base-100 space-y-2 animate-fade-in-up transition-all duration-300 w-full max-w-full overflow-hidden">
+    <div className="flex flex-wrap items-center justify-between gap-1">
+      <div className="flex items-center gap-2 text-sm font-medium text-base-content min-w-0 truncate">
         {icon}
         {title}
       </div>
@@ -24,3 +24,4 @@ export const StatCard = ({
     <h2 className={`text-2xl font-bold ${valueColor}`}>{value}</h2>
   </div>
 );
+

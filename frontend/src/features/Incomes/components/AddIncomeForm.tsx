@@ -7,7 +7,7 @@ import { RecurrenceFrequency, RecurrenceFrequencyOptions } from '@/types/shared/
 import { formatCurrency } from '@/utils/formatting';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { createIncome } from '../services/incomesService';
+import { useCreateIncome } from '../services/incomesService';
 import { createRecurringItem } from '@/features/recurring/services/recurringService';
 import { AppIcons } from '@/components/icons/AppIcons';
 import { RecurringItemType } from '@/types/finance/recurring';
@@ -39,7 +39,11 @@ export default function AddIncomeForm({ onAdd }: Props) {
 
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+
+  const { mutateAsync: createIncome, isPending: loading } = useCreateIncome();
+
+  const { categories } = useCategories();
+  const { currency: userCurrency } = useCurrency();
 
   const isRecurring = form.recurrenceFrequency !== 'None';
 
@@ -60,7 +64,6 @@ export default function AddIncomeForm({ onAdd }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError(null);
 
     try {
@@ -98,13 +101,8 @@ export default function AddIncomeForm({ onAdd }: Props) {
     } catch (err: unknown) {
       toast.error('Failed to add income');
       setError(err instanceof Error ? err.message : 'Something went wrong');
-    } finally {
-      setLoading(false);
     }
   };
-
-  const { categories } = useCategories();
-  const { currency: userCurrency } = useCurrency();
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl">

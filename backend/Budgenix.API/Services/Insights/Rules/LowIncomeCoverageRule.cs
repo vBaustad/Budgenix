@@ -1,4 +1,5 @@
-﻿using Budgenix.Data;
+﻿using Budgenix.Services.User;
+using Budgenix.Data;
 using Budgenix.Dtos.Insights;
 using Budgenix.Models.Shared;
 using Microsoft.EntityFrameworkCore;

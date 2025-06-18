@@ -18,12 +18,13 @@ import { useDateFilter } from '@/context/DateFilterContext';
 type ViewMode = 'daily' | 'monthly' | 'yearly';
 type CustomPayload = { isMax?: boolean; isMin?: boolean };
 type Props = {
-  data: number[];
+  data: { day: number; total: number }[];
   view?: ViewMode;
   year?: number;
   month?: number;
   highlightSpikes?: boolean;
 };
+
 
 type TooltipProps = {
   active?: boolean;
@@ -34,42 +35,65 @@ type TooltipProps = {
   currency: string;
 };
 
-function getChartData(view: ViewMode, data: number[], year: number, month: number, isCurrentMonth: boolean) {
+
+function getChartData(
+  view: ViewMode,
+  data: { day: number; total: number }[],
+  year: number,
+  month: number,
+  isCurrentMonth: boolean
+) {
   if (view === 'daily') {
     const daysInMonth = new Date(year, month, 0).getDate();
     const numDays = isCurrentMonth ? new Date().getDate() : daysInMonth;
+
+    const dayMap = new Map(data.map(d => [d.day, d.total]));
+
     return Array.from({ length: numDays }, (_, i) => {
-      const date = new Date(year, month - 1, i + 1);
+      const day = i + 1;
       return {
-        label: date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
-        value: data[i] ?? 0,
+        label: new Date(year, month - 1, day).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+        value: dayMap.get(day) ?? 0
       };
     });
   }
 
   if (view === 'monthly') {
-    return [{ label: '', value: 0 },
-      ...Array.from({ length: 12 }, (_, i) => ({
+    // Aggregate totals for each month (assuming data spans a year)
+    const monthTotals = Array.from({ length: 12 }, (_, i) => {
+      const monthData = data.filter(d => {
+        const date = new Date(year, month - 1, d.day);
+        return date.getMonth() === i;
+      });
+      const total = monthData.reduce((sum, d) => sum + d.total, 0);
+      return {
         label: new Date(year, i).toLocaleString(undefined, { month: 'short' }),
-        value: data[i] ?? 0,
-      })),
-      { label: '', value: 0 }
-    ];
+        value: total
+      };
+    });
+    return monthTotals;
   }
 
   if (view === 'yearly') {
     const startYear = year - 5;
-    return [{ label: '', value: 0 },
-      ...Array.from({ length: 6 }, (_, i) => ({
-        label: `${startYear + i}`,
-        value: data[i] ?? 0,
-      })),
-      { label: '', value: 0 }
-    ];
+    const yearTotals = Array.from({ length: 6 }, (_, i) => {
+      const y = startYear + i;
+      const yearData = data.filter(d => {
+        const date = new Date(year, month - 1, d.day);
+        return date.getFullYear() === y;
+      });
+      const total = yearData.reduce((sum, d) => sum + d.total, 0);
+      return {
+        label: `${y}`,
+        value: total
+      };
+    });
+    return yearTotals;
   }
 
   return [];
 }
+
 
 function getMinMax(data: { value: number }[]) {
   if (data.length === 0) return [0, 0];

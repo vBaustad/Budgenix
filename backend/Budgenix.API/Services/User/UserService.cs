@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Localization;
 using System.Security.Claims;
 
-namespace Budgenix.Services
+namespace Budgenix.Services.User
 {
     public class UserService : IUserService
     {

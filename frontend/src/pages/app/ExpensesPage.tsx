@@ -11,7 +11,7 @@ import SectionShell from '@/components/layout/SectionShell';
 import { AppIcons } from '@/components/icons/AppIcons';
 import { GROUP_OPTIONS } from '@/features/expenses/constants/grouping';
 import RecurringSummary from '@/features/recurring/components/RecurringSummary';
-import { useExpenses } from '@/features/expenses/context/ExpensesContext';
+import { useExpensesContext } from '@/features/expenses/context/ExpensesContext';
 import { useRecurring } from '@/context/RecurringContext';
 import { useCategories } from '@/context/CategoryContext';
 import { t } from 'i18next';
@@ -20,16 +20,16 @@ export type GroupByOption = typeof GROUP_OPTIONS[number]['value'];
 
 export default function ExpensesPage() {
 
-  const {
-    expenses,
-    groupedExpenses,
-    loading,
-    groupBy,
-    selectedCategories,
-    setGroupBy,
-    setSelectedCategories,
-    handleAddExpense,    
-  } = useExpenses();
+const {
+  expenses,
+  groupedExpenses,
+  loading,
+  groupBy,
+  selectedCategories,
+  setGroupBy,
+  setSelectedCategories,
+  handleAddExpense,    
+} = useExpensesContext();
 
 const {
   recurringExpenses,
@@ -61,17 +61,17 @@ const {
 
 
   return (
-    <div className="flex flex-col p-2">
+    <div className="flex flex-col gap-4 p-4 w-full max-w-full overflow-hidden">
 
       <ExpensesOverview />   
-           
-      <div className="flex flex-col lg:flex-row">
-        <SectionShell title={t('expenses.add')} icon={AppIcons.add} minimizable>
+
+      <div className="flex flex-col lg:flex-row w-full max-w-full gap-4">
+        <SectionShell title={t('expenses.add')} icon={AppIcons.add} minimizable className="w-full">
           <AddExpenseForm onAdd={handleAddExpense} onRecurringChange={() => refreshRecurring()} />
         </SectionShell>
 
-        <SectionShell title="Upcoming Expenses" icon={AppIcons.recurring} refreshable>
-          <div className="flex flex-col lg:flex-row gap-4">
+        <SectionShell title="Upcoming Expenses" icon={AppIcons.recurring} refreshable className="w-full">
+          <div className="flex flex-col lg:flex-row gap-4 w-full">
             {/* LEFT: Recurring list */}
             <div className="w-full lg:w-1/2">
               <UpcomingRecurringList
@@ -101,12 +101,13 @@ const {
         </SectionShell>
       </div>
 
-      <div className="flex flex-col lg:flex-row">
+      <div className="flex flex-col lg:flex-row w-full max-w-full gap-4">
         <SectionShell
           title={t('expenses.allExpenses')}
           icon={AppIcons.list}
+          className="w-full"
           extraHeaderContent={
-            <div className="flex gap-4 text-sm font-medium text-base-content">
+            <div className="flex flex-wrap gap-2 text-sm font-medium text-base-content">
               <CategoryFilter
                 options={categoryOptions}
                 selected={selectedCategories}
@@ -130,14 +131,21 @@ const {
             )}
           </div>          
         </SectionShell>
-        <SectionShell title="Spending by Category" icon={AppIcons.pieChart}>
-        <BreakdownPieChart
-          data={chartData}
-          groupBy={(e) => e.categoryName || 'Uncategorized'}
-          getValue={(e) => e.amount}
-          height={600}
-          width={700}
-        />
+
+        <SectionShell 
+          title="Spending by Category" 
+          icon={AppIcons.pieChart} 
+          className="w-full hidden sm:block"
+        >
+          <div className="w-full overflow-x-auto">
+            <BreakdownPieChart
+              data={chartData}
+              groupBy={(e) => e.categoryName || 'Uncategorized'}
+              getValue={(e) => e.amount}
+              height={400}
+              width={700}
+            />
+          </div>
         </SectionShell>
       </div>
     </div>

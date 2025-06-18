@@ -4,8 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Budgenix.Data;
 using Budgenix.Dtos.Goals;
 using Budgenix.Models.Finance;
-using Budgenix.Services;
 using AutoMapper;
+using Budgenix.Services.User;
 
 namespace Budgenix.API.Controllers
 {

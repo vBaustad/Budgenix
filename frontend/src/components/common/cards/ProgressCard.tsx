@@ -16,7 +16,7 @@ export default function ProgressCard({
   const [textClass = 'text-base-content', bgClass = 'bg-base-300'] = colorClass.split(' ');
 
   return (
-    <div className="bg-base-100 rounded-xl p-4 shadow-md space-y-2">
+    <div className="bg-base-100 rounded-xl p-4 shadow-md space-y-2 w-full max-w-full overflow-hidden">
       <p className="text-sm text-base-content font-medium truncate">{label}</p>
 
       <div className="w-full bg-base-200 h-2 rounded-full overflow-hidden">
@@ -26,7 +26,8 @@ export default function ProgressCard({
         />
       </div>
 
-      <p className={`text-sm font-medium ${textClass}`}>{valueText}</p>
+      <p className={`text-sm font-medium ${textClass} truncate`}>{valueText}</p>
     </div>
   );
 }
+

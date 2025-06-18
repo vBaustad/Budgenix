@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Budgenix.Services.Insights;
 using Microsoft.AspNetCore.Authorization;
-using Budgenix.Services;
+using Budgenix.Services.User;
 
 namespace Budgenix.API.Controllers
 {

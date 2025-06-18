@@ -31,14 +31,15 @@ export default function UpcomingRecurringItemsList({ recurringItems, loading, on
             key={exp.id}
             className="relative bg-base-100 rounded-xl p-2 border border-base-300 shadow-md w-full"
           >
-            <div className="flex justify-between items-center">
-              <div className="flex justify-between">
-                <div className="font-medium text-base-content">{exp.name}</div>
-                <div className="flex items-center gap-1 text-sm text-base-content ml-4">
+            <div className="flex justify-between items-center flex-wrap gap-1">
+              <div className="flex flex-wrap items-center gap-1 min-w-0">
+                <div className="font-medium text-base-content truncate">{exp.name}</div>
+                <div className="flex items-center gap-1 text-sm text-base-content">
                   <AppIcons.calendar className="w-4 h-4" />
                   {formatDate(exp.nextOccurrenceDate)} · {RecurrenceFrequencyLabels[exp.frequency]}
                 </div>
               </div>
+
               <div className="text-sm font-semibold text-base-content">
                   {formatCurrency(exp.amount, userCurrency)}
               </div>

@@ -1,25 +1,23 @@
-﻿using Budgenix.API.Services;
+﻿using Budgenix.Services;
+using Budgenix.Services.Dashboard;
+using Budgenix.Services.User;
 using Budgenix.Data;
 using Budgenix.Helpers;
 using Budgenix.Mapping;
 using Budgenix.Models.Users;
-using Budgenix.Services;
 using Budgenix.Services.Insights;
-using Budgenix.Services.Insights.Rules;
 using Budgenix.Services.Recurring;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Globalization;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Budgenix.Services.Finance;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,10 +48,14 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<RecurringItemService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IInsightService, InsightService>();
+builder.Services.AddScoped<IExpenseService, ExpenseService>();
+builder.Services.AddScoped<IIncomeService, IncomeService>();
+
 builder.Services.AddInsightRules();
 builder.Services.AddTransient<NextOccurrenceResolver>();
 builder.Services.AddAutoMapper(typeof(MappingProfile));

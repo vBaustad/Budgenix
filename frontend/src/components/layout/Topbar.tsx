@@ -1,9 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
-import { ThemeDropdown } from '../common/ThemeDropdown';
-import CurrencyDropdown from '../common/CurrencyDropdown';
 import { DatePickerControls } from '../common/DatePickerControls';
 import { useDateFilter } from '@/context/DateFilterContext';
+import { Bars3Icon } from '@heroicons/react/24/outline';
 
 const routeTitles: Record<string, string> = {
   '/dashboard': 'topbar.dashboard',
@@ -16,7 +15,7 @@ const routeTitles: Record<string, string> = {
   '/settings': 'topbar.settings',
 };
 
-export default function Topbar() {
+export default function Topbar({ onMenuClick }: { onMenuClick?: () => void }) {
   const { pathname } = useLocation();
   const { t } = useTranslation();
 
@@ -24,18 +23,17 @@ export default function Topbar() {
   const title = t(titleKey);
 
   const isExpensesPage = pathname === '/expenses';
-
   const { selectedMonth, setSelectedMonth, selectedYear, setSelectedYear } = useDateFilter();
 
   return (
-    <div className="bg-base-300 border-b border-base-content/20 text-base-content z-30">
-      {/* Topbar Header */}
-      <div className="h-16 flex justify-between items-center px-4 sm:px-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:gap-6 gap-1">
-          <h1 className="text-xl font-bold">{title}</h1>
+    <div className="bg-base-300 border-b border-base-content/20 text-base-content z-30 w-full overflow-hidden">
+      <div className="h-16 flex items-center px-4 sm:px-6 w-full max-w-full overflow-hidden">
+        {/* Left side: flexible, can shrink */}
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <h1 className="text-lg font-bold truncate">{title}</h1>
 
           {isExpensesPage && (
-            <div className="flex items-center gap-2 text-sm text-base-content/80">
+            <div className="min-w-0 overflow-hidden">
               <DatePickerControls
                 selectedMonth={selectedMonth}
                 setSelectedMonth={setSelectedMonth}
@@ -46,11 +44,18 @@ export default function Topbar() {
           )}
         </div>
 
-        <div className="flex items-center gap-4 sm:gap-6 text-sm font-medium">
-          <CurrencyDropdown />
-          <ThemeDropdown />
-        </div>
+
+        {/* Right side: hamburger always visible */}
+      <button
+        onClick={onMenuClick}
+        className="lg:hidden p-2 rounded hover:bg-base-content/10 flex-shrink-0 ml-2"
+      >
+        <span className="sr-only">Open sidebar</span>
+        <Bars3Icon className="w-6 h-6" />
+      </button>
+
       </div>
     </div>
+
   );
 }

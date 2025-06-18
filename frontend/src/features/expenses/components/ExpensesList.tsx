@@ -35,51 +35,53 @@ export default function ExpensesList({ expenses }: { expenses: Expense[] }) {
       rowKey="id"
       data={paddedExpenses}
       columns={[
-        {
-          label: 'Date',
-          accessor: 'date',
-          format: formatDate,
-          width: '100px',
-          sortable: true,
-        },
-        {
-          label: 'Name',
-          accessor: 'name',
-          width: '200px',
-          sortable: true,
-        },
-        {
-          label: 'Description',
-          accessor: 'description',
-          format: truncateText,
-          width: '400px',
-          sortable: true,
-        },
-        {
-          label: 'Amount',
-          accessor: 'amount',
-          align: 'right',
-          format: (val) => formatCurrency(val, currency),
-          width: '100px',
-          sortable: true,
-        },
-        {
-          label: 'Category',
-          accessor: 'categoryName',
-          align: 'center',
-          format: (val) =>
-            val ? (
-              <span className="badge badge-sm badge-accent">{val}</span>
-            ) : (
-              <span className="text-base-content/40">–</span>
-            ),
-          width: '150px',
-          sortable: true
-        },
-      ]}
+          {
+            label: 'Date',
+            accessor: 'date',
+            format: formatDate,
+            width: 'w-[80px]',
+            sortable: true,
+          },
+          {
+            label: 'Name',
+            accessor: 'name',
+            width: 'w-[120px] sm:w-[130px] lg:w-[200px]',
+            sortable: true,
+          },
+          {
+            label: 'Description',
+            accessor: 'description',
+            format: truncateText,
+            width: 'w-[150px] sm:w-[180px] lg:w-[240px]',
+            sortable: true,
+            showOnMobile: false,
+          },
+          {
+            label: 'Amount',
+            accessor: 'amount',
+            align: 'right',
+            format: (val) => formatCurrency(val, currency),
+            width: 'w-[80px] sm:w-[100px]',
+            sortable: true,
+          },
+          {
+            label: 'Category',
+            accessor: 'categoryName',
+            align: 'center',
+            format: (val) =>
+              val ? (
+                <span className="badge badge-sm badge-accent">{val}</span>
+              ) : (
+                <span className="text-base-content/40">–</span>
+              ),
+            width: 'w-[100px] sm:w-[150px]',
+            sortable: true,
+            showOnMobile: false,
+          },
+        ]}
       actionHandlers={{
         onEdit: openEditModal,
-        onDelete: (row) => confirmDelete(row.id),
+        onDelete: (row) => confirmDelete(row.id),        
       }}
     />
   );

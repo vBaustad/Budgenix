@@ -3,7 +3,6 @@ using Budgenix.Data;
 using Microsoft.EntityFrameworkCore;
 using Budgenix.Models.Finance;
 using Budgenix.Dtos.Budgets;
-using Budgenix.Services;
 using AutoMapper;
 using Budgenix.Dtos.Expenses;
 using Budgenix.Helpers.Query;
@@ -11,6 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 using Budgenix.Models.Shared;
 using Microsoft.Extensions.Localization;
 using Budgenix.Helpers;
+using Budgenix.Services.User;
 
 namespace Budgenix.API.Controllers
 {
