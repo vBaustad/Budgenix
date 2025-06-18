@@ -26,7 +26,6 @@ export default function Sidebar({
   const { logout } = useAuth();
   const { pathname } = useLocation();
   const { user, cachedUser } = useUser();
-
   const isActive = (path?: string) => pathname === path;
 
   return (
