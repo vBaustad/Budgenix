@@ -5,28 +5,30 @@ namespace Budgenix.Dtos.Recurring
 {
     public class CreateRecurringItemDto
     {
-        [Required]
+        [Required(ErrorMessage = "Name is required.")]
+        [MaxLength(100, ErrorMessage = "Name cannot exceed 100 characters.")]
         public string Name { get; set; } = null!;
 
-        [MaxLength(250)]
+        [MaxLength(250, ErrorMessage = "Description cannot exceed 250 characters.")]
         public string? Description { get; set; }
 
-        [Range(0.01, double.MaxValue)]
+        [Required]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Amount must be greater than zero.")]
         public decimal Amount { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Start date is required.")]
         public DateTime StartDate { get; set; }
 
         public DateTime? EndDate { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Frequency is required.")]
         public RecurrenceTypeEnum Frequency { get; set; }
+
+        [Required(ErrorMessage = "Type is required.")]
+        public RecurringItemType Type { get; set; }
 
         [Required]
         public bool IsActive { get; set; } = true;
-
-        [Required]
-        public RecurringItemType Type { get; set; }
 
         public Guid? CategoryId { get; set; }
     }

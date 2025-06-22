@@ -1,200 +1,112 @@
 ﻿using AutoMapper;
-using Budgenix.Data;
 using Budgenix.Dtos.Recurring;
-using Budgenix.Models.Shared;
-using Budgenix.Services.Recurring;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Localization;
-using Budgenix.Models.Finance;
 using Budgenix.Dtos.Expenses;
+using Budgenix.Services.Recurring;
 using Budgenix.Services.User;
+using Microsoft.AspNetCore.Mvc;
+using Budgenix.Models.Shared;
 
-[ApiController]
-[Route("api/[controller]")]
-public class RecurringController : Controller
+namespace Budgenix.API.Controllers
 {
-    private readonly BudgenixDbContext _context;
-    private readonly IUserService _userService;
-    private readonly RecurringItemService _service;
-    private readonly IMapper _mapper;
-    private readonly IStringLocalizer<SharedResource> _localizer;
-
-    public RecurringController(
-        IUserService userService,
-        BudgenixDbContext context,
-        RecurringItemService service,
-        IMapper mapper,
-        IStringLocalizer<SharedResource> localizer)
+    [ApiController]
+    [Route("api/[controller]")]
+    public class RecurringController : ControllerBase
     {
-        _context = context;
-        _userService = userService;
-        _service = service;
-        _mapper = mapper;
-        _localizer = localizer;
-    }
+        private readonly IUserService _userService;
+        private readonly IRecurringService _recurringService;
 
-    [HttpGet("upcoming")]
-    public ActionResult<IEnumerable<RecurringItemDto>> GetUpcoming()
-    {
-        var userId = _userService.GetUserId();
-        var today = DateTime.Today;
-
-        var items = _context.RecurringItems
-            .Where(x => x.UserId == userId && x.IsActive)
-            .ToList();
-
-        var result = items.Select(item => new RecurringItemDto
+        public RecurringController(IUserService userService, IRecurringService recurringService)
         {
-            Id = item.Id,
-            Name = item.Name,
-            Description = item.Description,
-            Amount = item.Amount,
-            StartDate = item.StartDate,
-            EndDate = item.EndDate,
-            Frequency = item.Frequency,
-            IsActive = item.IsActive,
-            Type = item.Type,
-            CategoryId = item.CategoryId,
-            LastTriggeredDate = item.LastTriggeredDate,
-            LastSkippedDate = item.LastSkippedDate,
-            NextOccurrenceDate = _service.GetNextOccurrenceDate(item, today)
-        });
+            _userService = userService;
+            _recurringService = recurringService;
+        }
 
-        return Ok(result);
-    }
-
-    [HttpPut("{id}")]
-    public async Task<ActionResult> UpdateRecurringItem(Guid id, [FromBody] UpdateRecurringItemDto dto)
-    {
-        var userId = _userService.GetUserId();
-        var item = await _context.RecurringItems.FindAsync(id);
-
-        if (item == null || item.UserId != userId)
-            return NotFound();
-
-        item.Name = dto.Name;
-        item.Description = dto.Description ?? string.Empty;
-        item.Amount = dto.Amount;
-        item.StartDate = dto.StartDate;
-        item.EndDate = dto.EndDate;
-        item.Frequency = dto.Frequency;
-        item.IsActive = dto.IsActive;
-        item.Type = dto.Type;
-        item.CategoryId = dto.CategoryId;
-
-        await _context.SaveChangesAsync();
-        return NoContent();
-    }
-
-
-
-    [HttpDelete("{id}")]
-    public async Task<ActionResult> DeleteRecurringItem(Guid id)
-    {
-        var userId = _userService.GetUserId();
-        var item = await _context.RecurringItems.FindAsync(id);
-
-        if (item == null || item.UserId != userId)
-            return NotFound();
-
-        _context.RecurringItems.Remove(item);
-        await _context.SaveChangesAsync();
-        return NoContent();
-    }
-
-    [HttpPost]
-    public async Task<ActionResult<RecurringItemDto>> CreateRecurringItem([FromBody] CreateRecurringItemDto dto)
-    {
-        var userId = _userService.GetUserId();
-
-        var entity = new RecurringItem
+        [HttpGet]
+        public async Task<ActionResult<ApiResponse<IEnumerable<RecurringItemDto>>>> GetAll()
         {
-            Id = Guid.NewGuid(),
-            Name = dto.Name,
-            Description = dto.Description ?? string.Empty,
-            Amount = dto.Amount,
-            StartDate = dto.StartDate,
-            EndDate = dto.EndDate,
-            Frequency = dto.Frequency,
-            IsActive = dto.IsActive,
-            Type = dto.Type,
-            CategoryId = dto.CategoryId,
-            UserId = userId
-        };
+            var userId = _userService.GetUserId();
+            var result = await _recurringService.GetAllAsync(userId);
+            return Ok(ApiResponse<IEnumerable<RecurringItemDto>>.Success(result, "Fetched all recurring items"));
+        }
 
-        _context.RecurringItems.Add(entity);
-        await _context.SaveChangesAsync();
-
-        var today = DateTime.Today;
-        var result = new RecurringItemDto
+        [HttpGet("upcoming")]
+        public async Task<ActionResult<ApiResponse<IEnumerable<RecurringItemDto>>>> GetUpcoming([FromQuery] int daysAhead = 30)
         {
-            Id = entity.Id,
-            Name = entity.Name,
-            Description = entity.Description,
-            Amount = entity.Amount,
-            StartDate = entity.StartDate,
-            EndDate = entity.EndDate,
-            Frequency = entity.Frequency,
-            IsActive = entity.IsActive,
-            Type = entity.Type,
-            CategoryId = entity.CategoryId,
-            NextOccurrenceDate = _service.GetNextOccurrenceDate(entity, today)
-        };
+            var userId = _userService.GetUserId();
+            var result = await _recurringService.GetUpcomingAsync(userId, daysAhead);
+            return Ok(ApiResponse<IEnumerable<RecurringItemDto>>.Success(result, $"Fetched upcoming items for next {daysAhead} days"));
+        }
 
-        return CreatedAtAction(nameof(GetUpcoming), new { id = entity.Id }, result);
-    }
-
-    [HttpPost("{id}/trigger")]
-    public async Task<ActionResult<ExpenseDto>> TriggerRecurringItem(Guid id)
-    {
-        var userId = _userService.GetUserId();
-        var item = await _context.RecurringItems.FindAsync(id);
-
-        if (item == null || item.UserId != userId)
-            return NotFound();
-
-        if (item.CategoryId == null)
-            return BadRequest("Recurring item must have a category.");
-
-        var expense = new Expense
+        [HttpGet("overview")]
+        public async Task<ActionResult<ApiResponse<RecurringOverviewDto>>> GetOverview([FromQuery] int month, [FromQuery] int year)
         {
-            Id = Guid.NewGuid(),
-            Name = item.Name,
-            Description = item.Description,
-            Amount = item.Amount,
-            Date = DateTime.Today,
-            CategoryId = item.CategoryId.Value,
-            UserId = userId,
-            Notes = "Triggered from recurring item"
-        };
+            var userId = _userService.GetUserId();
+            var result = await _recurringService.GetOverviewAsync(userId, month, year);
+            return Ok(ApiResponse<RecurringOverviewDto>.Success(result, "Fetched overview"));
+        }
 
-        item.LastTriggeredDate = DateTime.Today;
-        _service.AdvanceStartDate(item);
+        [HttpGet("{id}")]
+        public async Task<ActionResult<ApiResponse<RecurringItemDto>>> GetById(Guid id)
+        {
+            var userId = _userService.GetUserId();
+            var result = await _recurringService.GetByIdAsync(userId, id);
+            if (result == null)
+                return NotFound(ApiResponse<RecurringItemDto>.Fail("Recurring item not found", 404));
 
-        _context.Expenses.Add(expense);
-        await _context.SaveChangesAsync();
+            return Ok(ApiResponse<RecurringItemDto>.Success(result, "Fetched recurring item"));
+        }
 
-        var result = _mapper.Map<ExpenseDto>(expense);
-        return Ok(result);
+        [HttpPost]
+        public async Task<ActionResult<ApiResponse<RecurringItemDto>>> Create([FromBody] CreateRecurringItemDto dto)
+        {
+            var userId = _userService.GetUserId();
+            var created = await _recurringService.CreateAsync(userId, dto);
+            return CreatedAtAction(nameof(GetById), new { id = created.Id },
+                ApiResponse<RecurringItemDto>.Success(created, "Created recurring item", 201));
+        }
+
+        [HttpPut("{id}")]
+        public async Task<ActionResult<ApiResponse<RecurringItemDto>>> Update(Guid id, [FromBody] UpdateRecurringItemDto dto)
+        {
+            var userId = _userService.GetUserId();
+            var updated = await _recurringService.UpdateAsync(userId, id, dto);
+            if (updated == null)
+                return NotFound(ApiResponse<RecurringItemDto>.Fail("Recurring item not found", 404));
+
+            return Ok(ApiResponse<RecurringItemDto>.Success(updated, "Updated recurring item"));
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<ApiResponse<object>>> Delete(Guid id)
+        {
+            var userId = _userService.GetUserId();
+            var success = await _recurringService.DeleteAsync(userId, id);
+            if (!success)
+                return NotFound(ApiResponse<object>.Fail("Recurring item not found", 404));
+
+            return Ok(ApiResponse<object>.Success(null, "Deleted recurring item"));
+        }
+
+        [HttpPost("{id}/trigger")]
+        public async Task<ActionResult<ApiResponse<ExpenseDto>>> Trigger(Guid id)
+        {
+            var userId = _userService.GetUserId();
+            var result = await _recurringService.TriggerAsync(userId, id);
+            if (result == null)
+                return NotFound(ApiResponse<ExpenseDto>.Fail("Recurring item not found or could not trigger", 404));
+
+            return Ok(ApiResponse<ExpenseDto>.Success(result, "Triggered recurring item"));
+        }
+
+        [HttpPost("{id}/skip")]
+        public async Task<ActionResult<ApiResponse<object>>> Skip(Guid id, [FromQuery] DateTime? occurrenceDate = null)
+        {
+            var userId = _userService.GetUserId();
+            var success = await _recurringService.SkipAsync(userId, id, occurrenceDate);
+            if (!success)
+                return NotFound(ApiResponse<object>.Fail("Recurring item not found or could not skip", 404));
+
+            return Ok(ApiResponse<object>.Success(null, "Skipped occurrence"));
+        }
     }
-
-
-
-    [HttpPost("{id}/skip")]
-    public async Task<ActionResult> SkipNextOccurrence(Guid id)
-    {
-        var userId = _userService.GetUserId();
-        var item = await _context.RecurringItems.FindAsync(id);
-
-        if (item == null || item.UserId != userId)
-            return NotFound();
-
-        item.LastSkippedDate = DateTime.Today;
-
-        _service.AdvanceStartDate(item);
-        await _context.SaveChangesAsync();
-
-        return NoContent();
-    }
-
 }

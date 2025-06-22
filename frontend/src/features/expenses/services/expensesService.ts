@@ -1,4 +1,4 @@
-import { Expense, GroupedExpenses, CreateExpenseDto } from '@/types/finance/expense';
+import { Expense, GroupedExpenses, CreateExpenseDto, UpdateExpenseDto } from '@/types/finance/expense';
 import { apiFetch } from '@/utils/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -15,7 +15,6 @@ type ExpensesOverviewResponse = {
   totalSpent: number;
   lastMonthSpent: number;
   incomeReceived: number;
-  upcomingRecurring: number;
   dailyTotals: { day: number; total: number }[];
 };
 
@@ -43,7 +42,6 @@ async function fetchExpensesOverview(month: number, year: number): Promise<Expen
     totalSpent: res.totalExpense,
     lastMonthSpent: res.lastMonthExpense,
     incomeReceived: res.incomeReceived,
-    upcomingRecurring: res.upcomingRecurring,
     dailyTotals: res.dailyTotals,
   };
 }
@@ -56,6 +54,27 @@ async function createExpenseApi(expense: CreateExpenseDto): Promise<Expense> {
       ...expense,
       description: expense.description || '',
     }),
+  });
+}
+
+async function updateExpenseApi({
+  id,
+  data,
+}: {
+  id: string;
+  data: UpdateExpenseDto;
+}): Promise<void> {
+  await apiFetch(`${API_BASE_URL}/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}
+
+
+async function deleteExpenseApi(id: string): Promise<void> {
+  await apiFetch(`${API_BASE_URL}/${id}`, {
+    method: 'DELETE',
   });
 }
 
@@ -93,6 +112,32 @@ export function useCreateExpense() {
   });
 }
 
+export function useUpdateExpense() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: { id: string; data: UpdateExpenseDto }) => updateExpenseApi(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['expenses'] });
+      queryClient.invalidateQueries({ queryKey: ['expensesOverview'] });
+    },
+  });
+}
+
+
+export function useDeleteExpense() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: deleteExpenseApi,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['expenses'] });
+      queryClient.invalidateQueries({ queryKey: ['expensesOverview'] });
+    },
+  });
+}
+
+
 // === UTILITY ===
 export function isGroupedExpenses(data: Expense[] | GroupedExpenses): data is GroupedExpenses {
   return (
@@ -105,3 +150,6 @@ export function isGroupedExpenses(data: Expense[] | GroupedExpenses): data is Gr
     Array.isArray(data[0].expenses)
   );
 }
+
+
+

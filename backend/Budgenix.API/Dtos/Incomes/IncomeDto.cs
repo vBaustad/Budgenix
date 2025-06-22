@@ -15,6 +15,7 @@ namespace Budgenix.Dtos.Incomes
         public DateTime Date { get; set; }
         [Required]
         public required string CategoryName { get; set; }
+        public Guid CategoryId { get; set; }
         public string? Notes { get; set; }
     }
 }

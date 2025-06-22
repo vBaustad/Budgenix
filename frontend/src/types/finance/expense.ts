@@ -1,5 +1,3 @@
-import { RecurrenceFrequency } from "../shared/recurrence";
-
 export type Expense = {
   id: string;
   name: string;
@@ -7,19 +5,23 @@ export type Expense = {
   amount: number;
   date: string;
   categoryName: string;
+  categoryId: string;
   notes?: string | null;
 };
 
-export type CreateExpenseDto = {
+type ExpenseDtoBase = {
   name: string;
   description?: string;
   amount: number;
   date: string;
   categoryId: string;
   notes?: string | null;
+};
 
-  // Optional recurrence field used only in the form — backend no longer uses this
-  recurrenceFrequency?: RecurrenceFrequency;
+export type ExpenseOverviewDto = {
+  totalExpense: number;
+  lastMonthExpense: number;
+  dailyTotals: number[];
 };
 
 export type GroupedExpenseItem = {
@@ -29,4 +31,5 @@ export type GroupedExpenseItem = {
 };
 
 export type GroupedExpenses = GroupedExpenseItem[];
-
+export type CreateExpenseDto = ExpenseDtoBase;
+export type UpdateExpenseDto = ExpenseDtoBase;

@@ -1,53 +1,53 @@
 ﻿using Budgenix.Models.Categories;
 using Budgenix.Models.Shared;
 using Budgenix.Models.Users;
-using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
-namespace Budgenix.Models.Finance
+public class RecurringItem : BaseEntity
 {
-    public class RecurringItem : BaseEntity
-    {
+    public Guid Id { get; set; }
 
-        public Guid Id { get; set; }
-        [Required]
-        [MaxLength(100)]
-        public required string Name { get; set; }
-        
-        [MaxLength(250)]
-        public string? Description { get; set; }
+    [Required, MaxLength(100)]
+    public required string Name { get; set; }
 
-        [Required]
-        [Range(0.01, double.MaxValue, ErrorMessage = "Amount must be greater than zero.")]
-        public decimal Amount { get; set; }
+    [MaxLength(250)]
+    public string? Description { get; set; }
 
-        [Required]
-        public DateTime StartDate { get; set; }
+    [Required, Range(0.01, double.MaxValue)]
+    public decimal Amount { get; set; }
 
-        public DateTime? EndDate { get; set; }
+    [Required]
+    public DateTime StartDate { get; set; }
 
-        [Required]
-        public RecurrenceTypeEnum Frequency { get; set; }
+    public DateTime? EndDate { get; set; }
 
-        [Required]
-        public RecurringItemType Type { get; set; }
+    [Required]
+    public RecurrenceTypeEnum Frequency { get; set; }
 
-        public Guid? CategoryId { get; set; }
+    [Required]
+    public RecurringItemType Type { get; set; }
 
-        [Required]
-        public bool IsActive { get; set; } = true;
-        public DateTime? LastSkippedDate { get; set; }
-        public DateTime? LastTriggeredDate { get; set; }
+    public Guid? CategoryId { get; set; }
+    [ForeignKey("CategoryId")]
+    public Category? Category { get; set; }
 
-        [ForeignKey("CategoryId")]
-        public Category? Category { get; set; }
+    public string? UserId { get; set; }
+    [ForeignKey("UserId")]
+    public ApplicationUser? User { get; set; }
 
+    [Required]
+    public bool IsActive { get; set; } = true;
 
-        public string? UserId { get; set; }
-        [ForeignKey("UserId")]
-        public ApplicationUser? User { get; set; }
+    public bool IsFulfilledForCurrentPeriod { get; set; } = false;
 
-        // Optional: Foreign key to user/household if needed
-    }
+    public DateTime? NextExpectedDate { get; set; }
+
+    public DateTime? LastMatchedDate { get; set; }
+    public DateTime? LastMissedDate { get; set; }
+
+    public DateTime? LastTriggeredDate { get; set; }
+    public DateTime? LastSkippedDate { get; set; }
+
+    public Guid? LastMatchedTransactionId { get; set; } // optional: bank match trace
 }

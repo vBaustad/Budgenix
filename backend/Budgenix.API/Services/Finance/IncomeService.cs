@@ -71,7 +71,8 @@ namespace Budgenix.Services.Finance
                 Name = i.Name,
                 Amount = i.Amount,
                 Date = i.Date,
-                CategoryName = i.Category?.Name
+                CategoryName = i.Category?.Name,
+                CategoryId = i.CategoryId
             }).ToList();
         }
 
@@ -94,7 +95,8 @@ namespace Budgenix.Services.Finance
                 Name = i.Name,
                 Amount = i.Amount,
                 Date = i.Date,
-                CategoryName = i.Category?.Name
+                CategoryName = i.Category?.Name,
+                CategoryId = i.CategoryId
             };
         }
 
@@ -185,28 +187,6 @@ namespace Budgenix.Services.Finance
                 .Where(i => i.Date.Year == lastMonth.Year && i.Date.Month == lastMonth.Month)
                 .Sum(i => i.Amount);
 
-            var recurringItems = await _context.RecurringItems
-                .Where(r => r.UserId == userId && r.Type == RecurringItemType.Income && r.IsActive)
-                .ToListAsync();
-
-            var nextItemWithDate = recurringItems
-                .Select(r => new
-                {
-                    Item = r,
-                    NextDate = _recurringService.GetNextOccurrenceDate(r, DateTime.Today)
-                })
-                .Where(x => x.NextDate != null)
-                .OrderBy(x => x.NextDate)
-                .FirstOrDefault();
-
-            var nextRecurring = nextItemWithDate == null
-                ? null
-                : new UpcomingRecurringDto
-                {
-                    NextDate = nextItemWithDate.NextDate.Value.ToString("o"),
-                    Amount = nextItemWithDate.Item.Amount
-                };
-
             var dailyTotals = incomes
                 .Where(i => i.Date.Year == year && i.Date.Month == month)
                 .GroupBy(i => i.Date.Day)
@@ -221,13 +201,13 @@ namespace Budgenix.Services.Finance
             {
                 TotalIncome = totalIncome,
                 LastMonthIncome = lastMonthIncome,
-                UpcomingRecurring = nextRecurring,
                 DailyTotals = dailyTotals
             };
 
             _cache.Set(cacheKey, result, TimeSpan.FromMinutes(5));
             return result;
         }
+
 
         public async Task<IncomeDto> AddIncomeAsync(string userId, CreateIncomeDto dto)
         {
@@ -255,7 +235,8 @@ namespace Budgenix.Services.Finance
                 Name = i.Name,
                 Amount = i.Amount,
                 Date = i.Date,
-                CategoryName = i.Category.Name
+                CategoryName = i.Category.Name,
+                CategoryId = i.CategoryId
             };
         }
 

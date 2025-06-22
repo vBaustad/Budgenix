@@ -1,15 +1,15 @@
-
 export type Income = {
   id: string;
   name: string;
-  description: string;
+  description?: string;
   amount: number;
   date: string;
   categoryName: string;
+  categoryId: string;
   notes?: string | null;
 };
 
-export type CreateIncomeDto = {
+type IncomeDtoBase = {
   name: string;
   description?: string;
   amount: number;
@@ -18,14 +18,9 @@ export type CreateIncomeDto = {
   notes?: string | null;
 };
 
-
 export type IncomeOverviewDto = {
   totalIncome: number;
   lastMonthIncome: number;
-  upcomingRecurring: {
-    nextDate: string;
-    amount: number;
-  } | null;
   dailyTotals: number[];
 };
 
@@ -36,3 +31,5 @@ export type GroupedIncomeItem = {
 };
 
 export type GroupedIncomes = GroupedIncomeItem[];
+export type CreateIncomeDto = IncomeDtoBase;
+export type UpdateIncomeDto = IncomeDtoBase;

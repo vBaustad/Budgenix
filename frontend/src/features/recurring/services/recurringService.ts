@@ -1,103 +1,162 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiFetch } from '@/utils/api';
-import { Expense } from "@/types/finance/expense";
-import { CreateRecurringItemDto, RecurringItemDto } from '@/types/finance/recurring';
+import { toast } from 'react-hot-toast';
+import { Expense } from '@/types/finance/expense';
+import { ApiResponse } from '@/types/shared/ApiResponse';
+import {
+  CreateRecurringItemDto,
+  UpdateRecurringItemDto,
+  RecurringItemDto,
+  RecurringOverviewDto
+} from '@/types/finance/recurring';
 
-const RECURRING_API_BASE = '/api/recurring';
+const RECURRING_QUERY_KEY = ['recurring-items'];
+const UPCOMING_QUERY_KEY = ['upcoming-recurring'];
+const OVERVIEW_QUERY_KEY = (month: number, year: number) => ['recurring-overview', month, year];
 
-export async function fetchUpcomingRecurring(): Promise<{
-  id: string;
-  name: string;
-  amount: number;
-  startDate: string;
-  frequency: string;
-  nextOccurrenceDate: string;
-}[]> {
-  const res = await apiFetch(`${RECURRING_API_BASE}/recurring`);
-  return res.json();
+// --- RAW FETCHERS ---
+async function fetchApiResponse<T>(url: string, options?: RequestInit): Promise<T> {
+  const res: ApiResponse<T> = await apiFetch(url, options);
+  if (!res.ok) throw new Error(res.message || 'Unknown API error');
+  return res.data!;
 }
 
-export async function fetchRecurringExpenses(): Promise<RecurringItemDto[]> {
-  const res = await apiFetch(`${RECURRING_API_BASE}/upcoming`);
-  return res.json();
+async function fetchRecurringItems(): Promise<RecurringItemDto[]> {
+  return fetchApiResponse<RecurringItemDto[]>('/api/recurring');
 }
 
-export async function createRecurringItem(data: CreateRecurringItemDto): Promise<RecurringItemDto> {
-  const res = await apiFetch(RECURRING_API_BASE, {
+async function fetchUpcomingRecurring(): Promise<RecurringItemDto[]> {
+  return fetchApiResponse<RecurringItemDto[]>('/api/recurring/upcoming');
+}
+
+async function fetchRecurringOverview(month: number, year: number): Promise<RecurringOverviewDto> {
+  return fetchApiResponse<RecurringOverviewDto>(`/api/recurring/overview?month=${month}&year=${year}`);
+}
+
+async function createRecurringItem(data: CreateRecurringItemDto): Promise<RecurringItemDto> {
+  return fetchApiResponse<RecurringItemDto>('/api/recurring', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
-
-  if (!res.ok) {
-    const error = await res.text();
-    throw new Error(`Failed to create recurring item: ${error}`);
-  }
-
-  return res.json();
 }
 
-export async function updateRecurringItem(item: RecurringItemDto): Promise<void> {
-  const payload = {
-    name: item.name,
-    description: item.description ?? '',
-    amount: item.amount,
-    startDate: item.startDate,
-    endDate: item.endDate || null,
-    frequency: item.frequency,
-    isActive: item.isActive,
-    type: item.type,
-    categoryId: item.categoryId,
-  };
-
-  const res = await apiFetch(`${RECURRING_API_BASE}/${item.id}`, {
+async function updateRecurringItem(id: string, data: UpdateRecurringItemDto): Promise<RecurringItemDto> {
+  return fetchApiResponse<RecurringItemDto>(`/api/recurring/${id}`, {
     method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}
+
+async function deleteRecurringItem(id: string): Promise<void> {
+  await fetchApiResponse<object>(`/api/recurring/${id}`, { method: 'DELETE' });
+}
+
+async function triggerRecurringItem(id: string): Promise<Expense> {
+  return fetchApiResponse<Expense>(`/api/recurring/${id}/trigger`, { method: 'POST' });
+}
+
+async function skipRecurringItem(id: string, occurrenceDate?: string): Promise<void> {
+  const url = occurrenceDate
+    ? `/api/recurring/${id}/skip?occurrenceDate=${encodeURIComponent(occurrenceDate)}`
+    : `/api/recurring/${id}/skip`;
+  await fetchApiResponse<object>(url, { method: 'POST' });
+}
+
+// --- HOOKS ---
+export function useRecurringItems() {
+  return useQuery({
+    queryKey: RECURRING_QUERY_KEY,
+    queryFn: fetchRecurringItems,
+    staleTime: 1000 * 60 * 5,
+    gcTime: 10 * 60 * 1000,
+  });
+}
+
+export function useUpcomingRecurring() {
+  return useQuery({
+    queryKey: UPCOMING_QUERY_KEY,
+    queryFn: fetchUpcomingRecurring,
+    staleTime: 1000 * 60 * 5,
+  });
+}
+
+export function useRecurringOverview(month: number, year: number) {
+  return useQuery({
+    queryKey: OVERVIEW_QUERY_KEY(month, year),
+    queryFn: () => fetchRecurringOverview(month, year),
+    staleTime: 1000 * 60 * 5,
+  });
+}
+
+export function useCreateRecurringItem() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: createRecurringItem,
+    onSuccess: () => {
+      toast.success('Recurring item created');
+      queryClient.invalidateQueries({ queryKey: RECURRING_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: UPCOMING_QUERY_KEY });
+      queryClient.invalidateQueries({ predicate: query => query.queryKey[0] === 'recurring-overview' });
     },
-    body: JSON.stringify(payload),
+    onError: (err: Error) => toast.error(`Failed to create: ${err.message}`),
   });
-
-  if (!res.ok) {
-    const error = await res.text();
-    throw new Error(`Failed to update item: ${error}`);
-  }
 }
 
-export async function triggerRecurringItem(id: string): Promise<Expense> {
-  const res = await apiFetch(`${RECURRING_API_BASE}/${id}/trigger`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+export function useUpdateRecurringItem() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdateRecurringItemDto }) => updateRecurringItem(id, data),
+    onSuccess: () => {
+      toast.success('Recurring item updated');
+      queryClient.invalidateQueries({ queryKey: RECURRING_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: UPCOMING_QUERY_KEY });
+      queryClient.invalidateQueries({ predicate: query => query.queryKey[0] === 'recurring-overview' });
+    },
+    onError: (err: Error) => toast.error(`Failed to update: ${err.message}`),
   });
-
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(err || 'Failed to trigger recurring item');
-  }
-
-  return res.json();
 }
 
-export async function skipRecurringItem(id: string): Promise<void> {
-  const res = await apiFetch(`${RECURRING_API_BASE}/${id}/skip`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+export function useDeleteRecurringItem() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: deleteRecurringItem,
+    onSuccess: () => {
+      toast.success('Recurring item deleted');
+      queryClient.invalidateQueries({ queryKey: RECURRING_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: UPCOMING_QUERY_KEY });
+      queryClient.invalidateQueries({ predicate: query => query.queryKey[0] === 'recurring-overview' });
+    },
+    onError: (err: Error) => toast.error(`Failed to delete: ${err.message}`),
   });
-
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(err || 'Failed to skip recurring item');
-  }
 }
 
-export async function deleteRecurringItem(id: string): Promise<void> {
-  const res = await apiFetch(`${RECURRING_API_BASE}/${id}`, {
-    method: 'DELETE',
+export function useTriggerRecurringItem() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: triggerRecurringItem,
+    onSuccess: () => {
+      toast.success('Recurring item triggered');
+      queryClient.invalidateQueries({ queryKey: RECURRING_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: ['expenses'] });
+      queryClient.invalidateQueries({ predicate: query => query.queryKey[0] === 'recurring-overview' });
+    },
+    onError: (err: Error) => toast.error(`Failed to trigger: ${err.message}`),
   });
+}
 
-  if (!res.ok) {
-    const error = await res.text();
-    throw new Error(`Failed to delete item: ${error}`);
-  }
+export function useSkipRecurringItem() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, occurrenceDate }: { id: string; occurrenceDate?: string }) =>
+      skipRecurringItem(id, occurrenceDate),
+    onSuccess: () => {
+      toast.success('Recurring item skipped');
+      queryClient.invalidateQueries({ queryKey: RECURRING_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: UPCOMING_QUERY_KEY });
+      queryClient.invalidateQueries({ predicate: query => query.queryKey[0] === 'recurring-overview' });
+    },
+    onError: (err: Error) => toast.error(`Failed to skip: ${err.message}`),
+  });
 }

@@ -14,5 +14,20 @@
         public decimal TopSpendingAmount { get; set; }
         public int TotalGoals { get; set; }
         public int GoalsNearCompletion { get; set; }
+        public int BudgetsNearLimit { get; set; }
+        public int BudgetsOverLimit { get; set; }
+        public string? LowestRemainingBudgetName { get; set; }
+        public decimal LowestRemainingBudgetAmount { get; set; }
+        public decimal AverageDailySpend { get; set; }
+        public int DaysOverDailyAverage { get; set; }
+        public int UpcomingExpensesCount { get; set; }
+        public int UpcomingIncomeCount { get; set; }
+        public decimal LastIncomeAmount { get; set; }
+        public string? LastIncomeSource { get; set; }
+        public decimal SavingsGoalProgressPercent { get; set; }
+        public string? NextGoalName { get; set; }
+        public string? NextGoalDueDate { get; set; }
+        public string LastUpdated { get; set; } = DateTime.UtcNow.ToString("o");
+        public int AlertsCount { get; set; }
     }
 }
