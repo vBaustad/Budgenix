@@ -71,7 +71,8 @@ namespace Budgenix.Services.Finance
                 Name = e.Name,
                 Amount = e.Amount,
                 Date = e.Date,
-                CategoryName = e.Category?.Name
+                CategoryName = e.Category?.Name,
+                CategoryId = e.CategoryId
             }).ToList();
         }
 
@@ -94,7 +95,8 @@ namespace Budgenix.Services.Finance
                 Name = e.Name,
                 Amount = e.Amount,
                 Date = e.Date,
-                CategoryName = e.Category?.Name
+                CategoryName = e.Category?.Name,
+                CategoryId = e.CategoryId
             };
         }
 
@@ -177,41 +179,18 @@ namespace Budgenix.Services.Finance
 
             _logger.LogInformation("Daily totals generated: {DailyTotals}", string.Join(", ", dailyTotals.Select(d => $"{d.Day}:{d.Total}")));
 
-
-            var recurringItems = await _context.RecurringItems
-                .Where(r => r.UserId == userId && r.Type == RecurringItemType.Expense && r.IsActive)
-                .ToListAsync();
-
-            var nextItemWithDate = recurringItems
-                .Select(r => new
-                {
-                    Item = r,
-                    NextDate = _recurringService.GetNextOccurrenceDate(r, DateTime.Today)
-                })
-                .Where(x => x.NextDate != null)
-                .OrderBy(x => x.NextDate)
-                .FirstOrDefault();
-
-            var nextRecurring = nextItemWithDate == null
-                ? null
-                : new UpcomingRecurringDto
-                {
-                    NextDate = nextItemWithDate.NextDate.Value.ToString("o"),
-                    Amount = nextItemWithDate.Item.Amount
-                };
-
             var result = new ExpenseOverviewDto
             {
                 TotalExpense = totalExpense,
                 LastMonthExpense = lastMonthExpense,
                 IncomeReceived = incomeReceived,
-                UpcomingRecurring = nextRecurring,
                 DailyTotals = dailyTotals
             };
 
             _cache.Set(cacheKey, result, TimeSpan.FromMinutes(5));
             return result;
         }
+
 
 
 

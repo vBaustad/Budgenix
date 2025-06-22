@@ -9,6 +9,7 @@ import { useInsights } from '../hooks/useInsights';
 import { InsightCategories } from '@/types/insights/insight';
 import { useDateFilter } from '@/context/DateFilterContext';
 import { useExpensesOverview } from '@/features/expenses/services/expensesService';
+import { useRecurringOverview } from '@/features/recurring/services/recurringService';
 
 export default function ExpensesOverview() {
   const { currency: userCurrency } = useCurrency();
@@ -20,14 +21,15 @@ export default function ExpensesOverview() {
     selectedMonth === now.getMonth() + 1;
 
   const { insights, loading: insightsLoading } = useInsights(selectedMonth, selectedYear);
-  const filteredInsights = insights.filter(i => i.category === InsightCategories.Expenses);  
+  const filteredInsights = insights.filter(i => i.category === InsightCategories.Expenses);
 
   const { data: overview, isLoading: overviewLoading } = useExpensesOverview(selectedMonth, selectedYear);
+  const { data: recurringOverview } = useRecurringOverview(selectedMonth, selectedYear);
 
   const totalSpent = overview?.totalSpent ?? 0;
   const lastMonthSpent = overview?.lastMonthSpent ?? 0;
   const incomeReceived = overview?.incomeReceived ?? 0;
-  const upcomingRecurring = overview?.upcomingRecurring ?? 0;
+  const upcomingRecurringExpenseTotal = recurringOverview?.upcomingRecurringExpenseTotal ?? 0;
   const dailyTotals = overview?.dailyTotals ?? [];
 
   const spendingDiff = totalSpent - lastMonthSpent;
@@ -68,12 +70,12 @@ export default function ExpensesOverview() {
           />
           <StatCard
             icon={<AppIcons.recurring className="w-4 h-4" />}
-            title="Upcoming Recurring"
+            title="Upcoming Expenses"
             value={
               isCurrentMonth
                 ? overviewLoading
                   ? 'Loading...'
-                  : formatCurrency(upcomingRecurring, userCurrency)
+                  : formatCurrency(upcomingRecurringExpenseTotal, userCurrency)
                 : 'Only shown for current month'
             }
             valueColor={

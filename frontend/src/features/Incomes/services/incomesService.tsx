@@ -3,7 +3,8 @@ import {
   Income,
   GroupedIncomes,
   CreateIncomeDto,
-  IncomeOverviewDto
+  IncomeOverviewDto,
+  UpdateIncomeDto
 } from '@/types/finance/income';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useDateFilter } from '@/context/DateFilterContext';
@@ -47,6 +48,27 @@ async function createIncomeApi(income: CreateIncomeDto): Promise<Income> {
   });
 }
 
+async function updateIncomeApi({
+  id,
+  data,
+}: {
+  id: string;
+  data: UpdateIncomeDto;
+}): Promise<void> {
+  await apiFetch(`${API_BASE_URL}/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}
+
+
+async function deleteIncomeApi(id: string): Promise<void> {
+  await apiFetch(`${API_BASE_URL}/${id}`, {
+    method: 'DELETE',
+  });
+}
+
 // === REACT QUERY HOOKS ===
 export function useIncomes(filters: FetchIncomeOptions) {
   return useQuery<Income[]>({
@@ -80,6 +102,32 @@ export function useCreateIncome() {
     },
   });
 }
+
+export function useUpdateIncome() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: { id: string; data: UpdateIncomeDto }) => updateIncomeApi(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['incomes'] });
+      queryClient.invalidateQueries({ queryKey: ['incomesOverview'] });
+    },
+  });
+}
+
+
+export function useDeleteIncome() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: deleteIncomeApi,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['incomes'] });
+      queryClient.invalidateQueries({ queryKey: ['incomesOverview'] });
+    },
+  });
+}
+
 
 // === UTILITY ===
 export function isGroupedIncomes(data: Income[] | GroupedIncomes): data is GroupedIncomes {

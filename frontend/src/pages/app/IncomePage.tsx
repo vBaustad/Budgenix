@@ -32,14 +32,16 @@ export default function IncomePage() {
   } = useIncomesContext();
 
   const { categories } = useCategories();
+
   const {
-    recurringIncomes,
+    upcomingRecurringIncomes,
+    monthlyRecurringIncomeTotal,
+    lastTriggeredRecurringIncome,
+    nextRecurringIncome,
     loadingRecurring,
     refreshRecurring,
     selectedRecurringItem,
     setSelectedRecurringItem,
-    lastTriggeredRecurringIncome,
-    monthlyRecurringIncomeTotal,
   } = useRecurring();
 
   const { data: incomes = [], isLoading: loading } = useIncomes({
@@ -51,9 +53,10 @@ export default function IncomePage() {
 
   const chartData = useMemo(() => incomes, [incomes]);
 
-  const categoryOptions = useMemo(() => (
-    categories.map(c => ({ value: c.id, label: c.name }))
-  ), [categories]);
+  const categoryOptions = useMemo(
+    () => categories.map((c) => ({ value: c.id, label: c.name })),
+    [categories]
+  );
 
   const handleRecurringSave = async () => {
     setSelectedRecurringItem(null);
@@ -68,7 +71,7 @@ export default function IncomePage() {
         <SectionShell title="Add Income" icon={AppIcons.add}>
           <div className="flex flex-col lg:flex-row gap-4">
             <div className="lg:w-1/2">
-              <AddIncomeForm onAdd={() => refreshRecurring()} />
+              <AddIncomeForm onAdd={refreshRecurring} />
             </div>
             <div className="lg:w-1/2 bg-base-100 border border-base-200 text-base-content rounded-xl shadow-sm p-4">
               <h3 className="text-lg font-semibold mb-4">Income Overview</h3>
@@ -89,14 +92,14 @@ export default function IncomePage() {
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Upcoming recurring:</span>
-                    {overview?.upcomingRecurring ? (
+                    <span>Next recurring:</span>
+                    {nextRecurringIncome ? (
                       <span className="font-medium">
-                        Next on {new Date(overview.upcomingRecurring.nextDate).toLocaleDateString(undefined, {
+                        {new Date(nextRecurringIncome.nextOccurrenceDate!).toLocaleDateString(undefined, {
                           year: 'numeric',
                           month: 'short',
                           day: 'numeric',
-                        })}: {formatCurrency(overview.upcomingRecurring.amount)}
+                        })}: {formatCurrency(nextRecurringIncome.amount)}
                       </span>
                     ) : (
                       <span className="text-base-content/40">–</span>
@@ -112,10 +115,11 @@ export default function IncomePage() {
           <div className="flex flex-col lg:flex-row gap-4">
             <div className="w-full lg:w-1/2">
               <UpcomingRecurringList
-                recurringItems={recurringIncomes}
+                recurringItems={upcomingRecurringIncomes ?? []}
                 loading={loadingRecurring}
                 onSelect={setSelectedRecurringItem}
               />
+
             </div>
             <div className="w-full lg:w-1/2">
               {selectedRecurringItem ? (
@@ -125,11 +129,11 @@ export default function IncomePage() {
                   onCancel={() => setSelectedRecurringItem(null)}
                 />
               ) : (
-                <RecurringSummary
-                  recurringItems={recurringIncomes}
-                  monthlyTotal={monthlyRecurringIncomeTotal}
-                  lastTriggered={lastTriggeredRecurringIncome}
-                />
+              <RecurringSummary
+                recurringItems={upcomingRecurringIncomes ?? []}
+                monthlyTotal={monthlyRecurringIncomeTotal ?? 0}
+                lastTriggered={lastTriggeredRecurringIncome}
+              />
               )}
             </div>
           </div>

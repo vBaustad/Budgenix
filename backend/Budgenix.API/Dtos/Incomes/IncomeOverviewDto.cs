@@ -6,7 +6,6 @@ namespace Budgenix.Dtos.Incomes
     {
         public decimal TotalIncome { get; set; }
         public decimal LastMonthIncome { get; set; }
-        public UpcomingRecurringDto? UpcomingRecurring { get; set; }
         public List<DailyIncomeDto> DailyTotals { get; set; } = new();
     }
 }

@@ -1,56 +1,29 @@
 import { RecurringItemDto } from '@/types/finance/recurring';
-import { formatDate } from '@/utils/formatting';
-import { AppIcons } from '@/components/icons/AppIcons';
-
-type Props = {
-  recurringItems: RecurringItemDto[];
-  monthlyTotal: number;
-  lastTriggered?: RecurringItemDto | null;
-  lastSkipped?: RecurringItemDto | null;
-};
-
 
 export default function RecurringSummary({
-  recurringItems,
-  monthlyTotal,
+  recurringItems = [], // default to empty array
+  monthlyTotal = 0,
   lastTriggered,
   lastSkipped,
-}: Props) {
-  const activeCount = recurringItems.filter(e => e.isActive).length;
+}: {
+  recurringItems?: RecurringItemDto[];
+  monthlyTotal?: number;
+  lastTriggered?: RecurringItemDto | null;
+  lastSkipped?: RecurringItemDto | null;
+}) {
+  // Safe to use .filter now!
+  const activeItems = recurringItems.filter((item) => item.isActive);
 
   return (
-    <div className="w-full max-w-full overflow-hidden bg-base-100 border border-base-200 rounded-xl shadow-sm p-4 space-y-4">
-      <h3 className="text-xl text-primary font-semibold mb-1 flex items-center gap-2">
-        <AppIcons.recurring className="w-5 h-5" />
-        Recurring Summary
-      </h3>
-
-      <div className="text-sm text-base-content/80 space-y-2">
-        <div className="flex justify-between flex-wrap gap-1">
-          <span className="font-medium">Active recurring:</span>
-          <span>{activeCount}</span>
-        </div>
-
-        <div className="flex justify-between flex-wrap gap-1">
-          <span className="font-medium">Monthly total:</span>
-          <span>kr {monthlyTotal.toLocaleString()}</span>
-        </div>
-
-        <div className="flex justify-between flex-wrap gap-1">
-          <span className="font-medium">Last triggered:</span>
-          <span className="truncate">{lastTriggered?.lastTriggeredDate ? formatDate(lastTriggered.lastTriggeredDate) : '—'}</span>
-        </div>
-
-        <div className="flex justify-between flex-wrap gap-1">
-          <span className="font-medium">Last skipped:</span>
-          <span className="truncate">
-            {lastSkipped?.lastSkippedDate
-              ? `${formatDate(lastSkipped.lastSkippedDate)} – ${lastSkipped.name}`
-              : '—'}
-          </span>
-        </div>
-      </div>
+    <div className="space-y-2">
+      <div>Total: {monthlyTotal}</div>
+      <div>Active items: {activeItems.length}</div>
+      {lastTriggered && (
+        <div>Last triggered: {lastTriggered.name}</div>
+      )}
+      {lastSkipped && (
+        <div>Last skipped: {lastSkipped.name}</div>
+      )}
     </div>
-
   );
 }

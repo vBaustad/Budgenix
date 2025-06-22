@@ -4,13 +4,13 @@ using Budgenix.Models.Shared;
 
 namespace Budgenix.Services.Recurring
 {
-    public class RecurringItemProcessor
+    public class RecurringRuleEngine
     {
         private readonly BudgenixDbContext _context;
         private readonly RecurringItemService _service;
         private readonly IUserService _userService;
 
-        public RecurringItemProcessor(IUserService userService, BudgenixDbContext context, RecurringItemService service)
+        public RecurringRuleEngine(IUserService userService, BudgenixDbContext context, RecurringItemService service)
         {
             _context = context;
             _service = service;

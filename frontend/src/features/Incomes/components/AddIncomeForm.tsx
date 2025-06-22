@@ -3,14 +3,10 @@ import SelectField from '@/components/common/forms/SelectField';
 import { useCategories } from '@/context/CategoryContext';
 import { useCurrency } from '@/context/CurrencyContext';
 import { Income } from '@/types/finance/income';
-import { RecurrenceFrequency, RecurrenceFrequencyOptions } from '@/types/shared/recurrence';
 import { formatCurrency } from '@/utils/formatting';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useCreateIncome } from '../services/incomesService';
-import { createRecurringItem } from '@/features/recurring/services/recurringService';
-import { AppIcons } from '@/components/icons/AppIcons';
-import { RecurringItemType } from '@/types/finance/recurring';
 
 type Props = {
   onAdd: (income: Income) => void;
@@ -23,7 +19,6 @@ type IncomeFormState = {
   date: string;
   categoryId: string;
   notes?: string;
-  recurrenceFrequency: RecurrenceFrequency;
 };
 
 export default function AddIncomeForm({ onAdd }: Props) {
@@ -34,26 +29,12 @@ export default function AddIncomeForm({ onAdd }: Props) {
     date: new Date().toISOString().slice(0, 10),
     categoryId: '',
     notes: '',
-    recurrenceFrequency: 'None',
   });
 
-  const [showAdvanced, setShowAdvanced] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
   const { mutateAsync: createIncome, isPending: loading } = useCreateIncome();
-
   const { categories } = useCategories();
   const { currency: userCurrency } = useCurrency();
-
-  const isRecurring = form.recurrenceFrequency !== 'None';
-
-  const isFutureDate = (dateStr: string) => {
-    const selected = new Date(dateStr);
-    const today = new Date();
-    selected.setHours(0, 0, 0, 0);
-    today.setHours(0, 0, 0, 0);
-    return selected > today;
-  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -67,27 +48,8 @@ export default function AddIncomeForm({ onAdd }: Props) {
     setError(null);
 
     try {
-      const { recurrenceFrequency, ...incomeData } = form;
-      const skipCreation = isFutureDate(form.date);
-
-      if (!skipCreation) {
-        const newIncome = await createIncome(incomeData);
-        onAdd(newIncome);
-      }
-
-      if (isRecurring) {
-        await createRecurringItem({
-          name: form.name,
-          description: form.description,
-          amount: form.amount,
-          startDate: form.date,
-          frequency: recurrenceFrequency,
-          type: RecurringItemType.Income,
-          categoryId: form.categoryId || undefined,
-          isActive: true,
-        });
-      }
-
+      const newIncome = await createIncome(form);
+      onAdd(newIncome);
       toast.success('Income added successfully!');
       setForm({
         name: '',
@@ -96,7 +58,6 @@ export default function AddIncomeForm({ onAdd }: Props) {
         date: new Date().toISOString().slice(0, 10),
         categoryId: '',
         notes: '',
-        recurrenceFrequency: 'None',
       });
     } catch (err: unknown) {
       toast.error('Failed to add income');
@@ -124,54 +85,32 @@ export default function AddIncomeForm({ onAdd }: Props) {
           showCurrency
           required
         />
-        <SelectField
-          name="categoryId"
-          value={form.categoryId}
+        <div className="grid grid-cols-2 gap-2">
+          <SelectField
+            name="categoryId"
+            value={form.categoryId}
+            onChange={handleChange}
+            options={categories
+              .slice()
+              .sort((a, b) => a.name.localeCompare(b.name))
+              .map((c) => ({ value: c.id, label: c.name }))}
+            placeholder="Select category"
+          />
+          <InputField
+            name="date"
+            type="date"
+            value={form.date}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <InputField
+          name="description"
+          type="text"
+          placeholder="Description"
+          value={form.description || ''}
           onChange={handleChange}
-          options={categories
-            .slice()
-            .sort((a, b) => a.name.localeCompare(b.name))
-            .map((c) => ({ value: c.id, label: c.name }))}
-          placeholder="Select a category"
         />
-
-        <details
-          open={showAdvanced}
-          className="rounded-xl border border-base-300 bg-base-100"
-          onToggle={() => setShowAdvanced(!showAdvanced)}
-        >
-          <summary className="flex items-center justify-between cursor-pointer p-2 font-medium">
-            Advanced Options
-            {showAdvanced ? (
-              <AppIcons.up className="w-4 h-4 text-base-content/60" />
-            ) : (
-              <AppIcons.down className="w-4 h-4 text-base-content/60" />
-            )}
-          </summary>
-
-          <div className="space-y-3 mt-2 px-2 pb-4">
-            <InputField
-              name="date"
-              type="date"
-              value={form.date}
-              onChange={handleChange}
-              required
-            />
-            <SelectField
-              name="recurrenceFrequency"
-              value={form.recurrenceFrequency}
-              onChange={handleChange}
-              options={[...RecurrenceFrequencyOptions]}
-            />
-            <InputField
-              name="description"
-              type="text"
-              placeholder="Description"
-              value={form.description || ''}
-              onChange={handleChange}
-            />
-          </div>
-        </details>
 
         {error && <p className="text-error">{error}</p>}
 

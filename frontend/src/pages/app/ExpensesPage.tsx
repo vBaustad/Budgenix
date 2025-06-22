@@ -15,39 +15,39 @@ import { useExpensesContext } from '@/features/expenses/context/ExpensesContext'
 import { useRecurring } from '@/context/RecurringContext';
 import { useCategories } from '@/context/CategoryContext';
 import { t } from 'i18next';
-
-export type GroupByOption = typeof GROUP_OPTIONS[number]['value'];
+import { formatCurrency } from '@/utils/formatting';
 
 export default function ExpensesPage() {
+  const {
+    expenses,
+    groupedExpenses,
+    loading,
+    groupBy,
+    selectedCategories,
+    setGroupBy,
+    setSelectedCategories,
+    handleAddExpense,
+    overview,
+    overviewLoading,
+  } = useExpensesContext();
 
-const {
-  expenses,
-  groupedExpenses,
-  loading,
-  groupBy,
-  selectedCategories,
-  setGroupBy,
-  setSelectedCategories,
-  handleAddExpense,    
-} = useExpensesContext();
-
-const {
-  recurringExpenses,
-  loadingRecurring,
-  refreshRecurring,
-  selectedRecurringItem,
-  setSelectedRecurringItem,
-  monthlyRecurringExpenseTotal,
-  lastTriggeredRecurringExpense,
-  lastSkippedRecurringExpense,
-} = useRecurring();
-
+  const {
+    upcomingRecurringExpenses,
+    monthlyRecurringExpenseTotal,
+    lastTriggeredRecurringExpense,
+    lastSkippedRecurringExpense,
+    nextRecurringExpense,
+    loadingRecurring,
+    refreshRecurring,
+    selectedRecurringItem,
+    setSelectedRecurringItem,
+  } = useRecurring();
 
   const { categories } = useCategories();
 
   const categoryOptions = categories.map((c) => ({
-  value: c.id,
-  label: c.name,
+    value: c.id,
+    label: c.name,
   }));
 
   const handleRecurringSave = async () => {
@@ -55,32 +55,69 @@ const {
     await refreshRecurring();
   };
 
-  const chartData = groupedExpenses.length > 0
-    ? groupedExpenses.flatMap(g => g.expenses)
-    : expenses;
-
+  const chartData =
+    groupedExpenses.length > 0
+      ? groupedExpenses.flatMap((g) => g.expenses)
+      : expenses;
 
   return (
     <div className="flex flex-col gap-4 p-4 w-full max-w-full overflow-hidden">
-
-      <ExpensesOverview />   
+      <ExpensesOverview />
 
       <div className="flex flex-col lg:flex-row w-full max-w-full gap-4">
         <SectionShell title={t('expenses.add')} icon={AppIcons.add} minimizable className="w-full">
-          <AddExpenseForm onAdd={handleAddExpense} onRecurringChange={() => refreshRecurring()} />
+          <div className="flex flex-col lg:flex-row gap-4">
+            <div className="lg:w-1/2">
+              <AddExpenseForm onAdd={handleAddExpense} />
+            </div>
+
+            <div className="lg:w-1/2 bg-base-100 border border-base-200 text-base-content rounded-xl shadow-sm p-4">
+              <h3 className="text-lg font-semibold mb-4">Expense Overview</h3>
+              {overviewLoading ? (
+                <span className="loading loading-spinner loading-md" />
+              ) : (
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span>Total spent:</span>
+                    <span className="font-medium">
+                      {formatCurrency(overview?.totalSpent ?? 0)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Last month:</span>
+                    <span className="font-medium">
+                      {formatCurrency(overview?.lastMonthSpent ?? 0)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Next recurring:</span>
+                    {nextRecurringExpense ? (
+                      <span className="font-medium">
+                        {new Date(nextRecurringExpense.nextOccurrenceDate!).toLocaleDateString(undefined, {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                        })}: {formatCurrency(nextRecurringExpense.amount)}
+                      </span>
+                    ) : (
+                      <span className="text-base-content/40">–</span>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </SectionShell>
 
-        <SectionShell title="Upcoming Expenses" icon={AppIcons.recurring} refreshable className="w-full">
+        <SectionShell title={t('expenses.upcoming')} icon={AppIcons.recurring} refreshable className="w-full">
           <div className="flex flex-col lg:flex-row gap-4 w-full">
-            {/* LEFT: Recurring list */}
             <div className="w-full lg:w-1/2">
               <UpcomingRecurringList
-                recurringItems={recurringExpenses}
+                recurringItems={upcomingRecurringExpenses ?? []}
                 loading={loadingRecurring}
                 onSelect={setSelectedRecurringItem}
               />
             </div>
-            {/* RIGHT: Edit or Summary */}
             <div className="w-full lg:w-1/2">
               {selectedRecurringItem ? (
                 <EditRecurringItemForm
@@ -88,9 +125,9 @@ const {
                   onSave={handleRecurringSave}
                   onCancel={() => setSelectedRecurringItem(null)}
                 />
-              ) : (                
+              ) : (
                 <RecurringSummary
-                  recurringItems={recurringExpenses}
+                  recurringItems={upcomingRecurringExpenses}
                   monthlyTotal={monthlyRecurringExpenseTotal}
                   lastTriggered={lastTriggeredRecurringExpense}
                   lastSkipped={lastSkippedRecurringExpense}
@@ -129,14 +166,10 @@ const {
             ) : (
               <ExpensesList expenses={expenses} />
             )}
-          </div>          
+          </div>
         </SectionShell>
 
-        <SectionShell 
-          title="Spending by Category" 
-          icon={AppIcons.pieChart} 
-          className="w-full hidden sm:block"
-        >
+        <SectionShell title="Spending by Category" icon={AppIcons.pieChart} className="w-full hidden sm:block">
           <div className="w-full overflow-x-auto">
             <BreakdownPieChart
               data={chartData}
