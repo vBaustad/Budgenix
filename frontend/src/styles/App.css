@@ -7,23 +7,21 @@
   prefersdark: false;
   color-scheme: light;
 
-  /* Brighter warm base */
-  --color-base-100: #FDFBF7; /* Light linen */
-  --color-base-200: #F5F1EA; /* Soft oat */
-  --color-base-300: #E8DFD2; /* Warm parchment */
+  --color-base-100: #FDFBF7;
+  --color-base-200: #F5F1EA;
+  --color-base-300: #E8DFD2;
   --color-base-content: #2A2927;
 
-  /* Gradient — subtle variation of base */
   --color-gradient-start: #F5F1EA;
   --color-gradient-end: #EDE6DA;
 
-  --color-primary: #4C7C59; /* Muted forest green */
+  --color-primary: #4C7C59;
   --color-primary-content: #FFFFFF;
 
-  --color-secondary: #E1D4C4; /* Softer beige */
+  --color-secondary: #E1D4C4;
   --color-secondary-content: #2D2A26;
 
-  --color-accent: #A8B998; /* Pale olive green */
+  --color-accent: #A8B998;
   --color-accent-content: #1F1F1F;
 
   --color-neutral: #2A2E37;
@@ -35,51 +33,133 @@
   --color-success: #22C55E;
   --color-success-content: #FFFFFF;
 
-  --color-warning: #FACC15; /* Softer yellow error tone */
+  --color-warning: #FACC15;
   --color-warning-content: #2D2A26;
 
-  --color-error: #D86363; /* Warm clay red */
+  --color-error: #D86363;
   --color-error-content: #2D2A26;
 }
 
 
-/* Budgenix Light Orange Theme */
 @plugin "daisyui/theme" {
   name: "budgenixLightOrange";
   default: false;
-  prefersdark: false;
   color-scheme: light;
 
-  --color-base-100: #FAF8F3;
-  --color-base-200: #F1EDE6;
-  --color-base-300: #D8CEC3;
-  --color-base-content: #2D2A26;
+  --color-base-100: #FDFBF7;
+  --color-base-200: #F5F1EA;
+  --color-base-300: #E8DFD2;
+  --color-base-content: #2A2927;
 
-  --color-primary: #CE7B4F; /* Warm clay orange */
+
+  --color-gradient-start: #F5F1EA;
+  --color-gradient-end: #EDE6DA;
+
+
+  --color-primary: #CE7B4F;
   --color-primary-content: #FFFFFF;
 
-  --color-secondary: #F0D9C4; /* Creamy beige */
+ 
+  --color-secondary: #E1D4C4;
   --color-secondary-content: #2D2A26;
 
-  --color-accent: #F2B279; /* Soft apricot */
+ 
+  --color-accent: #F2B279;
   --color-accent-content: #1F1F1F;
+
 
   --color-neutral: #2A2E37;
   --color-neutral-content: #E4E4E4;
 
+ 
   --color-info: #60A5FA;
   --color-info-content: #FFFFFF;
 
   --color-success: #22C55E;
   --color-success-content: #FFFFFF;
 
-  --color-warning: #FCA5A5;
+  --color-warning: #FACC15;
   --color-warning-content: #2D2A26;
 
-  --color-error: #FCD34D;
+  --color-error: #D86363;
   --color-error-content: #2D2A26;
 }
 
+@plugin "daisyui/theme" {
+  name: "budgenixDarkGreen";
+  default: false;
+  color-scheme: dark;
+
+  --color-base-100: #1E1F1C;
+  --color-base-200: #272822;
+  --color-base-300: #33332D;
+  --color-base-content: #E5E7EB;
+
+  --color-gradient-start: #272822;
+  --color-gradient-end: #33332D;
+
+  --color-primary: #6CA16E;
+  --color-primary-content: #1E1F1C;
+
+  --color-secondary: #3F3D37;
+  --color-secondary-content: #E5E7EB;
+
+  --color-accent: #8FAE8E;
+  --color-accent-content: #1E1F1C;
+
+  --color-neutral: #44403C;
+  --color-neutral-content: #F3F4F6;
+
+  --color-info: #60A5FA;
+  --color-info-content: #1E1F1C;
+
+  --color-success: #22C55E;
+  --color-success-content: #1E1F1C;
+
+  --color-warning: #FACC15;
+  --color-warning-content: #1E1F1C;
+
+  --color-error: #D86363;
+  --color-error-content: #1E1F1C;
+}
+
+@plugin "daisyui/theme" {
+  name: "budgenixDarkOrange";
+  default: false;
+  color-scheme: dark;
+
+  --color-base-100: #1E1C1A;
+  --color-base-200: #272421;
+  --color-base-300: #332F2A;
+  --color-base-content: #E5E7EB;
+
+  --color-gradient-start: #272421;
+  --color-gradient-end: #332F2A;
+
+  --color-primary: #CE7B4F;
+  --color-primary-content: #1E1C1A;
+
+  --color-secondary: #3F3A36;
+  --color-secondary-content: #E5E7EB;
+
+  --color-accent: #F2B279;
+  --color-accent-content: #1E1C1A;
+
+  --color-neutral: #44403C;
+  --color-neutral-content: #F3F4F6;
+
+  --color-info: #60A5FA;
+  --color-info-content: #1E1C1A;
+
+  --color-success: #22C55E;
+  --color-success-content: #1E1C1A;
+
+  --color-warning: #FACC15;
+  --color-warning-content: #1E1C1A;
+
+  --color-error: #D86363;
+  --color-error-content: #1E1C1A;
+}
 
 
 .bg-budgenix-gradient {

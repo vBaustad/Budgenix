@@ -25,8 +25,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [authChecked, setAuthChecked] = useState(false); 
 
   const [theme, setThemeState] = useState(() => {
-    return localStorage.getItem("theme") ?? "budgenixLightGreen";
+    const stored = localStorage.getItem("theme") ?? "budgenixLightGreen";
+    document.documentElement.setAttribute("data-theme", stored);
+    return stored;
   });
+
 
   const applyTheme = (newTheme: string) => {
     document.documentElement.setAttribute("data-theme", newTheme);
@@ -35,8 +38,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    applyTheme(theme);
-
     const checkSession = async () => {
       try {
         await apiFetch('/api/account/me');
@@ -50,6 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     checkSession();
   }, []);
+
 
 
 
