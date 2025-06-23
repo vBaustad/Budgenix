@@ -26,6 +26,8 @@ namespace Budgenix.Models.Finance
         public DateTime? TargetDate { get; set; }
 
         public bool IsActive { get; set; } = true;
+        [StringLength(50)]
+        public string? Icon { get; set; }
 
         [Required]
         public string UserId { get; set; } = null!;

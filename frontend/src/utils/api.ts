@@ -14,10 +14,18 @@ export async function apiFetch(path: string, options?: RequestInit) {
   });
 
   if (!res.ok) {
+  let errorMessage = 'API request failed';
+  try {
+    const errorJson = await res.json();
+    errorMessage = errorJson.message || JSON.stringify(errorJson);
+  } catch {
     const text = await res.text();
-    console.error('[apiFetch] API error:', text);
-    throw new Error(text || 'API request failed');
+    errorMessage = text || errorMessage;
   }
+  console.error('[apiFetch] API error:', errorMessage);
+  throw new Error(errorMessage);
+}
+
 
   // Only parse as JSON if there's content
   const contentType = res.headers.get('content-type');

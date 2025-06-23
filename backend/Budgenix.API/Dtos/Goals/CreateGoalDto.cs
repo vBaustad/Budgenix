@@ -1,4 +1,6 @@
-﻿namespace Budgenix.Dtos.Goals
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Budgenix.Dtos.Goals
 {
     public class CreateGoalDto
     {
@@ -7,5 +9,7 @@
         public decimal TargetAmount { get; set; }
         public decimal CurrentAmount { get; set; }
         public DateTime? TargetDate { get; set; }
+        [StringLength(50)]
+        public string? Icon { get; set; }
     }
 }

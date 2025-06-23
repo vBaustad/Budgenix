@@ -12,6 +12,7 @@ using Microsoft.Extensions.Localization;
 
 namespace Budgenix.API.Controllers
 {
+
     [ApiController]
     [Route("api/[controller]")]
     public class AccountController : ControllerBase
