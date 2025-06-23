@@ -1,60 +1,55 @@
 import { useAuth } from "../../context/AuthContext";
+import { CheckCircle2 } from "lucide-react";
 
 const lightThemes = [
-  "light",
-  "cupcake",
-  "bumblebee",
-  "emerald",
-  "corporate",
-  "garden",  
-  "pastel",
-  "fantasy",
-  "lemonade",
-  "winter",
-  "nord",
-  "silk"
+  { id: "budgenixLightGreen", label: "Light Green" },
+  { id: "budgenixLightOrange", label: "Light Orange" },
 ];
-
 const darkThemes = [
-  "dark",
-  "synthwave",
-  "halloween",
-  "forest",
-  "luxury",
-  "dracula",
-  "night",
-  "black",
-  "dim",
-  "sunset",
-  "business",
-  "coffee",
-];
-
-const customThemes = ["budgenixLightGreen", "budgenixLightOrange"];
-
-const funThemes = [
-  "retro",
-  "cyberpunk",
-  "valentine",
-  "wireframe",
-  "cmyk",
-  "autumn",
-  "acid",
-  "aqua",
+  { id: "budgenixDarkGreen", label: "Dark Green" },
+  { id: "budgenixDarkOrange", label: "Dark Orange" },
 ];
 
 export function ThemeDropdown() {
   const { theme, setTheme } = useAuth();
+  const currentTheme = [...lightThemes, ...darkThemes].find((t) => t.id === theme);
+
+  const renderTheme = (t: { id: string; label: string }) => (
+    <button
+      key={t.id}
+      onClick={() => setTheme(t.id)}
+      className={`flex items-center gap-2 p-2 w-full rounded hover:bg-base-300 relative ${
+        theme === t.id ? "ring-1 ring-primary ring-offset-1" : ""
+      }`}
+    >
+      <div
+        data-theme={t.id}
+        className="w-4 h-4 rounded-full border border-base-content bg-primary"
+      ></div>
+      <span className="text-sm">{t.label}</span>
+      {theme === t.id && (
+        <CheckCircle2 className="w-4 h-4 text-primary absolute right-2" />
+      )}
+    </button>
+  );
 
   return (
     <div className="dropdown dropdown-end">
       <label
         tabIndex={0}
-        className="text-sm/6 font-semibold text-base-content hover:text-primary cursor-pointer flex items-center gap-1 mr-4"
+        className="btn btn-sm btn-outline flex items-center gap-2 min-w-[10rem] justify-between"
       >
-        Theme: {theme}
+        <div className="flex items-center gap-2">
+          <div
+            data-theme={theme}
+            className="w-4 h-4 rounded-full border border-base-content bg-primary"
+          ></div>
+          <span className="text-sm">
+            {currentTheme ? currentTheme.label : "Select Theme"}
+          </span>
+        </div>
         <svg
-          className="inline-block w-4 h-4 fill-current"
+          className="w-4 h-4"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 20 20"
         >
@@ -62,99 +57,19 @@ export function ThemeDropdown() {
         </svg>
       </label>
 
-      <ul
+      <div
         tabIndex={0}
-        className="dropdown-content z-[1] p-4 shadow bg-base-200 rounded-box w-auto max-h-96 overflow-auto flex gap-8"
+        className="dropdown-content z-[1] p-4 shadow bg-base-200 rounded-box w-64 grid gap-4"
       >
-        {/* Light themes column */}
         <div>
-          <h3 className="font-bold text-sm text-base-content mb-2">
-            Light Themes
-          </h3>
-          {lightThemes.map((t) => (
-            <button
-              key={t}
-              onClick={() => setTheme(t)}
-              className={`flex items-center gap-2 mb-1 ${
-                theme === t ? "font-bold" : ""
-              }`}
-            >
-              <span
-                data-theme={t}
-                className="w-4 h-4 rounded-full bg-primary border border-base-content"
-              ></span>
-              {t}
-            </button>
-          ))}
+          <h3 className="font-bold text-xs mb-1 text-base-content">Light</h3>
+          <div className="grid gap-1">{lightThemes.map(renderTheme)}</div>
         </div>
-
-        {/* Dark themes column */}
         <div>
-          <h3 className="font-bold text-sm text-base-content mb-2">
-            Dark Themes
-          </h3>
-          {darkThemes.map((t) => (
-            <button
-              key={t}
-              onClick={() => setTheme(t)}
-              className={`flex items-center gap-2 mb-1 ${
-                theme === t ? "font-bold" : ""
-              }`}
-            >
-              <span
-                data-theme={t}
-                className="w-4 h-4 rounded-full bg-primary border border-base-content"
-              ></span>
-              {t}
-            </button>
-          ))}
+          <h3 className="font-bold text-xs mb-1 text-base-content">Dark</h3>
+          <div className="grid gap-1">{darkThemes.map(renderTheme)}</div>
         </div>
-
-        {/*Custom Themes*/}
-        <div>
-        <h3 className="font-bold text-sm text-base-content mb-2">
-          Custom
-        </h3>
-        {customThemes.map((t) => (
-          <button
-            key={t}
-            onClick={() => setTheme(t)}
-            className={`flex items-center gap-2 mb-1 ${
-              theme === t ? "font-bold" : ""
-            }`}
-          >
-            <span
-              data-theme={t}
-              className="w-4 h-4 rounded-full bg-primary border border-base-content"
-            ></span>
-            {t}
-          </button>
-        ))}
       </div>
-
-
-        {/* Fun themes column */}
-        <div>
-          <h3 className="font-bold text-sm text-base-content mb-2">
-            Fun Themes
-          </h3>
-          {funThemes.map((t) => (
-            <button
-              key={t}
-              onClick={() => setTheme(t)}
-              className={`flex items-center gap-2 mb-1 ${
-                theme === t ? "font-bold" : ""
-              }`}
-            >
-              <span
-                data-theme={t}
-                className="w-4 h-4 rounded-full bg-primary border border-base-content"
-              ></span>
-              {t}
-            </button>
-          ))}
-        </div>
-      </ul>
     </div>
   );
 }

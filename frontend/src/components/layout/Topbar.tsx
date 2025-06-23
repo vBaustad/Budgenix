@@ -9,6 +9,7 @@ const routeTitles: Record<string, string> = {
   '/budgets': 'topbar.budgets',
   '/expenses': 'topbar.expenses',
   '/income': 'topbar.income',
+  '/cashflow': 'topbar.cashflow',
   '/goals': 'topbar.goals',
   '/vacation-mode': 'topbar.vacation',
   '/reports': 'topbar.reports',

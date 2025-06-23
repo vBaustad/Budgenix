@@ -7,7 +7,7 @@ using Budgenix.Models.Shared;
 using Budgenix.Services.Recurring;
 using Microsoft.EntityFrameworkCore;
 
-namespace Budgenix.API.Services.Recurring
+namespace Budgenix.Services.Recurring
 {
     public class RecurringService : IRecurringService
     {

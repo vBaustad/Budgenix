@@ -1,47 +1,30 @@
-import {
-    HomeIcon,
-    WalletIcon,
-    ReceiptPercentIcon,
-    BanknotesIcon,
-    FlagIcon,
-    SunIcon,
-    ChartBarIcon,
-    Cog6ToothIcon,
-    ArrowRightStartOnRectangleIcon,
-    AdjustmentsHorizontalIcon,
-    UserIcon,
-  } from '@heroicons/react/24/outline'
-  
-  import type { SidebarSection } from '@/types/shared/sidebar';
+import { AppIcons } from '@/components/icons/AppIcons';
+import type { SidebarSection } from '@/types/shared/sidebar';
 
-
-  export const sidebarNav: SidebarSection[] = [
-    {
-      section: '',
-      items: [
-        { label: 'sidebar.dashboard', path: '/dashboard', icon: HomeIcon },
-        { label: 'sidebar.budgets', path: '/budgets', icon: WalletIcon },
-        { label: 'sidebar.expenses', path: '/expenses', icon: ReceiptPercentIcon },
-        { label: 'sidebar.income', path: '/income', icon: BanknotesIcon },
-      ],
-    },
-    {
-      section: 'sidebar.planning',
-      items: [
-        { label: 'sidebar.goals', path: '/goals', icon: FlagIcon },
-        { label: 'sidebar.vacation', path: '/vacation-mode', icon: SunIcon },
-        { label: 'sidebar.reports', path: '/reports', icon: ChartBarIcon },
-      ],
-    },
-    {
-      section: 'sidebar.system',
-      items: [
-        { label: 'sidebar.settings', icon: Cog6ToothIcon, collapsible: true, children: [
-          { label: 'sidebar.settings.user', path: '/settings#user', icon: UserIcon },
-          { label: 'sidebar.settings.app', path: '/settings#app', icon: AdjustmentsHorizontalIcon },
-        ]},
-        { label: 'sidebar.logout', action: 'logout', icon: ArrowRightStartOnRectangleIcon },
-      ]
-    }
-  ]
-  
+export const sidebarNav: SidebarSection[] = [
+  {
+    section: '',
+    items: [
+      { label: 'sidebar.dashboard', path: '/dashboard', icon: AppIcons.dashboard },
+      { label: 'sidebar.budgets', path: '/budgets', icon: AppIcons.wallet },
+      { label: 'sidebar.expenses', path: '/expenses', icon: AppIcons.expenses },
+      { label: 'sidebar.income', path: '/income', icon: AppIcons.income },
+      { label: 'sidebar.cashflow', path: '/cashflow', icon: AppIcons.recurring }
+    ],
+  },
+  {
+    section: 'sidebar.planning',
+    items: [
+      { label: 'sidebar.goals', path: '/goals', icon: AppIcons.goal },
+      { label: 'sidebar.vacation', path: '/vacation-mode', icon: AppIcons.calendar },
+      { label: 'sidebar.reports', path: '/reports', icon: AppIcons.report },
+    ],
+  },
+  {
+    section: 'sidebar.system',
+    items: [
+      { label: 'sidebar.settings', path: '/settings', icon: AppIcons.user },      
+      { label: 'sidebar.logout', action: 'logout', icon: AppIcons.logout },
+    ]
+  }
+];

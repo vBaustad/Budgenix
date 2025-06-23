@@ -18,7 +18,8 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Budgenix.Services.Finance;
-using Budgenix.API.Services.Recurring;
+using Budgenix.Services.Recurring;
+using Budgenix.Services.Budgets;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,6 +58,8 @@ builder.Services.AddScoped<IRecurringService, RecurringService>();
 builder.Services.AddScoped<IInsightService, InsightService>();
 builder.Services.AddScoped<IExpenseService, ExpenseService>();
 builder.Services.AddScoped<IIncomeService, IncomeService>();
+builder.Services.AddScoped<IBudgetService, BudgetService>();
+
 
 builder.Services.AddInsightRules();
 builder.Services.AddTransient<NextOccurrenceResolver>();

@@ -30,5 +30,6 @@ namespace Budgenix.Dtos.Budgets
         public string? Notes { get; set; }
 
         public bool IsActive { get; set; } = true;
+
     }
 }

@@ -1,12 +1,21 @@
-import { BudgetProgressItem } from '@/types/finance/budget';
+import { useBudgets } from '../context/BudgetsContext';
 import BudgetCard from './BudgetCard';
 
 type Props = {
-  budgets: BudgetProgressItem[];
   onAddClick: () => void;
 };
 
-export default function BudgetGrid({ budgets, onAddClick }: Props) {
+export default function BudgetGrid({ onAddClick }: Props) {
+  const { budgets, isLoading } = useBudgets();
+
+  if (isLoading) {
+    return (
+      <div className="w-full text-center py-10">
+        <span className="loading loading-spinner loading-lg"></span>
+      </div>
+    );
+  }
+
   if (budgets.length === 0) {
     return (
       <div className="w-full flex flex-col items-center justify-center py-20 text-center">
@@ -26,8 +35,6 @@ export default function BudgetGrid({ budgets, onAddClick }: Props) {
       {budgets.map((budget) => (
         <BudgetCard key={budget.id} budget={budget} />
       ))}
-
-      {/* Add Budget button */}
       <div className="col-span-full flex justify-center mt-2">
         <button className="btn btn-outline btn-primary" onClick={onAddClick}>
           + Add Budget

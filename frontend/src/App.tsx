@@ -27,6 +27,7 @@ import { InsightsProvider } from './context/InsightContext'
 import { FinanceProvider } from './context/FinanceContext'
 import { UserLayer } from './context/UserLayer'
 import { CoreProvider } from './context/CoreContext'
+import CashflowPage from './pages/app/CashflowPage';
 
 function App() {
   return (
@@ -49,6 +50,7 @@ function App() {
                     <Route path="/budgets" element={<BudgetsPage />} />
                     <Route path="/expenses" element={<ExpensesPage />} />
                     <Route path="/income" element={<IncomePage />} />
+                    <Route path="/cashflow" element={<CashflowPage />} />
                     <Route path="/goals" element={<GoalsPage />} />
                     <Route path="/vacation-mode" element={<VacationModePage />} />
                     <Route path="/reports" element={<ReportsPage />} />

@@ -32,6 +32,7 @@ export const getDefaultLocaleForCurrency = (currency: string): string => {
 };
 
 export function getRecurrenceLabel(value: string): string {
+  console.log(value);
   switch (value) {
     case 'Daily': return 'Daily';
     case 'Weekly': return 'Weekly';

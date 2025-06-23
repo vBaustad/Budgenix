@@ -1,17 +1,16 @@
 import { useState, useEffect } from 'react';
+// import { useLocation } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
+
 import CurrencyDropdown from '@/components/common/CurrencyDropdown';
 import { ThemeDropdown } from '@/components/common/ThemeDropdown';
-import { useLocation } from 'react-router-dom';
 import InputField from '@/components/common/forms/InputField';
-import { toast } from 'react-hot-toast';
 import { useUser } from '@/context/UserContext';
 import { apiFetch } from '@/utils/api';
 
 export default function SettingsPage() {
-  // const { t } = useTranslation();
-  const location = useLocation();
-  const activeTab = location.hash.replace('#', '') || 'user';
-
+  // const location = useLocation();
+  // const activeTab = location.hash.replace('#', '') || 'user';
   const { user, isLoading } = useUser();
 
   const [formData, setFormData] = useState({
@@ -28,10 +27,9 @@ export default function SettingsPage() {
     confirmNewPassword: '',
   });
 
-  // Sync form data when user loads
   useEffect(() => {
     if (user) {
-      setFormData((prev) => ({
+      setFormData(prev => ({
         ...prev,
         firstName: user.firstName || '',
         lastName: user.lastName || '',
@@ -90,74 +88,84 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-base-100 text-base-content px-8 py-6 space-y-8">
-      {activeTab === 'user' && user && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left: Overview */}
-          <div className="col-span-1 space-y-4">
-            <div className="card bg-base-200 p-4 shadow">
-              <h3 className="text-lg font-semibold mb-2">Profile</h3>
-              <p><strong>Name:</strong> {user.firstName} {user.lastName}</p>
-              <p><strong>Email:</strong> {user.email}</p>
-              <p><strong>Username:</strong> {user.userName}</p>
-            </div>
+    <div className="min-h-screen bg-base-100 text-base-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      <h1 className="text-2xl font-bold">Settings</h1>
 
-            <div className="card bg-base-200 p-4 shadow">
-              <h3 className="text-lg font-semibold mb-2">Address</h3>
-              <p>{user.addressLine1}</p>
-              {user.addressLine2 && <p>{user.addressLine2}</p>}
-              <p>{user.city}, {user.stateOrProvince} {user.zipOrPostalCode}</p>
-              <p>{user.country}</p>
-            </div>
-
-            <div className="card bg-base-200 p-4 shadow">
-              <h3 className="text-lg font-semibold mb-2">Subscription</h3>
-              <p><strong>Tier:</strong> {user.subscriptionTier}</p>
-              <p><strong>Billing cycle:</strong> {user.billingCycle}</p>
-              <p><strong>Next payment:</strong> {user.subscriptionEndDate || 'N/A'}</p>
-              {user.subscriptionIsActive && (
-                <button className="btn btn-sm btn-error mt-2">Cancel Subscription</button>
-              )}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* User + Account section */}
+        <div className="space-y-6 lg:col-span-2">
+          <div className="card bg-base-200 p-6 shadow">
+            <h2 className="text-lg font-semibold mb-2">Profile</h2>
+            <p className="text-sm text-base-content/70 mb-4">
+              Review your personal details and subscription.
+            </p>
+            <div className="space-y-2">
+              <p><strong>Name:</strong> {user?.firstName} {user?.lastName}</p>
+              <p><strong>Email:</strong> {user?.email}</p>
+              <p><strong>Username:</strong> {user?.userName}</p>
+              <p><strong>Address:</strong> {user?.addressLine1}, {user?.addressLine2} {user?.city} {user?.stateOrProvince} {user?.zipOrPostalCode}, {user?.country}</p>
+              <p><strong>Tier:</strong> {user?.subscriptionTier}</p>
+              <p><strong>Billing cycle:</strong> {user?.billingCycle}</p>
+              <p><strong>Next payment:</strong> {user?.subscriptionEndDate || 'N/A'}</p>
             </div>
           </div>
 
-          {/* Right: Forms */}
-          <div className="col-span-1 lg:col-span-2 space-y-6">
-            <form onSubmit={handleUserSubmit} className="card bg-base-200 p-4 shadow space-y-4">
-              <h3 className="text-lg font-semibold mb-2">Update Profile</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InputField name="firstName" placeholder="First name" value={formData.firstName} onChange={handleChange} />
-                <InputField name="lastName" placeholder="Last name" value={formData.lastName} onChange={handleChange} />
-                <InputField name="addressLine1" placeholder="Address line 1" value={formData.addressLine1} onChange={handleChange} />
-                <InputField name="addressLine2" placeholder="Address line 2" value={formData.addressLine2} onChange={handleChange} />
-                <InputField name="city" placeholder="City" value={formData.city} onChange={handleChange} />
-                <InputField name="stateOrProvince" placeholder="State/Province" value={formData.stateOrProvince} onChange={handleChange} />
-                <InputField name="zipOrPostalCode" placeholder="ZIP/Postal Code" value={formData.zipOrPostalCode} onChange={handleChange} />
-                <InputField name="country" placeholder="Country" value={formData.country} onChange={handleChange} />
+          <div className="card bg-base-200 p-6 shadow space-y-4">
+            <h2 className="text-lg font-semibold">Update Profile</h2>
+            <form onSubmit={handleUserSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <InputField name="firstName" placeholder="First name" value={formData.firstName} onChange={handleChange} />
+              <InputField name="lastName" placeholder="Last name" value={formData.lastName} onChange={handleChange} />
+              <InputField name="addressLine1" placeholder="Address line 1" value={formData.addressLine1} onChange={handleChange} />
+              <InputField name="addressLine2" placeholder="Address line 2" value={formData.addressLine2} onChange={handleChange} />
+              <InputField name="city" placeholder="City" value={formData.city} onChange={handleChange} />
+              <InputField name="stateOrProvince" placeholder="State/Province" value={formData.stateOrProvince} onChange={handleChange} />
+              <InputField name="zipOrPostalCode" placeholder="ZIP/Postal Code" value={formData.zipOrPostalCode} onChange={handleChange} />
+              <InputField name="country" placeholder="Country" value={formData.country} onChange={handleChange} />
+              <div className="col-span-full">
+                <button type="submit" className="btn btn-primary">Save Changes</button>
               </div>
-              <button type="submit" className="btn btn-primary">Save Changes</button>
             </form>
+          </div>
 
-            <form onSubmit={handlePasswordSubmit} className="card bg-base-200 p-4 shadow space-y-4">
-              <h3 className="text-lg font-semibold mb-2">Change Password</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InputField name="currentPassword" type="password" placeholder="Current password" value={formData.currentPassword} onChange={handleChange} />
-                <InputField name="newPassword" type="password" placeholder="New password" value={formData.newPassword} onChange={handleChange} />
-                <InputField name="confirmNewPassword" type="password" placeholder="Confirm new password" value={formData.confirmNewPassword} onChange={handleChange} />
+          <div className="card bg-base-200 p-6 shadow space-y-4">
+            <h2 className="text-lg font-semibold">Change Password</h2>
+            <form onSubmit={handlePasswordSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <InputField name="currentPassword" type="password" placeholder="Current password" value={formData.currentPassword} onChange={handleChange} />
+              <InputField name="newPassword" type="password" placeholder="New password" value={formData.newPassword} onChange={handleChange} />
+              <InputField name="confirmNewPassword" type="password" placeholder="Confirm new password" value={formData.confirmNewPassword} onChange={handleChange} />
+              <div className="col-span-full">
+                <button type="submit" className="btn btn-primary">Update Password</button>
               </div>
-              <button type="submit" className="btn btn-primary">Update Password</button>
             </form>
           </div>
         </div>
-      )}
 
-      {activeTab === 'app' && (
-        <div className="card bg-base-200 p-4 shadow">
-          <h3 className="text-lg font-semibold mb-2">App Settings</h3>
-          <CurrencyDropdown />
-          <ThemeDropdown />
+        {/* App settings section */}
+        <div className="space-y-6">
+          <div className="card bg-base-200 p-6 shadow">
+            <h2 className="text-lg font-semibold mb-2">App Settings</h2>
+            <p className="text-sm text-base-content/70 mb-4">Configure your app preferences.</p>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold mb-1">Currency</label>
+                <CurrencyDropdown />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold mb-1">Theme</label>
+                <ThemeDropdown />
+              </div>
+              <hr className="border-base-300 my-4" />
+              <div className="text-sm text-base-content/70">
+                <p><strong>Date Format:</strong> Coming soon...</p>
+                <p><strong>Language:</strong> Coming soon...</p>
+                <p><strong>Time Zone:</strong> Coming soon...</p>
+                <p><strong>Notifications:</strong> Coming soon...</p>
+              </div>
+            </div>
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
