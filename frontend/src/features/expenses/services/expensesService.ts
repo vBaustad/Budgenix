@@ -96,7 +96,7 @@ export function useExpensesOverview(month: number | undefined, year: number | un
   return useQuery<ExpensesOverviewResponse>({
     queryKey: ['expensesOverview', month, year],
     queryFn: () => fetchExpensesOverview(month!, year!),
-    enabled: isLoggedIn && !!month && !!year, // 👈 Prevent if logged out or no date
+    enabled: isLoggedIn && !!month && !!year,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
   });

@@ -9,6 +9,7 @@ import { Dialog } from '@headlessui/react';
 import InputField from '@/components/common/forms/InputField';
 import { useCategories } from '@/context/CategoryContext';
 import SelectField from '@/components/common/forms/SelectField';
+// import { useExpensesContext } from '../context/ExpensesContext';
 
 export default function ExpensesList({ expenses }: { expenses: Expense[] }) {
   const { currency } = useCurrency();
@@ -16,7 +17,7 @@ export default function ExpensesList({ expenses }: { expenses: Expense[] }) {
   const { categories } = useCategories();
   const { mutate: deleteExpense } = useDeleteExpense();
   const { mutate: updateExpense } = useUpdateExpense();
-
+  // const { refreshExpenses, refreshOverview } = useExpensesContext();
   const [deletePendingId, setDeletePendingId] = useState<string | null>(null);
   const [editItem, setEditItem] = useState<Expense | null>(null);
   const [editForm, setEditForm] = useState<Partial<Expense>>({});
@@ -31,16 +32,15 @@ export default function ExpensesList({ expenses }: { expenses: Expense[] }) {
     setDeletePendingId(id);
   };
 
-  const handleDeleteConfirmed = () => {
-    if (deletePendingId) {
-      deleteExpense(deletePendingId, {
-        onSuccess: () => toast.success("Expense deleted"),
-        onError: () => toast.error("Failed to delete expense"),
-      });
-      setDeletePendingId(null);
-    }
-  };
-
+const handleDeleteConfirmed = () => {
+  if (deletePendingId) {
+    deleteExpense(deletePendingId, {
+      onSuccess: () => toast.success('Expense deleted'),
+      onError: () => toast.error('Failed to delete expense'),
+    });
+        setDeletePendingId(null);
+      }
+    };
   const handleDeleteCancelled = () => {
     setDeletePendingId(null);
   };

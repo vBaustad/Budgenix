@@ -14,8 +14,12 @@ const API_BASE_URL = '/api/goals';
 export async function fetchGoals(activeOnly?: boolean): Promise<GoalDto[]> {
   const params = new URLSearchParams();
   if (activeOnly !== undefined) params.append('activeOnly', String(activeOnly));
-
   return await apiFetch(`/api/goals?${params.toString()}`);
+}
+
+export async function fetchGoalById(id: string): Promise<GoalDto> {
+  if (!id) throw new Error('Goal ID is required');
+  return await apiFetch(`/api/goals/${id}`);
 }
 
 async function createGoalApi(goal: CreateGoalDto): Promise<GoalDto> {
@@ -75,6 +79,19 @@ export function useGoals(activeOnly?: boolean) {
   });
 }
 
+export function useGoalById(id: string, options?: { enabled?: boolean }) {
+  const { isLoggedIn } = useAuth();
+
+  return useQuery<GoalDto>({
+    queryKey: ['goal', id],
+    queryFn: () => fetchGoalById(id),
+    enabled: isLoggedIn && !!id && (options?.enabled ?? true),
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
+}
+
+
 export function useCreateGoal() {
   const queryClient = useQueryClient();
 
@@ -82,6 +99,7 @@ export function useCreateGoal() {
     mutationFn: createGoalApi,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['goals'] });
+      queryClient.invalidateQueries({ queryKey: ['goalsOverview'] });
     },
   });
 }
@@ -93,6 +111,7 @@ export function useUpdateGoal() {
     mutationFn: (payload: { id: string; data: UpdateGoalDto }) => updateGoalApi(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['goals'] });
+      queryClient.invalidateQueries({ queryKey: ['goalsOverview'] });
     },
   });
 }
@@ -104,6 +123,7 @@ export function useDeleteGoal() {
     mutationFn: deleteGoalApi,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['goals'] });
+      queryClient.invalidateQueries({ queryKey: ['goalsOverview'] });
     },
   });
 }
@@ -115,6 +135,7 @@ export function useContributeGoal() {
     mutationFn: (payload: { id: string; data: GoalContributionDto }) => contributeGoalApi(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['goals'] });
+      queryClient.invalidateQueries({ queryKey: ['goalsOverview'] });
     },
   });
 }

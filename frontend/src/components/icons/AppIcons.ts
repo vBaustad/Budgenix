@@ -75,6 +75,7 @@ import {
   AlertTriangle,
   Info,
   Star,
+  Sparkles,
   FilePlus,
   CirclePlus,
   List,
@@ -158,6 +159,7 @@ export const AppIcons = {
   warning: AlertTriangle,
   info: Info,
   star: Star,
+  sparkles: Sparkles,
 
   // Utilities
   lightBulb: Lightbulb,

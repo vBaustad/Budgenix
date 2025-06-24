@@ -41,8 +41,8 @@ export default function InputField({
   return (
     <div>
       {label && (
-        <label className="label">
-          <span className="label-text text-base-content">{label}</span>
+        <label className="block mb-1 text-sm font-medium text-base-content/80">
+          {label}
         </label>
       )}
 
