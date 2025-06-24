@@ -8,6 +8,7 @@ import {
 } from '@/types/finance/income';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useDateFilter } from '@/context/DateFilterContext';
+import { useAuth } from '@/context/AuthContext'; // 👈 added
 
 type FetchIncomeOptions = {
   from?: string;
@@ -62,7 +63,6 @@ async function updateIncomeApi({
   });
 }
 
-
 async function deleteIncomeApi(id: string): Promise<void> {
   await apiFetch(`${API_BASE_URL}/${id}`, {
     method: 'DELETE',
@@ -71,21 +71,25 @@ async function deleteIncomeApi(id: string): Promise<void> {
 
 // === REACT QUERY HOOKS ===
 export function useIncomes(filters: FetchIncomeOptions) {
+  const { isLoggedIn } = useAuth(); // 👈 added
+
   return useQuery<Income[]>({
     queryKey: ['incomes', filters],
     queryFn: () => fetchIncomes(filters),
-    staleTime: 5 * 60 * 1000,  // 5 minutes
-    gcTime: 10 * 60 * 1000,    // 10 minutes
+    enabled: isLoggedIn, // 👈 prevents firing if not logged in
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 }
 
 export function useIncomeOverview() {
+  const { isLoggedIn } = useAuth(); // 👈 added
   const { selectedMonth: month, selectedYear: year } = useDateFilter();
-  
+
   return useQuery<IncomeOverviewDto>({
     queryKey: ['incomeOverview', month, year],
-    queryFn: () => fetchIncomeOverview(month!, year!), 
-    enabled: !!month && !!year,
+    queryFn: () => fetchIncomeOverview(month!, year!),
+    enabled: isLoggedIn && !!month && !!year, // 👈 prevents if logged out or missing date
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
   });
@@ -110,11 +114,10 @@ export function useUpdateIncome() {
     mutationFn: (payload: { id: string; data: UpdateIncomeDto }) => updateIncomeApi(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['incomes'] });
-      queryClient.invalidateQueries({ queryKey: ['incomesOverview'] });
+      queryClient.invalidateQueries({ queryKey: ['incomeOverview'] });
     },
   });
 }
-
 
 export function useDeleteIncome() {
   const queryClient = useQueryClient();
@@ -123,11 +126,10 @@ export function useDeleteIncome() {
     mutationFn: deleteIncomeApi,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['incomes'] });
-      queryClient.invalidateQueries({ queryKey: ['incomesOverview'] });
+      queryClient.invalidateQueries({ queryKey: ['incomeOverview'] });
     },
   });
 }
-
 
 // === UTILITY ===
 export function isGroupedIncomes(data: Income[] | GroupedIncomes): data is GroupedIncomes {

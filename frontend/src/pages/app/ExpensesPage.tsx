@@ -2,20 +2,20 @@ import ExpensesOverview from '@/features/expenses/components/ExpensesOverview';
 import AddExpenseForm from '@/features/expenses/components/AddExpenseForm';
 import ExpensesList from '@/features/expenses/components/ExpensesList';
 import GroupedExpensesList from '@/features/expenses/components/GroupedExpensesList';
-import UpcomingRecurringList from '@/features/recurring/components/UpcomingRecurringList';
-import EditRecurringItemForm from '@/features/recurring/components/EditRecurringItemForm';
 import BreakdownPieChart from '@/components/common/charts/BreakdownPieChart';
 import CategoryFilter from '@/components/common/filters/CategoryFilter';
 import GroupByDropdown from '@/components/common/filters/GroupByDropdown';
 import SectionShell from '@/components/layout/SectionShell';
 import { AppIcons } from '@/components/icons/AppIcons';
 import { GROUP_OPTIONS } from '@/features/expenses/constants/grouping';
-import RecurringSummary from '@/features/recurring/components/RecurringSummary';
 import { useExpensesContext } from '@/features/expenses/context/ExpensesContext';
-import { useRecurring } from '@/context/RecurringContext';
 import { useCategories } from '@/context/CategoryContext';
 import { t } from 'i18next';
-import { formatCurrency } from '@/utils/formatting';
+import SpendingTrendChart from '@/components/common/charts/SpendingTrendChart';
+import { useState } from 'react';
+import { Dialog } from '@headlessui/react';
+import { useExpensesOverview } from '@/features/expenses/services/expensesService';
+import { useDateFilter } from '@/context/DateFilterContext';
 
 export default function ExpensesPage() {
   const {
@@ -27,33 +27,17 @@ export default function ExpensesPage() {
     setGroupBy,
     setSelectedCategories,
     handleAddExpense,
-    overview,
-    overviewLoading,
   } = useExpensesContext();
 
-  const {
-    upcomingRecurringExpenses,
-    monthlyRecurringExpenseTotal,
-    lastTriggeredRecurringExpense,
-    lastSkippedRecurringExpense,
-    nextRecurringExpense,
-    loadingRecurring,
-    refreshRecurring,
-    selectedRecurringItem,
-    setSelectedRecurringItem,
-  } = useRecurring();
-
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const { selectedMonth, selectedYear } = useDateFilter();
+  const { data: overview, isLoading: overviewLoading } = useExpensesOverview(selectedMonth, selectedYear);
   const { categories } = useCategories();
-
+  const dailyTotals = overview?.dailyTotals ?? [];
   const categoryOptions = categories.map((c) => ({
     value: c.id,
     label: c.name,
   }));
-
-  const handleRecurringSave = async () => {
-    setSelectedRecurringItem(null);
-    await refreshRecurring();
-  };
 
   const chartData =
     groupedExpenses.length > 0
@@ -63,80 +47,23 @@ export default function ExpensesPage() {
   return (
     <div className="flex flex-col gap-4 p-4 w-full max-w-full overflow-hidden">
       <ExpensesOverview />
-
-      <div className="flex flex-col lg:flex-row w-full max-w-full gap-4">
-        <SectionShell title={t('expenses.add')} icon={AppIcons.add} minimizable className="w-full">
-          <div className="flex flex-col lg:flex-row gap-4">
-            <div className="lg:w-1/2">
-              <AddExpenseForm onAdd={handleAddExpense} />
-            </div>
-
-            <div className="lg:w-1/2 bg-base-100 border border-base-200 text-base-content rounded-xl shadow-sm p-4">
-              <h3 className="text-lg font-semibold mb-4">Expense Overview</h3>
-              {overviewLoading ? (
-                <span className="loading loading-spinner loading-md" />
-              ) : (
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span>Total spent:</span>
-                    <span className="font-medium">
-                      {formatCurrency(overview?.totalSpent ?? 0)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Last month:</span>
-                    <span className="font-medium">
-                      {formatCurrency(overview?.lastMonthSpent ?? 0)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Next recurring:</span>
-                    {nextRecurringExpense ? (
-                      <span className="font-medium">
-                        {new Date(nextRecurringExpense.nextOccurrenceDate!).toLocaleDateString(undefined, {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric',
-                        })}: {formatCurrency(nextRecurringExpense.amount)}
-                      </span>
-                    ) : (
-                      <span className="text-base-content/40">–</span>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </SectionShell>
-
-        <SectionShell title={t('expenses.upcoming')} icon={AppIcons.recurring} refreshable className="w-full">
-          <div className="flex flex-col lg:flex-row gap-4 w-full">
-            <div className="w-full lg:w-1/2">
-              <UpcomingRecurringList
-                recurringItems={upcomingRecurringExpenses ?? []}
-                loading={loadingRecurring}
-                onSelect={setSelectedRecurringItem}
-              />
-            </div>
-            <div className="w-full lg:w-1/2">
-              {selectedRecurringItem ? (
-                <EditRecurringItemForm
-                  item={selectedRecurringItem}
-                  onSave={handleRecurringSave}
-                  onCancel={() => setSelectedRecurringItem(null)}
-                />
-              ) : (
-                <RecurringSummary
-                  recurringItems={upcomingRecurringExpenses}
-                  monthlyTotal={monthlyRecurringExpenseTotal}
-                  lastTriggered={lastTriggeredRecurringExpense}
-                  lastSkipped={lastSkippedRecurringExpense}
-                />
-              )}
-            </div>
-          </div>
-        </SectionShell>
+      <div>
+        <div className="bg-base-100 shadow-md rounded-xl p-4">
+          {overviewLoading ? (
+            <div className="rounded animate-pulse h-40 bg-base-200" />
+          ) : (
+            <SpendingTrendChart view="daily" highlightSpikes={true} data={dailyTotals} />
+          )}
+        </div>
       </div>
+
+      <button
+        className="btn btn-primary flex items-center gap-2"
+        onClick={() => setIsAddModalOpen(true)}
+      >
+        <AppIcons.add className="w-4 h-4" />
+        Add Expense
+      </button>
 
       <div className="flex flex-col lg:flex-row w-full max-w-full gap-4">
         <SectionShell
@@ -181,6 +108,29 @@ export default function ExpensesPage() {
           </div>
         </SectionShell>
       </div>
+
+      {isAddModalOpen && (
+        <Dialog open={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} className="relative z-50">
+          <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+          <div className="fixed inset-0 flex items-center justify-center p-4">
+            <Dialog.Panel className="bg-base-100 rounded-xl p-6 shadow-lg max-w-md w-full">
+              <Dialog.Title className="text-lg font-bold mb-4">Add Expense</Dialog.Title>
+              <AddExpenseForm
+                onAdd={(expense) => {
+                  handleAddExpense(expense);
+                  setIsAddModalOpen(false);
+                }}
+              />
+              <button
+                onClick={() => setIsAddModalOpen(false)}
+                className="btn btn-sm mt-4 w-full"
+              >
+                Cancel
+              </button>
+            </Dialog.Panel>
+          </div>
+        </Dialog>
+      )}
     </div>
   );
 }

@@ -18,8 +18,8 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Budgenix.Services.Finance;
-using Budgenix.Services.Recurring;
 using Budgenix.Services.Budgets;
+using Budgenix.Services.Goals;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -59,6 +59,8 @@ builder.Services.AddScoped<IInsightService, InsightService>();
 builder.Services.AddScoped<IExpenseService, ExpenseService>();
 builder.Services.AddScoped<IIncomeService, IncomeService>();
 builder.Services.AddScoped<IBudgetService, BudgetService>();
+builder.Services.AddScoped<IGoalService, GoalService>();
+
 
 
 builder.Services.AddInsightRules();
@@ -143,7 +145,7 @@ var logger = app.Services.GetRequiredService<ILogger<Program>>();
 
 // Localization
 var localizationOptions = app.Services.GetService<IOptions<RequestLocalizationOptions>>()?.Value;
-app.UseRequestLocalization(localizationOptions);
+app.UseRequestLocalization(localizationOptions!);
 app.UseCors("AllowFrontend");
 
 // Seed default data

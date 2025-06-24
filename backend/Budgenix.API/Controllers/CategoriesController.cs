@@ -3,12 +3,13 @@ using Budgenix.Data;
 using Budgenix.Dtos.Categories;
 using Budgenix.Models.Categories;
 using Budgenix.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Budgenix.API.Controllers
 {
-
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class CategoriesController : ControllerBase

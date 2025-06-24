@@ -1,7 +1,7 @@
 import { Expense, GroupedExpenses, CreateExpenseDto, UpdateExpenseDto } from '@/types/finance/expense';
 import { apiFetch } from '@/utils/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-
+import { useAuth } from '@/context/AuthContext'; // 👈 Add this
 
 type FetchExpenseOptions = {
   from?: string;
@@ -71,7 +71,6 @@ async function updateExpenseApi({
   });
 }
 
-
 async function deleteExpenseApi(id: string): Promise<void> {
   await apiFetch(`${API_BASE_URL}/${id}`, {
     method: 'DELETE',
@@ -80,24 +79,28 @@ async function deleteExpenseApi(id: string): Promise<void> {
 
 // === REACT QUERY HOOKS ===
 export function useExpenses(filters: FetchExpenseOptions) {
+  const { isLoggedIn } = useAuth(); // 👈 
+
   return useQuery<Expense[]>({
     queryKey: ['expenses', filters],
     queryFn: () => fetchExpenses(filters),
-    staleTime: 5 * 60 * 1000,   // 5 minutes
-    gcTime: 10 * 60 * 1000,
-  });
-}
-
-export function useExpensesOverview(month: number | undefined, year: number | undefined) {
-  return useQuery<ExpensesOverviewResponse>({
-    queryKey: ['expensesOverview', month, year],
-    queryFn: () => fetchExpensesOverview(month!, year!), // safe because enabled
-    enabled: !!month && !!year, // don't run unless both provided
+    enabled: isLoggedIn, // 👈 Prevent if logged out
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
   });
 }
 
+export function useExpensesOverview(month: number | undefined, year: number | undefined) {
+  const { isLoggedIn } = useAuth(); // 👈
+
+  return useQuery<ExpensesOverviewResponse>({
+    queryKey: ['expensesOverview', month, year],
+    queryFn: () => fetchExpensesOverview(month!, year!),
+    enabled: isLoggedIn && !!month && !!year,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
+}
 
 export function useCreateExpense() {
   const queryClient = useQueryClient();
@@ -105,7 +108,6 @@ export function useCreateExpense() {
   return useMutation({
     mutationFn: createExpenseApi,
     onSuccess: () => {
-      // Invalidate cached queries so data refreshes automatically
       queryClient.invalidateQueries({ queryKey: ['expenses'] });
       queryClient.invalidateQueries({ queryKey: ['expensesOverview'] });
     },
@@ -124,7 +126,6 @@ export function useUpdateExpense() {
   });
 }
 
-
 export function useDeleteExpense() {
   const queryClient = useQueryClient();
 
@@ -136,7 +137,6 @@ export function useDeleteExpense() {
     },
   });
 }
-
 
 // === UTILITY ===
 export function isGroupedExpenses(data: Expense[] | GroupedExpenses): data is GroupedExpenses {
@@ -150,6 +150,3 @@ export function isGroupedExpenses(data: Expense[] | GroupedExpenses): data is Gr
     Array.isArray(data[0].expenses)
   );
 }
-
-
-

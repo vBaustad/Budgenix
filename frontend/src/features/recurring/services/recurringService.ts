@@ -9,6 +9,7 @@ import {
   RecurringItemDto,
   RecurringOverviewDto
 } from '@/types/finance/recurring';
+import { useAuth } from '@/context/AuthContext';
 
 const RECURRING_QUERY_KEY = ['recurring-items'];
 const UPCOMING_QUERY_KEY = ['upcoming-recurring'];
@@ -66,26 +67,32 @@ async function skipRecurringItem(id: string, occurrenceDate?: string): Promise<v
 
 // --- HOOKS ---
 export function useRecurringItems() {
+  const { isLoggedIn } = useAuth();
   return useQuery({
     queryKey: RECURRING_QUERY_KEY,
     queryFn: fetchRecurringItems,
+    enabled: isLoggedIn,   // 🔑 Prevents firing when not logged in
     staleTime: 1000 * 60 * 5,
     gcTime: 10 * 60 * 1000,
   });
 }
 
 export function useUpcomingRecurring() {
+  const { isLoggedIn } = useAuth();
   return useQuery({
     queryKey: UPCOMING_QUERY_KEY,
     queryFn: fetchUpcomingRecurring,
+    enabled: isLoggedIn,
     staleTime: 1000 * 60 * 5,
   });
 }
 
 export function useRecurringOverview(month: number, year: number) {
+  const { isLoggedIn } = useAuth();
   return useQuery({
     queryKey: OVERVIEW_QUERY_KEY(month, year),
     queryFn: () => fetchRecurringOverview(month, year),
+    enabled: isLoggedIn && !!month && !!year,
     staleTime: 1000 * 60 * 5,
   });
 }

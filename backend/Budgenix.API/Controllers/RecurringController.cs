@@ -5,9 +5,11 @@ using Budgenix.Services.Recurring;
 using Budgenix.Services.User;
 using Microsoft.AspNetCore.Mvc;
 using Budgenix.Models.Shared;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Budgenix.API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class RecurringController : ControllerBase

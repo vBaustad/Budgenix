@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { Dialog, DialogPanel } from '@headlessui/react'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import BudgenixLogo from '@/assets/Logo/BudgenixLogo.png';
-import { ThemeDropdown } from '@/components/common/ThemeDropdown';
 import { useTranslation } from 'react-i18next';
 
 export default function Navbar() {
@@ -67,7 +66,6 @@ export default function Navbar() {
           </div>
 
           <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-            <ThemeDropdown />
             <a href="/login" className="text-sm/6 font-semibold text-base-content hover:text-primary">
               {t('navbar.login')} <span aria-hidden="true">&rarr;</span>
             </a>

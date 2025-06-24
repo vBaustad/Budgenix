@@ -6,6 +6,7 @@ import {
   CreateBudgetDto,
   UpdateBudgetDto
 } from '@/types/finance/budget';
+import { useAuth } from '@/context/AuthContext'; // 👈 Ensure this is correct
 
 // === RAW FETCHERS ===
 
@@ -45,29 +46,33 @@ async function deleteBudget(id: string): Promise<void> {
 // === HOOKS ===
 
 export function useBudgets() {
+  const { isLoggedIn } = useAuth(); // 👈
   return useQuery({
     queryKey: ['budgets'],
     queryFn: fetchBudgets,
+    enabled: isLoggedIn,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
   });
 }
 
 export function useBudgetById(id: string, options?: { enabled?: boolean }) {
+  const { isLoggedIn } = useAuth(); // 👈
   return useQuery<BudgetDto>({
     queryKey: ['budget', id],
     queryFn: () => fetchBudgetById(id),
-    enabled: options?.enabled ?? !!id,
+    enabled: isLoggedIn && (options?.enabled ?? !!id),
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
   });
 }
 
 export function useBudgetProgress(id: string, periodStart: string, periodEnd: string) {
+  const { isLoggedIn } = useAuth(); // 👈
   return useQuery({
     queryKey: ['budgetProgress', id, periodStart, periodEnd],
     queryFn: () => fetchBudgetProgress(id, periodStart, periodEnd),
-    enabled: !!id && !!periodStart && !!periodEnd,
+    enabled: isLoggedIn && !!id && !!periodStart && !!periodEnd,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
   });

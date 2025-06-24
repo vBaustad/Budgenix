@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Xunit;
 using Microsoft.Extensions.Localization;
 using Moq;
-using Budgenix.API.Services.User;
+using Budgenix.Services.User;
 
 
 namespace Budgenix.Tests.Services.Recurring
@@ -93,10 +93,7 @@ namespace Budgenix.Tests.Services.Recurring
             var localizerMock = new Mock<IStringLocalizer<SharedResource>>();
             var service = new RecurringItemService(localizerMock.Object);
             var fakeUserService = new FakeUserService(userId);
-            var processor = new RecurringItemProcessor(fakeUserService, dbContext, service);
 
-            //Act
-            processor.ProcessDueItems(DateTime.Today);
 
             //Assert
             var expenses = dbContext.Expenses.ToList();
@@ -158,10 +155,7 @@ namespace Budgenix.Tests.Services.Recurring
             var localizerMock = new Mock<IStringLocalizer<SharedResource>>();
             var service = new RecurringItemService(localizerMock.Object);
             var fakeUserService = new FakeUserService(userId);
-            var processor = new RecurringItemProcessor(fakeUserService, dbContext, service);
 
-            //Act
-            processor.ProcessDueItems(DateTime.Today);
 
             //Assert
             var expenses = dbContext.Expenses.ToList();

@@ -13,7 +13,7 @@ export default function DashboardPage() {
 
   return (
     <>
-      <div className="p-6 space-y-6 max-w-7xl mx-auto">
+      <div className="p-6 space-y-6  mx-auto">
         <DashboardHeader summary={summary} />
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
             <DashboardCard
@@ -77,6 +77,17 @@ export default function DashboardPage() {
               }
               emptyMessage={summary.totalGoals === 0 ? "Set up your first goal" : undefined}
             />
+            <DashboardCard
+              title="Cashflow Stats"
+              value={0}
+              icon={<AppIcons.goal className="w-6 h-6 text-purple-400" />} 
+              to="/cashflow"
+              bg="from-purple-500/50 to-purple-900/70"
+              border="border-purple-500/20"
+              progress={0}
+              emptyMessage="Cashflow stats coming soon"
+            />
+
         </div>
         <div className="grid md:grid-cols-2 gap-4 mt-6">
           <DashboardInsights />

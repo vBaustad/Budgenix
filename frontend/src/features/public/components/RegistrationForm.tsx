@@ -81,65 +81,64 @@ export default function RegistrationForm({ selectedPlan, frequency }: Registrati
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const fieldErrors: Record<string, string> = {};
+  e.preventDefault();
+  const fieldErrors: Record<string, string> = {};
 
+  if (!formData.userName) fieldErrors.userName = 'Username is required';
+  if (!formData.firstName) fieldErrors.firstName = 'First name is required';
+  if (!formData.lastName) fieldErrors.lastName = 'Last name is required';
+  if (!formData.email) fieldErrors.email = 'Email is required';
+  if (!formData.password) fieldErrors.password = 'Password is required';
+  if (formData.password.length < 6) fieldErrors.password = 'Password must be at least 6 characters';
+  if (formData.password !== formData.confirmPassword) fieldErrors.confirmPassword = 'Passwords do not match';
 
-    if (!formData.userName) fieldErrors.userName = 'Username is required';
-    if (!formData.firstName) fieldErrors.firstName = 'First name is required';
-    if (!formData.lastName) fieldErrors.lastName = 'Last name is required';
-    if (!formData.email) fieldErrors.email = 'Email is required';
-    if (!formData.password) fieldErrors.password = 'Password is required';
-    if (formData.password.length < 6) fieldErrors.password = 'Password must be at least 6 characters';
-    if (formData.password !== formData.confirmPassword) fieldErrors.confirmPassword = 'Passwords do not match';
+  if (isPaidPlan) {
+    if (!formData.addressLine1) fieldErrors.addressLine1 = 'Address is required for paid plans';
+    if (!formData.paymentMethod) fieldErrors.paymentMethod = 'Select a payment method';
+  }
 
-    if (isPaidPlan) {
-      if (!formData.addressLine1) fieldErrors.addressLine1 = 'Address is required for paid plans';
-      if (!formData.paymentMethod) fieldErrors.paymentMethod = 'Select a payment method';
-    }
+  if (Object.keys(fieldErrors).length > 0) {
+    console.warn('[handleSubmit] Validation errors:', fieldErrors);
+    setErrors(fieldErrors);
+    return;
+  }
 
-    if (Object.keys(fieldErrors).length > 0) {
-      console.warn('[handleSubmit] Validation errors:', fieldErrors);
-      setErrors(fieldErrors);
-      return;
-    }
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { confirmPassword, paymentMethod, ...payload } = {
+      ...formData,
+      billingCycle: frequency.value === 'monthly' ? 'Monthly' : 'Annually'
+    };
 
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { confirmPassword, paymentMethod, ...payload } = {
-        ...formData,
-        billingCycle: frequency.value === 'monthly' ? 'Monthly' : 'Annually'
-      };
+    await apiFetch('/api/account/register', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
 
-      await apiFetch('/api/account/register', {
+    if (isPaidPlan && formData.paymentMethod === 'stripe') {
+      const checkoutData = await apiFetch('/api/stripe/create-checkout-session', {
         method: 'POST',
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          email: formData.email,
+          priceId: selectedPlan.priceId[frequency.value],
+        }),
       });
 
-      if (isPaidPlan && formData.paymentMethod === 'stripe') {
-        const checkoutData = await apiFetch('/api/stripe/create-checkout-session', {
-          method: 'POST',
-          body: JSON.stringify({
-            email: formData.email,
-            priceId: selectedPlan.priceId[frequency.value],
-          }),
-        });
-
-
-        if (checkoutData.url) {
-          window.location.href = checkoutData.url;
-        } else {
-          toast.error('Stripe checkout session could not be created');
-        }
+      if (checkoutData.url) {
+        window.location.href = checkoutData.url;
       } else {
-        toast.success('Registration successful! Please check your email to confirm your account.');
-        navigate('/login');
+        toast.error('Stripe checkout session could not be created');
       }
-
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : t('register.errors.generic'));
+    } else {
+      // Instead of toast + login redirect, navigate to confirmation page
+      navigate('/signup/confirm');
     }
-  };
+
+  } catch (err) {
+    toast.error(err instanceof Error ? err.message : t('register.errors.generic'));
+  }
+};
+
 
 
   return (

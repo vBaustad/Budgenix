@@ -1,11 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Budgenix.Data;
-using Budgenix.Dtos.Goals;
-using Budgenix.Models.Finance;
-using AutoMapper;
+﻿using Budgenix.Dtos.Goals;
+using Budgenix.Services.Goals;
 using Budgenix.Services.User;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Budgenix.API.Controllers
 {
@@ -14,66 +11,83 @@ namespace Budgenix.API.Controllers
     [Route("api/[controller]")]
     public class GoalsController : ControllerBase
     {
-        private readonly BudgenixDbContext _context;
+        private readonly IGoalService _goalService;
         private readonly IUserService _userService;
-        private readonly IMapper _mapper;
 
-        public GoalsController(BudgenixDbContext context, IUserService userService, IMapper mapper)
+        public GoalsController(IGoalService goalService, IUserService userService)
         {
-            _context = context;
+            _goalService = goalService;
             _userService = userService;
-            _mapper = mapper;
         }
 
+        // GET api/goals
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<GoalDto>>> GetGoals()
+        public async Task<ActionResult<IEnumerable<GoalDto>>> GetAllGoals()
         {
             var userId = _userService.GetUserId();
-            var goals = await _context.Goals.Where(g => g.UserId == userId).ToListAsync();
-            return Ok(_mapper.Map<List<GoalDto>>(goals));
+            var goals = await _goalService.GetAllGoalsAsync(userId);
+            return Ok(goals);
         }
 
+        // GET api/goals/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<GoalDto>> GetGoal(Guid id)
+        public async Task<ActionResult<GoalDto>> GetGoalById(Guid id)
         {
             var userId = _userService.GetUserId();
-            var goal = await _context.Goals.FirstOrDefaultAsync(g => g.Id == id && g.UserId == userId);
-            if (goal == null) return NotFound();
-            return Ok(_mapper.Map<GoalDto>(goal));
+            var goal = await _goalService.GetGoalByIdAsync(userId, id);
+
+            if (goal == null)
+                return NotFound();
+
+            return Ok(goal);
         }
 
+        // POST api/goals
         [HttpPost]
         public async Task<ActionResult<GoalDto>> CreateGoal([FromBody] CreateGoalDto dto)
         {
             var userId = _userService.GetUserId();
-            var goal = _mapper.Map<Goal>(dto);
-            goal.Id = Guid.NewGuid();
-            goal.UserId = userId;
-            _context.Goals.Add(goal);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetGoal), new { id = goal.Id }, _mapper.Map<GoalDto>(goal));
+            var createdGoal = await _goalService.CreateGoalAsync(userId, dto);
+            return CreatedAtAction(nameof(GetGoalById), new { id = createdGoal.Id }, createdGoal);
         }
 
+        // PUT api/goals/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateGoal(Guid id, [FromBody] UpdateGoalDto dto)
+        public async Task<ActionResult<GoalDto>> UpdateGoal(Guid id, [FromBody] UpdateGoalDto dto)
         {
             var userId = _userService.GetUserId();
-            var goal = await _context.Goals.FirstOrDefaultAsync(g => g.Id == id && g.UserId == userId);
-            if (goal == null) return NotFound();
-            _mapper.Map(dto, goal);
-            await _context.SaveChangesAsync();
+            var updatedGoal = await _goalService.UpdateGoalAsync(userId, id, dto);
+
+            if (updatedGoal == null)
+                return NotFound();
+
+            return Ok(updatedGoal);
+        }
+
+        // DELETE api/goals/{id}
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> DeleteGoal(Guid id)
+        {
+            var userId = _userService.GetUserId();
+            var success = await _goalService.DeleteGoalAsync(userId, id);
+
+            if (!success)
+                return NotFound();
+
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteGoal(Guid id)
+        // POST api/goals/{id}/contribute
+        [HttpPost("{id}/contribute")]
+        public async Task<ActionResult<GoalDto>> ContributeToGoal(Guid id, [FromBody] GoalContributionDto dto)
         {
             var userId = _userService.GetUserId();
-            var goal = await _context.Goals.FirstOrDefaultAsync(g => g.Id == id && g.UserId == userId);
-            if (goal == null) return NotFound();
-            _context.Goals.Remove(goal);
-            await _context.SaveChangesAsync();
-            return NoContent();
+            var result = await _goalService.ContributeToGoalAsync(userId, id, dto);
+
+            if (result == null)
+                return NotFound();
+
+            return Ok(result);
         }
     }
 }

@@ -1,8 +1,7 @@
 // import { useEffect } from "react";
-import { useTranslation } from "react-i18next";
+
 
 export default function ReportsPage() {
-  const { t } = useTranslation();
 
   // useEffect(() => {
   //     document.title = "Manually set title";
@@ -12,8 +11,7 @@ export default function ReportsPage() {
     <>
       <div className="flex min-h-screen bg-base-100 text-base-content">        
         <div className="p-4">
-          <h2 className="text-sm text-base-content/70 mb-4">{t('dashboard.welcome')}</h2>
-          <p>{t('dashboard.description')}</p>
+          <h2 className="text-sm text-base-content/70 mb-4">Hello, here you will see a reports page when it's finished.</h2>
         </div>
       </div>
     </>

@@ -197,8 +197,14 @@ namespace Budgenix.Services.Finance
         public async Task<ExpenseDto> AddExpenseAsync(string userId, CreateExpenseDto dto)
         {
             _logger.LogInformation("Adding expense for user {UserId}", userId);
-            var category = await _context.Categories.FindAsync(dto.CategoryId);
-            if (category == null) throw new Exception("Invalid category");
+
+            var category = await _context.Categories
+                .Where(c => c.Id == dto.CategoryId)
+                .Select(c => new { c.Id, c.Name })
+                .FirstOrDefaultAsync();
+
+            if (category == null)
+                throw new InvalidOperationException("Invalid category ID provided");
 
             var e = new Expense
             {
@@ -207,12 +213,14 @@ namespace Budgenix.Services.Finance
                 Amount = dto.Amount,
                 Date = dto.Date,
                 Description = dto.Description,
-                Category = category,
+                CategoryId = category.Id,
                 UserId = userId
             };
 
             _context.Expenses.Add(e);
             await _context.SaveChangesAsync();
+
+            InvalidateExpenseOverviewCache(userId, e.Date);
 
             return new ExpenseDto
             {
@@ -220,9 +228,10 @@ namespace Budgenix.Services.Finance
                 Name = e.Name,
                 Amount = e.Amount,
                 Date = e.Date,
-                CategoryName = e.Category.Name
+                CategoryName = category.Name
             };
         }
+
 
         public async Task<bool> UpdateExpenseAsync(string userId, Guid id, UpdateExpenseDto dto)
         {
@@ -230,28 +239,61 @@ namespace Budgenix.Services.Finance
             var e = await _context.Expenses.Include(x => x.Category).FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
             if (e == null) return false;
 
-            var category = await _context.Categories.FindAsync(dto.CategoryId);
-            if (category == null) throw new Exception("Invalid category");
+            var categoryExists = await _context.Categories.AnyAsync(c => c.Id == dto.CategoryId);
+            if (!categoryExists) throw new Exception("Invalid category");
+
+            var oldDate = e.Date;
+
 
             e.Name = dto.Name;
             e.Amount = dto.Amount;
             e.Date = dto.Date;
             e.Description = dto.Description;
-            e.Category = category;
+            e.CategoryId = dto.CategoryId;
 
             await _context.SaveChangesAsync();
+
+            InvalidateExpenseOverviewCache(userId, oldDate);
+            InvalidateExpenseOverviewCache(userId, e.Date);
+
             return true;
         }
 
         public async Task<bool> DeleteExpenseAsync(string userId, Guid id)
         {
             _logger.LogInformation("Deleting expense {Id} for user {UserId}", id, userId);
-            var e = await _context.Expenses.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
-            if (e == null) return false;
+
+            var e = await _context.Expenses
+                .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+
+            if (e == null)
+            {
+                _logger.LogWarning("Expense {Id} not found for user {UserId}", id, userId);
+                return false;
+            }
 
             _context.Expenses.Remove(e);
             await _context.SaveChangesAsync();
+
+
+          
+            InvalidateExpenseOverviewCache(userId, e.Date);
+
             return true;
         }
+
+        // Consider creating a helper method:
+        private void InvalidateExpenseOverviewCache(string userId, DateTime date)
+        {
+            var currentKey = $"expense-overview:{userId}:{date.Month}:{date.Year}";
+            var lastMonthDate = date.AddMonths(-1);
+            var lastMonthKey = $"expense-overview:{userId}:{lastMonthDate.Month}:{lastMonthDate.Year}";
+
+            _cache.Remove(currentKey);
+            _cache.Remove(lastMonthKey);
+
+            _logger.LogInformation("Invalidated cache for {0} and {1}", currentKey, lastMonthKey);
+        }
+
     }
 }

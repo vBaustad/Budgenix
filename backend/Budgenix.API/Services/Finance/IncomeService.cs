@@ -212,8 +212,14 @@ namespace Budgenix.Services.Finance
         public async Task<IncomeDto> AddIncomeAsync(string userId, CreateIncomeDto dto)
         {
             _logger.LogInformation("Adding income for user {UserId}", userId);
-            var category = await _context.Categories.FindAsync(dto.CategoryId);
-            if (category == null) throw new Exception("Invalid category");
+
+            var category = await _context.Categories
+                .Where(c => c.Id == dto.CategoryId)
+                .Select(c => new { c.Id, c.Name })
+                .FirstOrDefaultAsync();
+
+            if (category == null)
+                throw new InvalidOperationException("Invalid category ID provided");
 
             var i = new Income
             {
@@ -222,12 +228,15 @@ namespace Budgenix.Services.Finance
                 Amount = dto.Amount,
                 Date = dto.Date,
                 Description = dto.Description,
-                Category = category,
+                CategoryId = category.Id,
                 UserId = userId
             };
 
             _context.Incomes.Add(i);
             await _context.SaveChangesAsync();
+
+            
+            InvalidateIncomeOverviewCache(userId, i.Date);
 
             return new IncomeDto
             {
@@ -235,39 +244,58 @@ namespace Budgenix.Services.Finance
                 Name = i.Name,
                 Amount = i.Amount,
                 Date = i.Date,
-                CategoryName = i.Category.Name,
-                CategoryId = i.CategoryId
+                CategoryId = category.Id,
+                CategoryName = category.Name
             };
         }
+
 
         public async Task<bool> UpdateIncomeAsync(string userId, Guid id, UpdateIncomeDto dto)
         {
             _logger.LogInformation("Updating income {Id} for user {UserId}", id, userId);
-            var i = await _context.Incomes.Include(x => x.Category).FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+
+            var i = await _context.Incomes.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
             if (i == null) return false;
 
-            var category = await _context.Categories.FindAsync(dto.CategoryId);
-            if (category == null) throw new Exception("Invalid category");
+            var categoryExists = await _context.Categories.AnyAsync(c => c.Id == dto.CategoryId);
+            if (!categoryExists)
+                throw new InvalidOperationException("Invalid category ID provided");
 
             i.Name = dto.Name;
             i.Amount = dto.Amount;
             i.Date = dto.Date;
             i.Description = dto.Description;
-            i.Category = category;
+            i.CategoryId = dto.CategoryId;
 
             await _context.SaveChangesAsync();
+
+            InvalidateIncomeOverviewCache(userId, i.Date);
+
             return true;
         }
+
 
         public async Task<bool> DeleteIncomeAsync(string userId, Guid id)
         {
             _logger.LogInformation("Deleting income {Id} for user {UserId}", id, userId);
+
             var i = await _context.Incomes.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
             if (i == null) return false;
 
             _context.Incomes.Remove(i);
             await _context.SaveChangesAsync();
+
+            InvalidateIncomeOverviewCache(userId, i.Date);
+
             return true;
+        }
+
+
+        private void InvalidateIncomeOverviewCache(string userId, DateTime date)
+        {
+            var key = $"income-overview:{userId}:{date.Month}:{date.Year}";
+            _cache.Remove(key);
+            _logger.LogInformation("Invalidated cache: {CacheKey}", key);
         }
     }
 }
