@@ -4,6 +4,7 @@ import { useContributeGoal } from '../services/GoalsService';
 import { GoalDto } from '@/types/finance/goal';
 import InputField from '@/components/common/forms/InputField';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   goal: GoalDto;
@@ -13,10 +14,11 @@ type Props = {
 export default function AddGoalContributionModal({ goal, onClose }: Props) {
   const [amount, setAmount] = useState<string>('');
   const { mutate: contributeGoal } = useContributeGoal();
+  const { t } = useTranslation();
 
   const handleSubmit = () => {
     if (!amount.trim() || Number(amount) <= 0) {
-      toast.error('Please enter a valid contribution amount.');
+      toast.error(t('goals.toast.invalidContribution'));
       return;
     }
 
@@ -29,10 +31,10 @@ export default function AddGoalContributionModal({ goal, onClose }: Props) {
       },
       {
         onSuccess: () => {
-          toast.success('Contribution added');
+          toast.success(t('goals.toast.contributeSuccess'));
           onClose();
         },
-        onError: () => toast.error('Failed to add contribution'),
+        onError: () => toast.error(t('goals.toast.contributeError')),
       }
     );
   };
@@ -42,7 +44,7 @@ export default function AddGoalContributionModal({ goal, onClose }: Props) {
       <div className="fixed inset-0 bg-black/30" />
       <Dialog.Panel className="bg-base-100 rounded-xl p-6 shadow-lg max-w-sm w-full z-50">
         <Dialog.Title className="text-lg font-bold mb-4">
-          Add Contribution to <span className="text-primary">{goal.name}</span>
+          {t('goals.contribute.title', { name: goal.name })}
         </Dialog.Title>
         <div className="space-y-3">
           <InputField
@@ -50,17 +52,17 @@ export default function AddGoalContributionModal({ goal, onClose }: Props) {
             type="number"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            placeholder="Contribution amount"
+            placeholder={t('goals.contribute.placeholder')}
             required
             showCurrency
           />
         </div>
         <div className="flex justify-end gap-2 mt-4">
           <button onClick={onClose} className="btn btn-ghost">
-            Cancel
+            {t('goals.contribute.cancel')}
           </button>
           <button onClick={handleSubmit} className="btn btn-primary">
-            Add Contribution
+            {t('goals.contribute.submit')}
           </button>
         </div>
       </Dialog.Panel>

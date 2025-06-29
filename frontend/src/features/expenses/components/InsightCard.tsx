@@ -1,6 +1,5 @@
-// import { AppIcons } from '@/components/icons/AppIcons';
-
-import { AppIcons } from "@/components/icons/AppIcons";
+import { AppIcons } from '@/components/icons/AppIcons';
+import { useTranslation } from 'react-i18next';
 
 type InsightItem = {
   icon: React.ElementType;
@@ -12,7 +11,9 @@ type InsightItem = {
 type Props = {
   insights: InsightItem[];
 };
+
 export default function InsightCard({ insights }: Props) {
+  const { t } = useTranslation();
   const hasInsights = insights.length > 0;
 
   return (
@@ -23,32 +24,33 @@ export default function InsightCard({ insights }: Props) {
             const Icon = item.icon;
             const statusColor =
               item.status === 'warning'
-                ? 'error'
+                ? 'text-error border-error'
                 : item.status === 'positive'
-                ? 'success'
-                : 'base-content';
+                ? 'text-success border-success'
+                : 'text-base-content border-base-content';
 
             return (
-            <div
-              key={idx}
-              className={`border-l-4 p-4 rounded-xl bg-base-100 shadow-md border w-full border-${statusColor}`}
-            >
-              <div className="flex items-start gap-3">
-                <Icon className={`w-5 h-5 mt-1 text-${statusColor}`} />
-                <div>
-                  <p className={`font-semibold text-${statusColor}`}>{item.title}</p>
-                  <p className="text-sm text-base-content/70">{item.message}</p>
+              <div
+                key={idx}
+                className={`border-l-4 p-4 rounded-xl bg-base-100 shadow-md w-full ${statusColor}`}
+              >
+                <div className="flex items-start gap-3">
+                  <Icon className={`w-5 h-5 mt-1 ${statusColor}`} />
+                  <div>
+                    <p className={`font-semibold ${statusColor}`}>{item.title}</p>
+                    <p className="text-sm text-base-content/70">{item.message}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-
             );
           })
         ) : (
           <div className="flex flex-col items-center justify-center text-center text-base-content/70 h-full py-12">
             <AppIcons.info className="w-8 h-8 mb-2 text-base-content/40" />
-            <p className="font-medium text-base">No insights available</p>
-            <p className="text-sm text-base-content/60">Try selecting a different month or update your data.</p>
+            <p className="font-medium text-base">{t('insights.empty.title')}</p>
+            <p className="text-sm text-base-content/60">
+              {t('insights.empty.subtitle')}
+            </p>
           </div>
         )}
       </div>
@@ -56,7 +58,7 @@ export default function InsightCard({ insights }: Props) {
       {hasInsights && (
         <div className="mt-4 text-right">
           <button className="btn btn-sm btn-ghost text-sm text-primary hover:underline">
-            View full report →
+            {t('insights.viewReport')}
           </button>
         </div>
       )}

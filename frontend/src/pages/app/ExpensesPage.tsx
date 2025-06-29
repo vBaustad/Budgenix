@@ -1,5 +1,7 @@
+'use client';
+
 import ExpensesOverview from '@/features/expenses/components/ExpensesOverview';
-import AddExpenseForm from '@/features/expenses/components/AddExpenseForm';
+import AddExpenseModal from '@/features/expenses/components/AddExpenseModal';
 import ExpensesList from '@/features/expenses/components/ExpensesList';
 import GroupedExpensesList from '@/features/expenses/components/GroupedExpensesList';
 import BreakdownPieChart from '@/components/common/charts/BreakdownPieChart';
@@ -10,14 +12,15 @@ import { AppIcons } from '@/components/icons/AppIcons';
 import { GROUP_OPTIONS } from '@/features/expenses/constants/grouping';
 import { useExpensesContext } from '@/features/expenses/context/ExpensesContext';
 import { useCategories } from '@/context/CategoryContext';
-import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 import SpendingTrendChart from '@/components/common/charts/SpendingTrendChart';
 import { useState } from 'react';
-import { Dialog } from '@headlessui/react';
 import { useExpensesOverview } from '@/features/expenses/services/expensesService';
 import { useDateFilter } from '@/context/DateFilterContext';
 
 export default function ExpensesPage() {
+  const { t } = useTranslation();
+
   const {
     expenses,
     groupedExpenses,
@@ -47,6 +50,7 @@ export default function ExpensesPage() {
   return (
     <div className="flex flex-col gap-4 p-4 w-full max-w-full overflow-hidden">
       <ExpensesOverview />
+
       <div>
         <div className="bg-base-100 shadow-md rounded-xl p-4">
           {overviewLoading ? (
@@ -62,7 +66,7 @@ export default function ExpensesPage() {
         onClick={() => setIsAddModalOpen(true)}
       >
         <AppIcons.add className="w-4 h-4" />
-        Add Expense
+        {t('buttons.addExpense')}
       </button>
 
       <div className="flex flex-col lg:flex-row w-full max-w-full gap-4">
@@ -96,11 +100,11 @@ export default function ExpensesPage() {
           </div>
         </SectionShell>
 
-        <SectionShell title="Spending by Category" icon={AppIcons.pieChart} className="w-full hidden sm:block">
+        <SectionShell title={t('expenses.spendingByCategory')} icon={AppIcons.pieChart} className="w-full hidden sm:block">
           <div className="w-full overflow-x-auto">
             <BreakdownPieChart
               data={chartData}
-              groupBy={(e) => e.categoryName || 'Uncategorized'}
+              groupBy={(e) => e.categoryName || t('shared.uncategorized')}
               getValue={(e) => e.amount}
               height={400}
               width={700}
@@ -110,26 +114,13 @@ export default function ExpensesPage() {
       </div>
 
       {isAddModalOpen && (
-        <Dialog open={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} className="relative z-50">
-          <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-          <div className="fixed inset-0 flex items-center justify-center p-4">
-            <Dialog.Panel className="bg-base-100 rounded-xl p-6 shadow-lg max-w-md w-full">
-              <Dialog.Title className="text-lg font-bold mb-4">Add Expense</Dialog.Title>
-              <AddExpenseForm
-                onAdd={(expense) => {
-                  handleAddExpense(expense);
-                  setIsAddModalOpen(false);
-                }}
-              />
-              <button
-                onClick={() => setIsAddModalOpen(false)}
-                className="btn btn-sm mt-4 w-full"
-              >
-                Cancel
-              </button>
-            </Dialog.Panel>
-          </div>
-        </Dialog>
+        <AddExpenseModal
+          onAdd={(expense) => {
+            handleAddExpense(expense);
+            setIsAddModalOpen(false);
+          }}
+          onClose={() => setIsAddModalOpen(false)}
+        />
       )}
     </div>
   );

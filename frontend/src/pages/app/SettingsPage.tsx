@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-// import { useLocation } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
 import CurrencyDropdown from '@/components/common/CurrencyDropdown';
 import { ThemeDropdown } from '@/components/common/ThemeDropdown';
@@ -9,8 +9,7 @@ import { useUser } from '@/context/UserContext';
 import { apiFetch } from '@/utils/api';
 
 export default function SettingsPage() {
-  // const location = useLocation();
-  // const activeTab = location.hash.replace('#', '') || 'user';
+  const { t } = useTranslation();
   const { user, isLoading } = useUser();
 
   const [formData, setFormData] = useState({
@@ -55,17 +54,17 @@ export default function SettingsPage() {
         method: 'PUT',
         body: JSON.stringify(formData),
       });
-      toast.success('Profile updated successfully!');
+      toast.success(t('settings.messages.profileSuccess'));
     } catch (err) {
       console.error('[SettingsPage] Failed to update profile', err);
-      toast.error('Failed to update profile');
+      toast.error(t('settings.messages.profileFail'));
     }
   };
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.newPassword !== formData.confirmNewPassword) {
-      toast.error('Passwords do not match');
+      toast.error(t('settings.password.errorMismatch'));
       return;
     }
     try {
@@ -76,91 +75,91 @@ export default function SettingsPage() {
           newPassword: formData.newPassword,
         }),
       });
-      toast.success('Password updated!');
+      toast.success(t('settings.messages.passwordSuccess'));
     } catch (err) {
       console.error('[SettingsPage] Failed to update password', err);
-      toast.error('Failed to update password');
+      toast.error(t('settings.messages.passwordFail'));
     }
   };
 
   if (isLoading) {
-    return <div className="p-8">Loading user settings...</div>;
+    return <div className="p-8">{t('shared.loading')}</div>;
   }
 
   return (
     <div className="min-h-screen bg-base-100 text-base-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      <h1 className="text-2xl font-bold">Settings</h1>
+      <h1 className="text-2xl font-bold">{t('settings.title')}</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* User + Account section */}
         <div className="space-y-6 lg:col-span-2">
           <div className="card bg-base-200 p-6 shadow">
-            <h2 className="text-lg font-semibold mb-2">Profile</h2>
+            <h2 className="text-lg font-semibold mb-2">{t('settings.profile.title')}</h2>
             <p className="text-sm text-base-content/70 mb-4">
-              Review your personal details and subscription.
+              {t('settings.profile.description')}
             </p>
-            <div className="space-y-2">
-              <p><strong>Name:</strong> {user?.firstName} {user?.lastName}</p>
-              <p><strong>Email:</strong> {user?.email}</p>
-              <p><strong>Username:</strong> {user?.userName}</p>
-              <p><strong>Address:</strong> {user?.addressLine1}, {user?.addressLine2} {user?.city} {user?.stateOrProvince} {user?.zipOrPostalCode}, {user?.country}</p>
-              <p><strong>Tier:</strong> {user?.subscriptionTier}</p>
-              <p><strong>Billing cycle:</strong> {user?.billingCycle}</p>
-              <p><strong>Next payment:</strong> {user?.subscriptionEndDate || 'N/A'}</p>
+            <div className="space-y-2 text-sm">
+              <p><strong>{t('settings.profile.fields.name')}</strong> {user?.firstName} {user?.lastName}</p>
+              <p><strong>{t('settings.profile.fields.email')}</strong> {user?.email}</p>
+              <p><strong>{t('settings.profile.fields.username')}</strong> {user?.userName}</p>
+              <p>
+                <strong>{t('settings.profile.fields.address')}</strong> {user?.addressLine1}, {user?.addressLine2} {user?.city} {user?.stateOrProvince} {user?.zipOrPostalCode}, {user?.country}
+              </p>
+              <p><strong>{t('settings.profile.fields.tier')}</strong> {user?.subscriptionTier}</p>
+              <p><strong>{t('settings.profile.fields.billingCycle')}</strong> {user?.billingCycle}</p>
+              <p><strong>{t('settings.profile.fields.nextPayment')}</strong> {user?.subscriptionEndDate || 'N/A'}</p>
             </div>
           </div>
 
           <div className="card bg-base-200 p-6 shadow space-y-4">
-            <h2 className="text-lg font-semibold">Update Profile</h2>
+            <h2 className="text-lg font-semibold">{t('settings.updateProfile.title')}</h2>
             <form onSubmit={handleUserSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <InputField name="firstName" placeholder="First name" value={formData.firstName} onChange={handleChange} />
-              <InputField name="lastName" placeholder="Last name" value={formData.lastName} onChange={handleChange} />
-              <InputField name="addressLine1" placeholder="Address line 1" value={formData.addressLine1} onChange={handleChange} />
+              <InputField name="firstName" placeholder={t('register.fields.firstName')} value={formData.firstName} onChange={handleChange} />
+              <InputField name="lastName" placeholder={t('register.fields.lastName')} value={formData.lastName} onChange={handleChange} />
+              <InputField name="addressLine1" placeholder={t('register.fields.address')} value={formData.addressLine1} onChange={handleChange} />
               <InputField name="addressLine2" placeholder="Address line 2" value={formData.addressLine2} onChange={handleChange} />
-              <InputField name="city" placeholder="City" value={formData.city} onChange={handleChange} />
-              <InputField name="stateOrProvince" placeholder="State/Province" value={formData.stateOrProvince} onChange={handleChange} />
-              <InputField name="zipOrPostalCode" placeholder="ZIP/Postal Code" value={formData.zipOrPostalCode} onChange={handleChange} />
-              <InputField name="country" placeholder="Country" value={formData.country} onChange={handleChange} />
+              <InputField name="city" placeholder={t('register.fields.city', 'City')} value={formData.city} onChange={handleChange} />
+              <InputField name="stateOrProvince" placeholder={t('register.fields.stateOrProvince', 'State/Province')} value={formData.stateOrProvince} onChange={handleChange} />
+              <InputField name="zipOrPostalCode" placeholder={t('register.fields.zipOrPostalCode', 'ZIP/Postal Code')} value={formData.zipOrPostalCode} onChange={handleChange} />
+              <InputField name="country" placeholder={t('register.fields.country')} value={formData.country} onChange={handleChange} />
               <div className="col-span-full">
-                <button type="submit" className="btn btn-primary">Save Changes</button>
+                <button type="submit" className="btn btn-primary">{t('settings.updateProfile.save')}</button>
               </div>
             </form>
           </div>
 
           <div className="card bg-base-200 p-6 shadow space-y-4">
-            <h2 className="text-lg font-semibold">Change Password</h2>
+            <h2 className="text-lg font-semibold">{t('settings.password.title')}</h2>
             <form onSubmit={handlePasswordSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <InputField name="currentPassword" type="password" placeholder="Current password" value={formData.currentPassword} onChange={handleChange} />
-              <InputField name="newPassword" type="password" placeholder="New password" value={formData.newPassword} onChange={handleChange} />
-              <InputField name="confirmNewPassword" type="password" placeholder="Confirm new password" value={formData.confirmNewPassword} onChange={handleChange} />
+              <InputField name="currentPassword" type="password" placeholder={t('login.password')} value={formData.currentPassword} onChange={handleChange} />
+              <InputField name="newPassword" type="password" placeholder={t('register.fields.password')} value={formData.newPassword} onChange={handleChange} />
+              <InputField name="confirmNewPassword" type="password" placeholder={t('register.fields.confirmPassword')} value={formData.confirmNewPassword} onChange={handleChange} />
               <div className="col-span-full">
-                <button type="submit" className="btn btn-primary">Update Password</button>
+                <button type="submit" className="btn btn-primary">{t('settings.password.update')}</button>
               </div>
             </form>
           </div>
         </div>
 
-        {/* App settings section */}
         <div className="space-y-6">
           <div className="card bg-base-200 p-6 shadow">
-            <h2 className="text-lg font-semibold mb-2">App Settings</h2>
-            <p className="text-sm text-base-content/70 mb-4">Configure your app preferences.</p>
+            <h2 className="text-lg font-semibold mb-2">{t('settings.app.title')}</h2>
+            <p className="text-sm text-base-content/70 mb-4">{t('settings.app.description')}</p>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-semibold mb-1">Currency</label>
+                <label className="block text-sm font-semibold mb-1">{t('settings.app.currency')}</label>
                 <CurrencyDropdown />
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-1">Theme</label>
+                <label className="block text-sm font-semibold mb-1">{t('settings.app.theme')}</label>
                 <ThemeDropdown />
               </div>
               <hr className="border-base-300 my-4" />
               <div className="text-sm text-base-content/70">
-                <p><strong>Date Format:</strong> Coming soon...</p>
-                <p><strong>Language:</strong> Coming soon...</p>
-                <p><strong>Time Zone:</strong> Coming soon...</p>
-                <p><strong>Notifications:</strong> Coming soon...</p>
+                <p><strong>{t('settings.app.dateFormat')}:</strong> {t('shared.comingSoon')}</p>
+                <p><strong>{t('settings.app.language')}:</strong> {t('shared.comingSoon')}</p>
+                <p><strong>{t('settings.app.timeZone')}:</strong> {t('shared.comingSoon')}</p>
+                <p><strong>{t('settings.app.notifications')}:</strong> {t('shared.comingSoon')}</p>
               </div>
             </div>
           </div>

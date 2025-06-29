@@ -2,6 +2,7 @@ import { formatCurrency, formatDate } from '@/utils/formatting';
 import DataTable from '@/components/common/tables/DataTable';
 import { useCurrency } from '@/context/CurrencyContext';
 import { GroupedIncomes } from '@/types/finance/income';
+import { useTranslation } from 'react-i18next';
 
 type GroupedIncomesListProps = {
   data: GroupedIncomes;
@@ -10,9 +11,10 @@ type GroupedIncomesListProps = {
 
 export default function GroupedIncomesList({ data, groupBy }: GroupedIncomesListProps) {
   const { currency } = useCurrency();
+  const { t } = useTranslation();
 
   const formatGroupLabel = (key: string | undefined): string => {
-    if (!key) return 'Unknown';
+    if (!key) return t('shared.unknown');
     switch (groupBy) {
       case 'month': {
         const [year, month] = key.split('-');
@@ -36,33 +38,33 @@ export default function GroupedIncomesList({ data, groupBy }: GroupedIncomesList
             data={incomes}
             columns={[
               {
-                label: 'Date',
+                label: t('shared.date'),
                 accessor: 'date',
                 format: formatDate,
                 width: '100px',
                 sortable: true,
               },
               {
-                label: 'Name',
+                label: t('shared.name'),
                 accessor: 'name',
                 width: '200px',
                 sortable: true,
               },
               {
-                label: 'Amount',
+                label: t('shared.amount'),
                 accessor: 'amount',
                 align: 'right',
                 format: (val) => formatCurrency(val, currency),
                 width: '100px',
               },
               {
-                label: 'Category',
+                label: t('shared.category'),
                 accessor: 'categoryName',
                 format: (val) =>
                   val ? (
                     <span className="badge badge-sm badge-accent">{val}</span>
                   ) : (
-                    <span className="text-base-content/40">–</span>
+                    <span className="text-base-content/40">{t('shared.emptyDash')}</span>
                   ),
                 width: '150px',
               },

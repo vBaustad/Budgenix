@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import InputField from '@/components/common/forms/InputField';
 import SelectField from '@/components/common/forms/SelectField';
 import { BudgetTypeEnum } from '@/types/finance/budget';
@@ -12,6 +13,7 @@ type Props = {
 };
 
 export default function AddBudgetModal({ onClose }: Props) {
+  const { t } = useTranslation();
   const { categories } = useCategories();
   const { mutate: createBudget } = useCreateBudget();
 
@@ -39,7 +41,7 @@ export default function AddBudgetModal({ onClose }: Props) {
 
   const handleSubmit = () => {
     if (!form.name || !form.categoryId || !form.allocatedAmount) {
-      toast.error('Please fill in all required fields');
+      toast.error(t('budgets.toast.invalidForm'));
       return;
     }
 
@@ -57,11 +59,11 @@ export default function AddBudgetModal({ onClose }: Props) {
       },
       {
         onSuccess: () => {
-          toast.success('Budget created');
+          toast.success(t('budgets.toast.createSuccess'));
           onClose();
         },
         onError: () => {
-          toast.error('Failed to create budget');
+          toast.error(t('budgets.toast.createError'));
         },
       }
     );
@@ -85,14 +87,14 @@ export default function AddBudgetModal({ onClose }: Props) {
         >
           ✕
         </button>
-        <h2 className="text-xl font-bold mb-4">Add Budget</h2>
+        <h2 className="text-xl font-bold mb-4">{t('budgets.addTitle')}</h2>
 
         <div className="space-y-3">
           <InputField
             name="name"
             value={form.name}
             onChange={handleChange}
-            placeholder="Budget name"
+            placeholder={t('budgets.form.namePlaceholder')}
             required
           />
           <SelectField
@@ -103,7 +105,7 @@ export default function AddBudgetModal({ onClose }: Props) {
               value: c.id,
               label: c.name,
             }))}
-            placeholder="Select category"
+            placeholder={t('budgets.form.selectCategoryPlaceholder')}
             required
           />
           <InputField
@@ -111,7 +113,7 @@ export default function AddBudgetModal({ onClose }: Props) {
             type="number"
             value={form.allocatedAmount}
             onChange={handleChange}
-            placeholder="Allocated amount"
+            placeholder={t('budgets.form.amountPlaceholder')}
             showCurrency
             required
           />
@@ -135,14 +137,14 @@ export default function AddBudgetModal({ onClose }: Props) {
             type="date"
             value={form.startDate}
             onChange={handleChange}
-            placeholder="Start date"
+            placeholder={t('budgets.form.startDatePlaceholder')}
           />
           <InputField
             name="endDate"
             type="date"
             value={form.endDate}
             onChange={handleChange}
-            placeholder="End date"
+            placeholder={t('budgets.form.endDatePlaceholder')}
           />
           <SelectField
             name="type"
@@ -163,16 +165,16 @@ export default function AddBudgetModal({ onClose }: Props) {
             name="notes"
             value={form.notes}
             onChange={handleChange}
-            placeholder="Notes (optional)"
+            placeholder={t('budgets.form.notesPlaceholder')}
           />
         </div>
 
         <div className="flex justify-end gap-2 mt-4">
           <button className="btn btn-ghost" onClick={onClose}>
-            Cancel
+            {t('shared.cancel')}
           </button>
           <button className="btn btn-primary" onClick={handleSubmit}>
-            Save
+            {t('shared.save')}
           </button>
         </div>
       </div>

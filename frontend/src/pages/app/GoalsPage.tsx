@@ -58,7 +58,7 @@ export default function GoalsPage() {
       {editTargetId && isLoadingGoal && (
         <div className="fixed inset-0 bg-base-content/30 flex items-center justify-center z-50">
           <div className="p-4 bg-base-100 rounded-xl shadow-xl">
-            <span className="loading loading-spinner loading-lg"></span>
+            <span className="loading loading-spinner loading-lg" />
           </div>
         </div>
       )}
