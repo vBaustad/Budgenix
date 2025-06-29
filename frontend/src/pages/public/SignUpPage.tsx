@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { tiers } from '../../constants/plans'
 import { Radio, RadioGroup } from '@headlessui/react'
@@ -21,6 +21,7 @@ const frequencies: { value: FrequencyValue; label: string; priceSuffix: string }
 
 export default function SignUpPage() {
   const { t } = useTranslation()
+  const signupRef = useRef<HTMLDivElement | null>(null);
   const [searchParams] = useSearchParams()
   const planId = searchParams.get('plan') || 'free'
   const selectedPlan = tiers.find((tier) => tier.id === planId) || tiers[0]
@@ -68,6 +69,7 @@ export default function SignUpPage() {
               key={tier.id}
               onClick={() => {
                 navigate(`/signup?plan=${tier.id}`)
+                signupRef.current?.scrollIntoView()
               }}
               className={`
                 cursor-pointer card shadow-2xl max-w-2xs w-full
@@ -107,8 +109,8 @@ export default function SignUpPage() {
       </section>
 
       {/* Signup Form */}
-      <div className="bg-base-100 flex flex-col justify-center items-center px-4 py-12">
-        <div className="card bg-base-200 border border-base-content/20 shadow-xl w-full max-w-4xl min-w-[60rem] grid grid-cols-1 md:grid-cols-2 overflow-hidden">
+      <div ref={signupRef} className="bg-base-100 flex flex-col justify-center items-center px-4 py-12">
+        <div className="card bg-base-200 border border-base-content/20 shadow-xl w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 overflow-hidden">
           {/* Left: Plan info */}
           <div className="p-8 bg-primary text-primary-content flex flex-col justify-center">
             <h2 className="text-3xl font-bold mb-2">
