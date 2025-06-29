@@ -7,6 +7,7 @@ import { formatCurrency } from '@/utils/formatting';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useCreateIncome } from '../services/incomesService';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   onAdd: (income: Income) => void;
@@ -22,6 +23,8 @@ type IncomeFormState = {
 };
 
 export default function AddIncomeForm({ onAdd }: Props) {
+  const { t } = useTranslation();
+
   const [form, setForm] = useState<IncomeFormState>({
     name: '',
     description: '',
@@ -50,7 +53,7 @@ export default function AddIncomeForm({ onAdd }: Props) {
     try {
       const newIncome = await createIncome(form);
       onAdd(newIncome);
-      toast.success('Income added successfully!');
+      toast.success(t('incomes.form.successMessage'));
       setForm({
         name: '',
         description: '',
@@ -60,7 +63,7 @@ export default function AddIncomeForm({ onAdd }: Props) {
         notes: '',
       });
     } catch (err: unknown) {
-      toast.error('Failed to add income');
+      toast.error(t('incomes.form.errorMessage'));
       setError(err instanceof Error ? err.message : 'Something went wrong');
     }
   };
@@ -71,7 +74,7 @@ export default function AddIncomeForm({ onAdd }: Props) {
         <InputField
           name="name"
           type="text"
-          placeholder="Income name"
+          placeholder={t('incomes.form.namePlaceholder')}
           value={form.name}
           onChange={handleChange}
           required
@@ -94,7 +97,7 @@ export default function AddIncomeForm({ onAdd }: Props) {
               .slice()
               .sort((a, b) => a.name.localeCompare(b.name))
               .map((c) => ({ value: c.id, label: c.name }))}
-            placeholder="Select category"
+            placeholder={t('incomes.form.selectCategoryPlaceholder')}
           />
           <InputField
             name="date"
@@ -107,7 +110,7 @@ export default function AddIncomeForm({ onAdd }: Props) {
         <InputField
           name="description"
           type="text"
-          placeholder="Description"
+          placeholder={t('incomes.form.descriptionPlaceholder')}
           value={form.description || ''}
           onChange={handleChange}
         />
@@ -115,7 +118,7 @@ export default function AddIncomeForm({ onAdd }: Props) {
         {error && <p className="text-error">{error}</p>}
 
         <button type="submit" className="btn btn-primary w-full" disabled={loading}>
-          {loading ? 'Saving...' : 'Add Income'}
+          {loading ? t('shared.saving') : t('buttons.addIncome')}
         </button>
       </div>
     </form>

@@ -2,12 +2,54 @@
     "app":{
         "name": "Budgenix"
     },
+    "settings": {
+        "title": "Settings",
+        "profile": {
+            "title": "Profile",
+            "description": "Review your personal details and subscription.",
+            "fields": {
+            "name": "Name:",
+            "email": "Email:",
+            "username": "Username:",
+            "address": "Address:",
+            "tier": "Tier:",
+            "billingCycle": "Billing cycle:",
+            "nextPayment": "Next payment:"
+            }
+        },
+        "updateProfile": {
+            "title": "Update Profile",
+            "save": "Save Changes"
+        },
+        "password": {
+            "title": "Change Password",
+            "update": "Update Password",
+            "errorMismatch": "Passwords do not match"
+        },
+        "app": {
+            "title": "App Settings",
+            "description": "Configure your app preferences.",
+            "currency": "Currency",
+            "theme": "Theme",
+            "dateFormat": "Date Format",
+            "language": "Language",
+            "timeZone": "Time Zone",
+            "notifications": "Notifications"
+        },
+        "messages": {
+            "profileSuccess": "Profile updated successfully!",
+            "profileFail": "Failed to update profile",
+            "passwordSuccess": "Password updated!",
+            "passwordFail": "Failed to update password"
+        }
+    },
     "sidebar": {
         "main": "Main",
         "dashboard": "Dashboard",
         "budgets": "Budgets",
         "expenses": "Expenses",
         "income": "Income",
+        "cashflow": "Cashflow",
         "planning": "Planning",
         "goals": "Goals",
         "vacation": "Vacation Mode",
@@ -24,14 +66,40 @@
         "budgets": "Budgets",
         "expenses": "Expenses",
         "income": "Income",
+        "cashflow": "Cashflow",
         "goals": "Goals",
         "vacation": "Vacation Mode",
         "reports": "Reports",
         "settings": "Settings"
     },
     "dashboard": {
-        "welcome": "Welcome to your Dashboard",
-        "description": "Here you'll see your budget, expenses, and more."
+        "header": {
+            "expensesThisMonth": "Expenses This Month",
+            "incomeReceived": "Income Received",
+            "activeBudgets": "Active Budgets",
+            "savingsTotal": "Savings Total",
+            "financialGoals": "Financial Goals",
+            "cashflowStats": "Cashflow Stats"
+        },
+        "suffix": {
+            "active": "active",
+            "goals": "Goals"
+        },
+        "empty": {
+            "noBudgets": "Create your first budget",
+            "noSavings": "Start saving today!",
+            "noGoals": "Set up your first goal",
+            "cashflowComingSoon": "Cashflow stats coming soon"
+        },
+        "welcome": "Welcome back, {{name}}",
+        "fallbackName": "Friend",
+        "subtitle": "Budget with vision. Spend with power. Save with purpose.",
+        "lastUpdated": "Last updated",
+        "budgets": {
+            "nearLimit": "{{count}} budget{{count > 1 ? 's' : ''}} near limit",
+            "healthy": "All budgets healthy"
+        },
+        "tapToView": "Tap to view details →"
     },
     "navbar": {
         "home": "Home",
@@ -185,19 +253,231 @@
         }
     },
     "expenses": {
-        "add": "Add Expense",
-        "allExpenses": "All Expenses"
-    },    
+        "editTitle": "Edit Expense",
+        "allExpenses": "All Expenses",
+        "spendingByCategory": "Spending by Category",
+        "confirmDeleteText": "Are you sure you want to delete this expense?",
+        "toast": {
+            "deleteSuccess": "Expense deleted",
+            "deleteError": "Failed to delete expense",
+            "updateSuccess": "Expense updated",
+            "updateError": "Failed to update expense",
+            "invalidForm": "Please fill out all required fields correctly."
+        },
+        "form": {
+            "namePlaceholder": "Name",
+            "amountPlaceholder": "Amount",
+            "descriptionPlaceholder": "Description",
+            "selectCategoryPlaceholder": "Select category"
+        },
+        "table": {
+            "date": "Date",
+            "name": "Name",
+            "description": "Description",
+            "amount": "Amount",
+            "category": "Category"
+        },
+         "overview": {
+            "spent": "Spent",
+            "upcoming": "Upcoming",
+            "vsLastMonth": "Vs Last Month",
+            "avgDailySpend": "Avg Daily Spend"
+        }
+    },
+    "incomes": {
+        "upcoming": "Upcoming Income",
+        "byCategory": "Income by Category", 
+        "editTitle": "Edit Income",
+        "confirmDeleteMessage": "Are you sure you want to delete this income?",
+        "allIncomes": "All Income",
+        "toast": {
+            "deleteSuccess": "Income deleted",
+            "deleteError": "Failed to delete income",
+            "updateSuccess": "Income updated",
+            "updateError": "Failed to update income",
+            "missingName": "Name is required",
+            "invalidAmount": "Amount is required and must be a number",
+            "missingCategory": "Category is required",
+            "noEditItem": "No item selected for editing"
+        },       
+        "form": {
+            "namePlaceholder": "Income name",
+            "selectCategoryPlaceholder": "Select category",
+            "descriptionPlaceholder": "Description",
+            "successMessage": "Income added successfully!",
+            "errorMessage": "Failed to add income"
+        },
+          "overview": {
+            "incomeTitle": "Income",
+            "comparedToLastMonth": "Compared to last month",
+            "moreThanLastMonth": "{{amount}} more than last month",
+            "lessThanLastMonth": "{{amount}} less than last month",
+            "total": "Total this month",
+            "lastMonth": "Last month",
+            "nextRecurring": "Next recurring income"
+        },
+        "insights": {
+            "notCurrentMonth": "Insights are only available for the current month.",
+            "loading": "Loading insights..."
+        }
+    },
+    "goals": {
+        "title": "Savings Goals",
+        "noGoals": {
+            "title": "No Goals Yet",
+            "description": "Add your first savings goal and start tracking your progress!"
+        },
+        "addGoal": {
+            "title": "Add New Goal",
+            "nameLabel": "Goal Name *",
+            "descriptionLabel": "Description",
+            "targetAmountLabel": "Target Amount *",
+            "targetDateLabel": "End Date",
+            "iconLabel": "Icon",
+            "namePlaceholder": "Enter goal name",
+            "descriptionPlaceholder": "Optional short description",
+            "amountPlaceholder": "Enter target amount",
+            "datePlaceholder": "Select date",
+            "iconPlaceholder": "Optional icon",
+            "cancel": "Cancel",
+            "save": "Save"
+        },
+        "editGoal": {
+            "title": "Edit Goal",
+            "save": "Save Changes"
+        },
+        "contribute": {
+            "title": "Add Contribution to {{name}}",
+            "placeholder": "Contribution amount",
+            "cancel": "Cancel",
+            "submit": "Add Contribution"
+        },
+        "overview": {
+            "target": "Target",
+            "saved": "Saved",
+            "remaining": "Remaining"
+        },
+        "card": {
+            "progress": "{{percent}}% complete",
+            "addContribution": "Add Contribution",
+            "delete": "Delete",
+            "confirmDelete": "Are you sure you want to delete \"{{name}}\"?"
+        },
+        "toast": {
+            "createSuccess": "Goal created",
+            "createError": "Failed to create goal",
+            "updateSuccess": "Goal updated",
+            "updateError": "Failed to update goal",
+            "deleteSuccess": "Goal deleted",
+            "deleteError": "Failed to delete goal",
+            "contributeSuccess": "Contribution added",
+            "contributeError": "Failed to add contribution",
+            "invalidForm": "Please fill out all required fields correctly.",
+            "invalidContribution": "Please enter a valid contribution amount."
+        }
+    },
+    "budgets": {
+        "subtitle": "Create your first budget and take control of your spending goals. You’ll be able to track how much you’ve used per category and get insights as you go.",
+        "empty": {
+            "noBudgets": "Create your first budget"
+        },
+        "form": {
+            "namePlaceholder": "Budget name",
+            "selectCategoryPlaceholder": "Select category",
+            "amountPlaceholder": "Allocated amount",
+            "startDatePlaceholder": "Start date",
+            "endDatePlaceholder": "End date",
+            "notesPlaceholder": "Notes (optional)"
+        },
+
+        "toast": {
+            "invalidForm": "Please fill in all required fields.",
+            "createSuccess": "Budget created successfully.",
+            "createError": "Failed to create budget."
+        },
+
+        "card": {
+            "remaining": "Remaining"            
+        }
+    },
+    "buttons": {
+        "addBudget": "Add Budget",
+        "createFirstBudget": "Create First Budget",
+        "addGoal": "Add Goal",
+        "createFirstGoal": "Create First Goal",
+        "addExpense": "Add Expense",
+        "addIncome": "Add Income",
+        "save": "Save",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "edit": "Edit",
+        "update": "Update",
+        "close": "Close",
+        "confirm": "Confirm",
+        "viewDetails": "View Details →"
+    },
     "shared": {
         "allCategories": "All categories",
         "noGrouping": "No grouping",
-        "noFilter":"No filter",
+        "noFilter": "No filter",
         "groupBy": "Group By",
-        "filterByCategory": "Filter by Category",        
-        "groupingOptions": {
-            "month": "Month",
-            "year": "Year",
-            "category": "Category"
+        "filterByCategory": "Filter by Category",
+        "loading": "Loading...",
+        "saving": "Saving...",
+        "uncategorized": "Uncategorized",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "edit": "Edit",
+        "save": "Save",
+        "name": "Name",
+        "description": "Description",
+        "amount": "Amount",
+        "date": "Date",
+        "category": "Category",
+        "selectCategory": "Select category",
+        "confirmDelete": "Confirm Delete",
+        "unknown": "Unknown",
+        "recurrence": {
+            "None": "Not Recurring",
+            "Daily": "Daily",
+            "Weekly": "Weekly",
+            "BiWeekly": "Bi-Weekly",
+            "Monthly": "Monthly",
+            "Quarterly": "Quarterly",
+            "Yearly": "Yearly"
         }
+    },
+    "categories": {
+        "Rent": "Rent",
+        "Groceries": "Groceries",
+        "Utilities": "Utilities",
+        "Transportation": "Transportation",
+        "Fuel": "Fuel",
+        "Dining Out": "Dining Out",
+        "Entertainment": "Entertainment",
+        "Subscriptions": "Subscriptions",
+        "Clothing": "Clothing",
+        "Health": "Health",
+        "Insurance": "Insurance",
+        "Personal Care": "Personal Care",
+        "Education": "Education",
+        "Pets": "Pets",
+        "Gifts & Donations": "Gifts & Donations",
+        "Vacation": "Vacation",
+        "Household": "Household",
+        "Miscellaneous": "Miscellaneous",
+        "Salary": "Salary",
+        "Freelance": "Freelance",
+        "Business": "Business",
+        "Investments": "Investments",
+        "Dividends": "Dividends",
+        "Interest": "Interest",
+        "Rental Income": "Rental Income",
+        "Pension": "Pension",
+        "Government Assistance": "Government Assistance",
+        "Gifts Received": "Gifts Received",
+        "Bonuses": "Bonuses",
+        "Gifts": "Gifts",
+        "Reimbursements": "Reimbursements"
     }
 }

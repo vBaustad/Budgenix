@@ -10,8 +10,10 @@ import InsightCard from '@/features/expenses/components/InsightCard';
 import { useIncomesContext } from '../context/IncomesContext';
 import IncomeMonthlyChart from './IncomeMonthlyChart';
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function IncomeOverview() {
+  const { t } = useTranslation();
   const now = new Date();
   const { currency: userCurrency } = useCurrency();
   const { selectedMonth, selectedYear } = useDateFilter();
@@ -47,27 +49,31 @@ export default function IncomeOverview() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <StatCard
             icon={<AppIcons.income className="w-4 h-4" />}
-            title="Income"
+            title={t('incomes.overview.incomeTitle')}
             value={
-              overviewLoading ? 'Loading...' : formatCurrency(incomeThisMonth, userCurrency)
+              overviewLoading ? t('shared.loading') : formatCurrency(incomeThisMonth, userCurrency)
             }
             valueColor={overviewLoading ? 'text-base-content/40' : 'text-success'}
           />
 
           <ProgressCard
-            label="Compared to last month"
+            label={t('incomes.overview.comparedToLastMonth')}
             valueText={
               overviewLoading ? (
-                <span className="text-base-content/40">Loading...</span>
+                <span className="text-base-content/40">{t('shared.loading')}</span>
               ) : incomeUp ? (
                 <span className="flex items-center gap-1 text-success">
                   <AppIcons.arrowUp className="w-4 h-4" />
-                  {formatCurrency(diff, userCurrency)} more than last month
+                  {t('incomes.overview.moreThanLastMonth', {
+                    amount: formatCurrency(diff, userCurrency),
+                  })}
                 </span>
               ) : (
                 <span className="flex items-center gap-1 text-error">
                   <AppIcons.arrowDown className="w-4 h-4" />
-                  {formatCurrency(Math.abs(diff), userCurrency)} less than last month
+                  {t('incomes.overview.lessThanLastMonth', {
+                    amount: formatCurrency(Math.abs(diff), userCurrency),
+                  })}
                 </span>
               )
             }
@@ -96,10 +102,10 @@ export default function IncomeOverview() {
         <div className="bg-base-100 rounded-2xl shadow-md p-4 h-full">
           {!isCurrentMonth ? (
             <p className="text-sm text-base-content/70 p-4">
-              Insights are only available for the current month.
+              {t('incomes.insights.notCurrentMonth')}
             </p>
           ) : insightsLoading ? (
-            <p className="text-sm text-base-content/70 p-4">Loading insights...</p>
+            <p className="text-sm text-base-content/70 p-4">{t('incomes.insights.loading')}</p>
           ) : (
             <InsightCard
               insights={filteredInsights.map((i) => ({

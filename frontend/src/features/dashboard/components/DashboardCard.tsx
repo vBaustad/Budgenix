@@ -3,6 +3,7 @@ import { cn } from '@/utils/cn';
 import { useEffect, useState } from 'react';
 import { formatCurrency } from '@/utils/formatting';
 import { useCurrency } from '@/context/CurrencyContext';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   title: string;
@@ -33,8 +34,9 @@ export default function DashboardCard({
   emptyMessage,
   animate = true,
 }: Props) {
-  const [displayValue, setDisplayValue] = useState(0);
   const { currency } = useCurrency();
+  const { t } = useTranslation();
+  const [displayValue, setDisplayValue] = useState(0);
 
   useEffect(() => {
     if (!animate) {
@@ -55,7 +57,12 @@ export default function DashboardCard({
     }, 30);
 
     return () => clearInterval(interval);
-  }, [value, animate, currency]);
+  }, [value, animate]);
+
+  const formattedValue =
+    showCurrency
+      ? formatCurrency(animate ? displayValue : value, currency)
+      : (animate ? displayValue : value).toLocaleString();
 
   const card = (
     <div
@@ -69,27 +76,28 @@ export default function DashboardCard({
         <div className="p-2 bg-white/80 rounded-full">{icon}</div>
         <h3 className="text-xl font-semibold text-base-content">{title}</h3>
       </div>
-        <div className="text-3xl font-bold mb-1">
+
+      <div className="text-3xl font-bold mb-1">
         {value === 0 && emptyMessage ? (
-            <span className="text-base-content/70 italic">{emptyMessage}</span>
+          <span className="text-base-content/70 italic">{emptyMessage}</span>
         ) : (
-            <>
+          <>
             {prefix && `${prefix} `}
-            {showCurrency
-                ? formatCurrency(animate ? displayValue : value, currency)
-                : (animate ? displayValue : value).toLocaleString()}
+            {formattedValue}
             {suffix && ` ${suffix}`}
-            </>
+          </>
         )}
-        </div>
+      </div>
+
       <div className="w-full h-2 mt-3 bg-white/20 rounded-full overflow-hidden">
         <div
           className="h-full bg-white/80 transition-all duration-700"
           style={{ width: `${progress}%` }}
         />
       </div>
+
       <div className="text-sm text-base-content mt-2 group-hover:text-white/90 transition">
-        Tap to view details →
+        {t('dashboard.tapToView')}
       </div>
     </div>
   );

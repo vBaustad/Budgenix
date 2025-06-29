@@ -1,5 +1,5 @@
 export default function RecentActivity() {
-  // In future: Replace with actual data or prop
+  // Demo-only activity list — replace with real data when backend is ready
   const activity = [
     { icon: '🛒', text: 'Added Grocery expense: 230 kr', time: '1 hour ago' },
     { icon: '💸', text: 'Income received: 12,000 kr', time: '2 days ago' },
@@ -13,7 +13,7 @@ export default function RecentActivity() {
       <ul className="space-y-2 text-sm text-base-content/80">
         {activity.map((a, idx) => (
           <li key={idx} className="flex items-center gap-2">
-            <span>{a.icon}</span>
+            <span className="text-lg">{a.icon}</span>
             <span>{a.text}</span>
             <span className="ml-auto text-xs text-base-content/50">{a.time}</span>
           </li>

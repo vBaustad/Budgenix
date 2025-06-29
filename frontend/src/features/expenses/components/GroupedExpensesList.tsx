@@ -1,7 +1,8 @@
-import { GroupedExpenses } from '../../../types/finance/expense';
-import { formatCurrency, formatDate, truncateText } from '../../../utils/formatting';
-import DataTable from '../../../components/common/tables/DataTable';
-import { useCurrency } from '../../../context/CurrencyContext';
+import { GroupedExpenses } from '@/types/finance/expense';
+import { formatCurrency, formatDate, truncateText } from '@/utils/formatting';
+import DataTable from '@/components/common/tables/DataTable';
+import { useCurrency } from '@/context/CurrencyContext';
+import { useTranslation } from 'react-i18next';
 
 type GroupedExpensesListProps = {
   data: GroupedExpenses;
@@ -10,16 +11,21 @@ type GroupedExpensesListProps = {
 
 export default function GroupedExpensesList({ data, groupBy }: GroupedExpensesListProps) {
   const { currency } = useCurrency();
+  const { t, i18n } = useTranslation();
 
   const formatGroupLabel = (key: string | undefined): string => {
-    if (!key) return 'Unknown';
+    if (!key) return t('shared.unknown');
 
     switch (groupBy) {
       case 'month': {
         const [year, month] = key.split('-');
         const date = new Date(Number(year), Number(month) - 1);
-        return date.toLocaleString(undefined, { month: 'long', year: 'numeric' });
+        return date.toLocaleString(i18n.language, { month: 'long', year: 'numeric' });
       }
+      case 'year':
+        return key;
+      case 'category':
+        return t(`categories.${key}`, key); // fallback to raw key
       default:
         return key;
     }
@@ -40,35 +46,35 @@ export default function GroupedExpensesList({ data, groupBy }: GroupedExpensesLi
             data={expenses}
             columns={[
               {
-                label: 'Date',
+                label: t('shared.date'),
                 accessor: 'date',
                 format: formatDate,
                 width: '100px',
                 sortable: true,
-                showOnMobile: false
+                showOnMobile: false,
               },
               {
-                label: 'Name',
+                label: t('shared.name'),
                 accessor: 'name',
                 width: '150px',
                 sortable: true,
               },
               {
-                label: 'Description',
+                label: t('shared.description'),
                 accessor: 'description',
                 format: truncateText,
                 width: '400px',
                 sortable: true,
               },
               {
-                label: 'Amount',
+                label: t('shared.amount'),
                 accessor: 'amount',
                 align: 'right',
                 format: (val) => formatCurrency(val, currency),
                 width: '100px',
               },
               {
-                label: 'Category',
+                label: t('shared.category'),
                 accessor: 'categoryName',
                 format: (val) =>
                   val ? (

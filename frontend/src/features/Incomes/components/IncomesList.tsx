@@ -9,8 +9,10 @@ import { useCategories } from '@/context/CategoryContext';
 import { useState } from 'react';
 import { useDeleteIncome, useUpdateIncome } from '../services/incomesService';
 import SelectField from '@/components/common/forms/SelectField';
+import { useTranslation } from 'react-i18next';
 
 export default function IncomesList({ incomes }: { incomes: Income[] }) {
+  const { t } = useTranslation();
   const { currency } = useCurrency();
   const minRows = 15;
   const { categories } = useCategories();
@@ -21,23 +23,20 @@ export default function IncomesList({ incomes }: { incomes: Income[] }) {
   const [editItem, setEditItem] = useState<Income | null>(null);
   const [editForm, setEditForm] = useState<Partial<Income>>({});
 
-
   const openEditModal = (item: Income) => {
-    console.log('Opening edit modal for:', item);
     setEditItem(item);
     setEditForm(item);
   };
 
-
- const confirmDelete = (id: string) => {
+  const confirmDelete = (id: string) => {
     setDeletePendingId(id);
   };
 
   const handleDeleteConfirmed = () => {
     if (deletePendingId) {
       deleteIncome(deletePendingId, {
-        onSuccess: () => toast.success("Income deleted"),
-        onError: () => toast.error("Failed to delete income"),
+        onSuccess: () => toast.success(t('incomes.toast.deleteSuccess')),
+        onError: () => toast.error(t('incomes.toast.deleteError')),
       });
       setDeletePendingId(null);
     }
@@ -56,22 +55,22 @@ export default function IncomesList({ incomes }: { incomes: Income[] }) {
 
   const handleEditSubmit = () => {
     if (!editItem) {
-      toast.error('No item selected for editing');
+      toast.error(t('incomes.toast.noEditItem'));
       return;
     }
 
     if (!editForm.name || editForm.name.trim() === '') {
-      toast.error('Name is required');
+      toast.error(t('incomes.toast.missingName'));
       return;
     }
 
     if (editForm.amount === undefined || isNaN(editForm.amount)) {
-      toast.error('Amount is required and must be a number');
+      toast.error(t('incomes.toast.invalidAmount'));
       return;
     }
 
     if (!editForm.categoryId) {
-      toast.error('Category is required');
+      toast.error(t('incomes.toast.missingCategory'));
       return;
     }
 
@@ -89,10 +88,10 @@ export default function IncomesList({ incomes }: { incomes: Income[] }) {
       },
       {
         onSuccess: () => {
-          toast.success('Expense updated');
+          toast.success(t('incomes.toast.updateSuccess'));
           setEditItem(null);
         },
-        onError: () => toast.error('Failed to update expense'),
+        onError: () => toast.error(t('incomes.toast.updateError')),
       }
     );
   };
@@ -118,20 +117,20 @@ export default function IncomesList({ incomes }: { incomes: Income[] }) {
         data={paddedIncomes}
         columns={[
           {
-            label: 'Date',
+            label: t('shared.date'),
             accessor: 'date',
             format: formatDate,
             width: 'w-[80px]',
             sortable: true,
           },
           {
-            label: 'Name',
+            label: t('shared.name'),
             accessor: 'name',
             width: 'w-[120px] sm:w-[130px] lg:w-[200px]',
             sortable: true,
           },
           {
-            label: 'Description',
+            label: t('shared.description'),
             accessor: 'description',
             format: truncateText,
             width: 'w-[150px] sm:w-[180px] lg:w-[240px]',
@@ -139,7 +138,7 @@ export default function IncomesList({ incomes }: { incomes: Income[] }) {
             showOnMobile: false,
           },
           {
-            label: 'Amount',
+            label: t('shared.amount'),
             accessor: 'amount',
             align: 'right',
             format: (val) => formatCurrency(val, currency),
@@ -147,7 +146,7 @@ export default function IncomesList({ incomes }: { incomes: Income[] }) {
             sortable: true,
           },
           {
-            label: 'Category',
+            label: t('shared.category'),
             accessor: 'categoryName',
             align: 'center',
             format: (val) =>
@@ -161,62 +160,62 @@ export default function IncomesList({ incomes }: { incomes: Income[] }) {
             showOnMobile: false,
           },
         ]}
-
-      actionHandlers={{
-        onEdit: openEditModal,
-        onDelete: (row) => confirmDelete(row.id),
-      }}
+        actionHandlers={{
+          onEdit: openEditModal,
+          onDelete: (row) => confirmDelete(row.id),
+        }}
       />
+
+      {/* Delete Dialog */}
       <Dialog open={!!deletePendingId} onClose={handleDeleteCancelled} className="fixed z-50 inset-0 flex items-center justify-center">
         <div className="fixed inset-0 bg-black opacity-30" />
         <div className="relative bg-base-100 rounded-lg p-6 shadow-lg">
-          <Dialog.Title className="text-lg font-semibold">Confirm Delete</Dialog.Title>
-          <Dialog.Description className="mt-2">Are you sure you want to delete this expense?</Dialog.Description>
+          <Dialog.Title className="text-lg font-semibold">{t('shared.confirmDelete')}</Dialog.Title>
+          <Dialog.Description className="mt-2">{t('incomes.confirmDeleteMessage')}</Dialog.Description>
           <div className="mt-4 flex justify-end gap-2">
-            <button onClick={handleDeleteCancelled} className="btn btn-ghost">Cancel</button>
-            <button onClick={handleDeleteConfirmed} className="btn btn-error">Delete</button>
+            <button onClick={handleDeleteCancelled} className="btn btn-ghost">{t('shared.cancel')}</button>
+            <button onClick={handleDeleteConfirmed} className="btn btn-error">{t('shared.delete')}</button>
           </div>
         </div>
       </Dialog>
 
-      {/* Edit popup dialog */}
+      {/* Edit Dialog */}
       <Dialog open={!!editItem} onClose={() => setEditItem(null)} className="fixed z-50 inset-0 flex items-center justify-center">
         <div className="fixed inset-0 bg-black opacity-30" />
         <div className="relative bg-base-100 rounded-lg p-6 shadow-lg w-full max-w-md">
-          <Dialog.Title className="text-lg font-semibold">Edit Income</Dialog.Title>
+          <Dialog.Title className="text-lg font-semibold">{t('incomes.editTitle')}</Dialog.Title>
           <div className="space-y-3 mt-4">
             <InputField
               name="name"
               value={editForm.name ?? ''}
               onChange={handleEditChange}
-              placeholder="Name"
+              placeholder={t('shared.name')}
             />
             <InputField
               name="amount"
               type="number"
               value={editForm.amount?.toString() ?? ''}
               onChange={handleEditChange}
-              placeholder="Amount"
+              placeholder={t('shared.amount')}
               showCurrency
             />
             <InputField
               name="description"
               value={editForm.description ?? ''}
               onChange={handleEditChange}
-              placeholder="Description"
+              placeholder={t('shared.description')}
             />
             <SelectField
               name="categoryId"
               value={editForm.categoryId ?? ''}
               onChange={(e) => handleEditChange(e as React.ChangeEvent<HTMLInputElement | HTMLSelectElement>)}
               options={categories.map(c => ({ value: c.id, label: c.name }))}
-              placeholder="Select category"
+              placeholder={t('shared.selectCategory')}
             />
-
           </div>
           <div className="flex justify-end gap-2 mt-4">
-            <button onClick={() => setEditItem(null)} className="btn btn-ghost">Cancel</button>
-            <button onClick={handleEditSubmit} className="btn btn-primary">Save</button>
+            <button onClick={() => setEditItem(null)} className="btn btn-ghost">{t('shared.cancel')}</button>
+            <button onClick={handleEditSubmit} className="btn btn-primary">{t('shared.save')}</button>
           </div>
         </div>
       </Dialog>

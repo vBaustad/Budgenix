@@ -16,12 +16,14 @@ import BreakdownPieChart from '@/components/common/charts/BreakdownPieChart';
 import UpcomingRecurringList from '@/features/recurring/components/UpcomingRecurringList';
 import EditRecurringItemForm from '@/features/recurring/components/EditRecurringItemForm';
 import RecurringSummary from '@/features/recurring/components/RecurringSummary';
-import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 import { GROUP_OPTIONS } from '@/features/expenses/constants/grouping';
 import { formatCurrency } from '@/utils/formatting';
 
 export default function IncomePage() {
+  const { t } = useTranslation();
   const { selectedMonth, selectedYear } = useDateFilter();
+
   const {
     groupBy,
     setGroupBy,
@@ -68,31 +70,31 @@ export default function IncomePage() {
       <IncomeOverview />
 
       <div className="flex flex-col lg:flex-row w-full max-w-full gap-4">
-        <SectionShell title="Add Income" icon={AppIcons.add}>
+        <SectionShell title={t('buttons.addIncome')} icon={AppIcons.add}>
           <div className="flex flex-col lg:flex-row gap-4">
             <div className="lg:w-1/2">
               <AddIncomeForm onAdd={refreshRecurring} />
             </div>
             <div className="lg:w-1/2 bg-base-100 border border-base-200 text-base-content rounded-xl shadow-sm p-4">
-              <h3 className="text-lg font-semibold mb-4">Income Overview</h3>
+              <h3 className="text-lg font-semibold mb-4">{t('incomes.overview.incomeTitle')}</h3>
               {overviewLoading ? (
                 <span className="loading loading-spinner loading-md" />
               ) : (
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span>Total income:</span>
+                    <span>{t('incomes.overview.total')}</span>
                     <span className="font-medium">
                       {formatCurrency(overview?.totalIncome ?? 0)}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Last month:</span>
+                    <span>{t('incomes.overview.lastMonth')}</span>
                     <span className="font-medium">
                       {formatCurrency(overview?.lastMonthIncome ?? 0)}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Next recurring:</span>
+                    <span>{t('incomes.overview.nextRecurring')}</span>
                     {nextRecurringIncome ? (
                       <span className="font-medium">
                         {new Date(nextRecurringIncome.nextOccurrenceDate!).toLocaleDateString(undefined, {
@@ -102,7 +104,7 @@ export default function IncomePage() {
                         })}: {formatCurrency(nextRecurringIncome.amount)}
                       </span>
                     ) : (
-                      <span className="text-base-content/40">–</span>
+                      <span className="text-base-content/40">{t('shared.emptyDash')}</span>
                     )}
                   </div>
                 </div>
@@ -111,7 +113,7 @@ export default function IncomePage() {
           </div>
         </SectionShell>
 
-        <SectionShell title="Upcoming Income" icon={AppIcons.recurring} refreshable>
+        <SectionShell title={t('incomes.upcoming')} icon={AppIcons.recurring} refreshable>
           <div className="flex flex-col lg:flex-row gap-4">
             <div className="w-full lg:w-1/2">
               <UpcomingRecurringList
@@ -119,7 +121,6 @@ export default function IncomePage() {
                 loading={loadingRecurring}
                 onSelect={setSelectedRecurringItem}
               />
-
             </div>
             <div className="w-full lg:w-1/2">
               {selectedRecurringItem ? (
@@ -129,11 +130,11 @@ export default function IncomePage() {
                   onCancel={() => setSelectedRecurringItem(null)}
                 />
               ) : (
-              <RecurringSummary
-                recurringItems={upcomingRecurringIncomes ?? []}
-                monthlyTotal={monthlyRecurringIncomeTotal ?? 0}
-                lastTriggered={lastTriggeredRecurringIncome}
-              />
+                <RecurringSummary
+                  recurringItems={upcomingRecurringIncomes ?? []}
+                  monthlyTotal={monthlyRecurringIncomeTotal ?? 0}
+                  lastTriggered={lastTriggeredRecurringIncome}
+                />
               )}
             </div>
           </div>
@@ -168,10 +169,10 @@ export default function IncomePage() {
           </div>
         </SectionShell>
 
-        <SectionShell title="Income by Category" icon={AppIcons.pieChart}>
+        <SectionShell title={t('incomes.byCategory')} icon={AppIcons.pieChart}>
           <BreakdownPieChart
             data={chartData}
-            groupBy={(e) => (e as Income).categoryName || 'Uncategorized'}
+            groupBy={(e) => (e as Income).categoryName || t('shared.uncategorized')}
             getValue={(e) => (e as Income).amount}
             height={600}
             width={700}
