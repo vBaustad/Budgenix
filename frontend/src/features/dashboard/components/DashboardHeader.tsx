@@ -62,16 +62,16 @@ export default function DashboardHeader({ summary }: { summary: DashboardSummary
       {/* Quick Action Buttons */}
       <div className="flex gap-3 flex-wrap relative z-10">
         <button onClick={() => setShowAddExpense(true)} className="btn btn-primary btn-sm shadow-md gap-2">
-          <AppIcons.add className="w-4 h-4" /> {t('dashboard.buttons.addExpense')}
+          <AppIcons.add className="w-4 h-4" /> {t('buttons.addExpense')}
         </button>
         <Link to="/income" className="btn btn-accent btn-sm shadow-md gap-2">
-          <AppIcons.add className="w-4 h-4" /> {t('dashboard.buttons.addIncome')}
+          <AppIcons.add className="w-4 h-4" /> {t('buttons.addIncome')}
         </Link>
         <button onClick={() => setShowAddBudget(true)} className="btn btn-secondary btn-sm shadow-md gap-2">
-          <AppIcons.add className="w-4 h-4" /> {t('dashboard.buttons.addBudget')}
+          <AppIcons.add className="w-4 h-4" /> {t('buttons.addBudget')}
         </button>
         <button onClick={() => setShowAddGoal(true)} className="btn btn-info btn-sm shadow-md gap-2">
-          <AppIcons.add className="w-4 h-4" /> {t('dashboard.buttons.addGoal')}
+          <AppIcons.add className="w-4 h-4" /> {t('buttons.addGoal')}
         </button>
       </div>
 

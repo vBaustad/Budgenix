@@ -102,7 +102,7 @@ namespace Budgenix.API.Controllers
             user.SubscriptionStartDate ??= DateTime.UtcNow;
             await _userManager.UpdateAsync(user);
 
-            var jwtToken = _jwtTokenService.CreateToken(user);
+            var jwtToken = await _jwtTokenService.CreateToken(user);
 
             // Set token in HttpOnly cookie
             Response.Cookies.Append("authToken", jwtToken, new CookieOptions
@@ -142,7 +142,7 @@ namespace Budgenix.API.Controllers
                 return Unauthorized(_localizer["Auth_ConfirmEmailBeforeLogin"]);
             }
 
-            var token = _jwtTokenService?.CreateToken(user);
+            var token = await _jwtTokenService.CreateToken(user);
 
             Response.Cookies.Append("authToken", token, new CookieOptions
             {
@@ -191,6 +191,9 @@ namespace Budgenix.API.Controllers
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null) return NotFound();
 
+            var roles = await _userManager.GetRolesAsync(user);
+            var isAdmin = roles.Contains("Admin");
+
             return Ok(new
             {
                 user.Id,
@@ -210,9 +213,11 @@ namespace Budgenix.API.Controllers
                 user.SubscriptionEndDate,
                 user.BillingCycle,
                 user.ReferralCode,
-                currency = user.PreferredCurrency ?? "USD"
+                currency = user.PreferredCurrency ?? "USD",
+                isAdmin
             });
         }
+
 
         [Authorize]
         [HttpGet("me/currency")]

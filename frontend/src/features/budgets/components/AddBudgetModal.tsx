@@ -87,7 +87,7 @@ export default function AddBudgetModal({ onClose }: Props) {
         >
           ✕
         </button>
-        <h2 className="text-xl font-bold mb-4">{t('budgets.addTitle')}</h2>
+        <h2 className="text-xl font-bold mb-4">{t('budgets.form.title')}</h2>
 
         <div className="space-y-3">
           <InputField

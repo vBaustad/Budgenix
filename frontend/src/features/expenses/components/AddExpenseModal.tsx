@@ -76,7 +76,7 @@ export default function AddExpenseModal({ onAdd, onClose }: Props) {
     <Dialog open onClose={onClose} className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="fixed inset-0 bg-black/30" />
       <Dialog.Panel className="bg-base-100 rounded-xl p-6 shadow-lg max-w-md w-full z-50">
-        <Dialog.Title className="text-lg font-bold mb-4">{t('expenses.add')}</Dialog.Title>
+        <Dialog.Title className="text-lg font-bold mb-4">{t('expenses.form.title')}</Dialog.Title>
         <form onSubmit={handleSubmit} className="space-y-4">
           <InputField
             name="name"
@@ -128,7 +128,7 @@ export default function AddExpenseModal({ onAdd, onClose }: Props) {
               {t('shared.cancel')}
             </button>
             <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? t('shared.saving') : t('expenses.add')}
+              {loading ? t('shared.saving') : t('buttons.addExpense')}
             </button>
           </div>
         </form>

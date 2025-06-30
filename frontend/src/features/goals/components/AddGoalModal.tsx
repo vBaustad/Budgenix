@@ -57,49 +57,49 @@ export default function AddGoalModal({ onClose }: Props) {
       <div className="fixed inset-0 bg-black/30" />
       <Dialog.Panel className="bg-base-100 rounded-xl p-6 shadow-lg max-w-md w-full z-50">
         <Dialog.Title className="text-lg font-bold mb-4">
-          {t('goals.addGoal.title')}
+          {t('goals.form.title')}
         </Dialog.Title>
         <div className="space-y-3">
           <InputField
             name="name"
-            label={t('goals.addGoal.nameLabel')}
+            label={t('goals.form.nameLabel')}
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder={t('goals.addGoal.namePlaceholder')}
+            placeholder={t('goals.form.namePlaceholder')}
             required
           />
           <InputField
             name="description"
-            label={t('goals.addGoal.descriptionLabel')}
+            label={t('goals.form.descriptionLabel')}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder={t('goals.addGoal.descriptionPlaceholder')}
+            placeholder={t('goals.form.descriptionPlaceholder')}
           />
           <InputField
             name="targetAmount"
             type="number"
-            label={t('goals.addGoal.targetAmountLabel')}
+            label={t('goals.form.targetAmountLabel')}
             value={targetAmount}
             onChange={(e) => setTargetAmount(e.target.value)}
-            placeholder={t('goals.addGoal.amountPlaceholder')}
+            placeholder={t('goals.form.amountPlaceholder')}
             required
             showCurrency
           />
           <InputField
             name="targetDate"
             type="date"
-            label={t('goals.addGoal.targetDateLabel')}
+            label={t('goals.form.targetDateLabel')}
             value={targetDate}
             onChange={(e) => setTargetDate(e.target.value)}
-            placeholder={t('goals.addGoal.datePlaceholder')}
+            placeholder={t('form.form.datePlaceholder')}
           />
           <SelectField
             name="icon"
-            label={t('goals.addGoal.iconLabel')}
+            label={t('goals.form.iconLabel')}
             value={icon}
             onChange={(e) => setIcon(e.target.value)}
             options={iconOptions}
-            placeholder={t('goals.addGoal.iconPlaceholder')}
+            placeholder={t('goals.form.iconPlaceholder')}
           />
         </div>
         <div className="flex justify-end gap-2 mt-4">

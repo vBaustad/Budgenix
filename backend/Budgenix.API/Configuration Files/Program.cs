@@ -20,6 +20,8 @@ using System.Text.Json.Serialization;
 using Budgenix.Services.Finance;
 using Budgenix.Services.Budgets;
 using Budgenix.Services.Goals;
+using Budgenix.Services.Admin;
+using Budgenix.Infrastructure.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -60,6 +62,7 @@ builder.Services.AddScoped<IExpenseService, ExpenseService>();
 builder.Services.AddScoped<IIncomeService, IncomeService>();
 builder.Services.AddScoped<IBudgetService, BudgetService>();
 builder.Services.AddScoped<IGoalService, GoalService>();
+builder.Services.AddScoped<IAdminService, AdminService>();
 
 
 
@@ -157,12 +160,15 @@ try
         var scopedLogger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
 
         SeedData.Initialize(context);
-        scopedLogger.LogInformation("✅ Database seeded successfully.");
+        scopedLogger.LogInformation("Database seeded successfully.");
+        
+        await IdentitySeeder.SeedRolesAsync(scope.ServiceProvider);
+        scopedLogger.LogInformation("Identity roles seeded successfully.");
     }
 }
 catch (Exception seedingEx)
 {
-    logger.LogError(seedingEx, "💥 Error during DB seeding.");
+    logger.LogError(seedingEx, "💥 Error during DB or Identity seeding.");
     throw;
 }
 
@@ -171,6 +177,7 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
+app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

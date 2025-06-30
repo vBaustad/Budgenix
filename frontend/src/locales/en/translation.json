@@ -252,7 +252,7 @@
             "network": "Something went wrong. Please try again."
         }
     },
-    "expenses": {
+    "expenses": {        
         "editTitle": "Edit Expense",
         "allExpenses": "All Expenses",
         "spendingByCategory": "Spending by Category",
@@ -264,7 +264,8 @@
             "updateError": "Failed to update expense",
             "invalidForm": "Please fill out all required fields correctly."
         },
-        "form": {
+        "form": {    
+            "title": "Add Expense",       
             "namePlaceholder": "Name",
             "amountPlaceholder": "Amount",
             "descriptionPlaceholder": "Description",
@@ -301,6 +302,7 @@
             "noEditItem": "No item selected for editing"
         },       
         "form": {
+            "title": "Add Income",
             "namePlaceholder": "Income name",
             "selectCategoryPlaceholder": "Select category",
             "descriptionPlaceholder": "Description",
@@ -322,12 +324,13 @@
         }
     },
     "goals": {
+        "addGoal":"Add Goal",
         "title": "Savings Goals",
         "noGoals": {
             "title": "No Goals Yet",
             "description": "Add your first savings goal and start tracking your progress!"
         },
-        "addGoal": {
+        "form": {
             "title": "Add New Goal",
             "nameLabel": "Goal Name *",
             "descriptionLabel": "Description",
@@ -382,6 +385,7 @@
             "noBudgets": "Create your first budget"
         },
         "form": {
+            "title":"Add Budget",
             "namePlaceholder": "Budget name",
             "selectCategoryPlaceholder": "Select category",
             "amountPlaceholder": "Allocated amount",
