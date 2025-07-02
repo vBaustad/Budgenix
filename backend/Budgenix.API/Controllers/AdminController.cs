@@ -1,20 +1,23 @@
 ﻿using Budgenix.Dtos.Admin;
 using Budgenix.Services.Admin;
+using Budgenix.Services.Audit; // ✅ Needed for IAuditService
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Budgenix.API.Controllers
 {
-    [Authorize(Roles = "Admin")] // optional: or use your own policy
+    [Authorize(Roles = "Admin")]
     [ApiController]
     [Route("api/admin")]
     public class AdminController : ControllerBase
     {
         private readonly IAdminService _adminService;
+        private readonly IAuditService _auditService;
 
-        public AdminController(IAdminService adminService)
+        public AdminController(IAdminService adminService, IAuditService auditService)
         {
             _adminService = adminService;
+            _auditService = auditService;
         }
 
         [HttpGet("users")]
@@ -41,6 +44,12 @@ namespace Budgenix.API.Controllers
             await _adminService.DeleteUserItemAsync(id, type, itemId);
             return NoContent();
         }
-    }
 
+        [HttpGet("user/{id}/logs")]
+        public async Task<ActionResult<List<AdminAuditLogDto>>> GetUserAuditLogs(string id)
+        {
+            var logs = await _auditService.GetLogsForUserAsync(id);
+            return Ok(logs);
+        }
+    }
 }

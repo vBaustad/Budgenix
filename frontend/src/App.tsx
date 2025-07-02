@@ -35,13 +35,13 @@ function App() {
       <Toaster position="top-right" />
 
       <Routes>
-        {/* 🌐 Public Routes */}
+        {/* Public Routes */}
         <Route path="/" element={<BaseLayout><LandingPage /></BaseLayout>} />
         <Route path="/login" element={<BaseLayout><LoginPage /></BaseLayout>} />
         <Route path="/signup" element={<BaseLayout><SignUpPage /></BaseLayout>} />
         <Route path="/signup/confirm" element={<BaseLayout><SignupConfirmationPage /></BaseLayout>} />
 
-        {/* 🔐 Authenticated Routes */}
+        {/* Authenticated Routes */}
         <Route element={<AppLayout />}>
           <Route element={<PrivateRoute />}>
             <Route path="/dashboard" element={<DashboardPage />} />
@@ -55,7 +55,7 @@ function App() {
             <Route path="/settings" element={<SettingsPage />} />
           </Route>
 
-          {/* 🛠️ Admin Route */}
+          {/* Admin Route */}
           <Route path="/admin" element={
             <RequireAdmin>
               <AdminPage />

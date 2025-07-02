@@ -5,6 +5,8 @@ import {
   AdminDeleteResultDto,
 } from '@/admin/types/admin';
 
+import { AuditLogDto } from '../types/auditLogDto';
+
 /**
  * Fetch all users for the admin panel
  */
@@ -22,6 +24,14 @@ export const getAdminUserDetails = async (userId: string): Promise<AdminUserDeta
   if (!result) throw new Error('Failed to fetch user details');
   return result;
 };
+
+
+export const getAuditLogsForUser = async (userId: string): Promise<AuditLogDto[]> => {
+  const result = await apiFetch<AuditLogDto[]>(`/api/admin/user/${userId}/logs`);
+  if (!result) throw new Error('Failed to fetch audit logs');
+  return result;
+};
+
 
 /**
  * Delete a user and all their data

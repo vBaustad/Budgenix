@@ -1,12 +1,15 @@
 ﻿using Budgenix.Data;
 using Budgenix.Dtos.Incomes;
 using Budgenix.Dtos.Recurring;
+using Budgenix.Models.Audit;
 using Budgenix.Models.Finance;
 using Budgenix.Models.Shared;
+using Budgenix.Services.Audit;
 using Budgenix.Services.Recurring;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
 
 namespace Budgenix.Services.Finance
 {
@@ -16,17 +19,20 @@ namespace Budgenix.Services.Finance
         private readonly ILogger<IncomeService> _logger;
         private readonly RecurringItemService _recurringService;
         private readonly IMemoryCache _cache;
+        private readonly IAuditService _audit;
 
         public IncomeService(
             BudgenixDbContext context,
             ILogger<IncomeService> logger,
             RecurringItemService recurringService,
-            IMemoryCache cache)
+            IMemoryCache cache,
+            IAuditService audit)
         {
             _context = context;
             _logger = logger;
             _recurringService = recurringService;
             _cache = cache;
+            _audit = audit;
         }
 
         public async Task<List<IncomeDto>> GetIncomesAsync(
@@ -235,7 +241,8 @@ namespace Budgenix.Services.Finance
             _context.Incomes.Add(i);
             await _context.SaveChangesAsync();
 
-            
+            await _audit.LogAsync(userId, AuditActionEnum.CreateIncome, "Income", i.Id.ToString(), null, JsonSerializer.Serialize(i));
+
             InvalidateIncomeOverviewCache(userId, i.Date);
 
             return new IncomeDto
@@ -249,7 +256,6 @@ namespace Budgenix.Services.Finance
             };
         }
 
-
         public async Task<bool> UpdateIncomeAsync(string userId, Guid id, UpdateIncomeDto dto)
         {
             _logger.LogInformation("Updating income {Id} for user {UserId}", id, userId);
@@ -261,6 +267,8 @@ namespace Budgenix.Services.Finance
             if (!categoryExists)
                 throw new InvalidOperationException("Invalid category ID provided");
 
+            var oldValues = JsonSerializer.Serialize(i);
+
             i.Name = dto.Name;
             i.Amount = dto.Amount;
             i.Date = dto.Date;
@@ -269,11 +277,12 @@ namespace Budgenix.Services.Finance
 
             await _context.SaveChangesAsync();
 
+            await _audit.LogAsync(userId, AuditActionEnum.UpdateIncome, "Income", i.Id.ToString(), oldValues, JsonSerializer.Serialize(i));
+
             InvalidateIncomeOverviewCache(userId, i.Date);
 
             return true;
         }
-
 
         public async Task<bool> DeleteIncomeAsync(string userId, Guid id)
         {
@@ -282,8 +291,12 @@ namespace Budgenix.Services.Finance
             var i = await _context.Incomes.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
             if (i == null) return false;
 
+            var oldValues = JsonSerializer.Serialize(i);
+
             _context.Incomes.Remove(i);
             await _context.SaveChangesAsync();
+
+            await _audit.LogAsync(userId, AuditActionEnum.DeleteIncome, "Income", i.Id.ToString(), oldValues, null);
 
             InvalidateIncomeOverviewCache(userId, i.Date);
 

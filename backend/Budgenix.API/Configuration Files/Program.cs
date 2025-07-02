@@ -22,6 +22,7 @@ using Budgenix.Services.Budgets;
 using Budgenix.Services.Goals;
 using Budgenix.Services.Admin;
 using Budgenix.Infrastructure.Identity;
+using Budgenix.Services.Audit;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -63,6 +64,7 @@ builder.Services.AddScoped<IIncomeService, IncomeService>();
 builder.Services.AddScoped<IBudgetService, BudgetService>();
 builder.Services.AddScoped<IGoalService, GoalService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
+builder.Services.AddScoped<IAuditService, AuditService>();
 
 
 

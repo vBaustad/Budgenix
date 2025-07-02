@@ -3,8 +3,11 @@ using Budgenix.Data;
 using Budgenix.Dtos.Budgets;
 using Budgenix.Helpers;
 using Budgenix.Helpers.Query;
+using Budgenix.Models.Audit;
 using Budgenix.Models.Finance;
+using Budgenix.Services.Audit;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace Budgenix.Services.Budgets
 {
@@ -12,11 +15,13 @@ namespace Budgenix.Services.Budgets
     {
         private readonly BudgenixDbContext _context;
         private readonly IMapper _mapper;
+        private readonly IAuditService _audit;
 
-        public BudgetService(BudgenixDbContext context, IMapper mapper)
+        public BudgetService(BudgenixDbContext context, IMapper mapper, IAuditService audit)
         {
             _context = context;
             _mapper = mapper;
+            _audit = audit;
         }
 
         public async Task<IEnumerable<BudgetDto>> GetBudgetsAsync(string userId, string? category, BudgetTypeEnum? type, string sort, int skip, int take)
@@ -121,6 +126,8 @@ namespace Budgenix.Services.Budgets
             _context.Budgets.Add(budget);
             await _context.SaveChangesAsync();
 
+            await _audit.LogAsync(userId, AuditActionEnum.CreateBudget, "Budget", budget.Id.ToString(), null, JsonSerializer.Serialize(budget));
+
             return _mapper.Map<BudgetDto>(budget);
         }
 
@@ -146,10 +153,14 @@ namespace Budgenix.Services.Budgets
 
             if (similarExists) throw new InvalidOperationException("A similar budget already exists");
 
+            var oldValues = JsonSerializer.Serialize(budget);
+
             _mapper.Map(dto, budget);
             budget.Category = category;
 
             await _context.SaveChangesAsync();
+
+            await _audit.LogAsync(userId, AuditActionEnum.UpdateBudget, "Budget", budget.Id.ToString(), oldValues, JsonSerializer.Serialize(budget));
 
             return _mapper.Map<BudgetDto>(budget);
         }
@@ -159,8 +170,12 @@ namespace Budgenix.Services.Budgets
             var budget = await _context.Budgets.FirstOrDefaultAsync(b => b.Id == id && b.UserId == userId);
             if (budget == null) return false;
 
+            var oldValues = JsonSerializer.Serialize(budget);
+
             _context.Budgets.Remove(budget);
             await _context.SaveChangesAsync();
+
+            await _audit.LogAsync(userId, AuditActionEnum.DeleteBudget, "Budget", id.ToString(), oldValues, null);
 
             return true;
         }
