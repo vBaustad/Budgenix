@@ -26,7 +26,7 @@ export type User = {
 export function useUserQuery() {
   const { isLoggedIn, authChecked } = useAuth();
 
-return useQuery<User>({
+return useQuery<User | null>({
   queryKey: ['user'],
   queryFn: async () => await apiFetch('/api/account/me'),
   enabled: authChecked && isLoggedIn,
@@ -34,6 +34,7 @@ return useQuery<User>({
   refetchOnWindowFocus: false,
   refetchOnMount: false,
 });
+
 
 }
 

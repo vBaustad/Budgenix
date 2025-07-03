@@ -33,6 +33,10 @@ type RegistrationFormData = {
   billingCycle: string;
 };
 
+type StripeCheckoutResponse = {
+  url: string;
+};
+
 export default function RegistrationForm({ selectedPlan, frequency }: RegistrationFormProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -54,92 +58,71 @@ export default function RegistrationForm({ selectedPlan, frequency }: Registrati
     country: '',
     paymentMethod: isPaidPlan ? 'stripe' : undefined,
     subscriptionTier: selectedPlan.id,
-    billingCycle: ''
+    billingCycle: '',
   });
-
-
-
-  // useEffect(() => {
-  //   if (isPaidPlan && formData.paymentMethod === 'paypal') {
-  //     const existingScript = document.querySelector('script[src^="https://www.paypal.com/sdk/js"]');
-  //     if (!existingScript) {
-  //       const script = document.createElement('script');
-  //       script.src = `https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&vault=true&intent=subscription`;
-  //       script.async = true;
-  //       document.body.appendChild(script);
-  //       return () => {
-  //         document.body.removeChild(script);
-  //       };
-  //     }
-  //   }
-  // }, [isPaidPlan, formData.paymentMethod]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    setErrors((prev) => ({ ...prev, [name]: '' })); // clear error on change
+    setErrors((prev) => ({ ...prev, [name]: '' }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  const fieldErrors: Record<string, string> = {};
+    e.preventDefault();
+    const fieldErrors: Record<string, string> = {};
 
-  if (!formData.userName) fieldErrors.userName = 'Username is required';
-  if (!formData.firstName) fieldErrors.firstName = 'First name is required';
-  if (!formData.lastName) fieldErrors.lastName = 'Last name is required';
-  if (!formData.email) fieldErrors.email = 'Email is required';
-  if (!formData.password) fieldErrors.password = 'Password is required';
-  if (formData.password.length < 6) fieldErrors.password = 'Password must be at least 6 characters';
-  if (formData.password !== formData.confirmPassword) fieldErrors.confirmPassword = 'Passwords do not match';
+    if (!formData.userName) fieldErrors.userName = 'Username is required';
+    if (!formData.firstName) fieldErrors.firstName = 'First name is required';
+    if (!formData.lastName) fieldErrors.lastName = 'Last name is required';
+    if (!formData.email) fieldErrors.email = 'Email is required';
+    if (!formData.password) fieldErrors.password = 'Password is required';
+    if (formData.password.length < 6) fieldErrors.password = 'Password must be at least 6 characters';
+    if (formData.password !== formData.confirmPassword) fieldErrors.confirmPassword = 'Passwords do not match';
 
-  if (isPaidPlan) {
-    if (!formData.addressLine1) fieldErrors.addressLine1 = 'Address is required for paid plans';
-    if (!formData.paymentMethod) fieldErrors.paymentMethod = 'Select a payment method';
-  }
-
-  if (Object.keys(fieldErrors).length > 0) {
-    console.warn('[handleSubmit] Validation errors:', fieldErrors);
-    setErrors(fieldErrors);
-    return;
-  }
-
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { confirmPassword, paymentMethod, ...payload } = {
-      ...formData,
-      billingCycle: frequency.value === 'monthly' ? 'Monthly' : 'Annually'
-    };
-
-    await apiFetch('/api/account/register', {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    });
-
-    if (isPaidPlan && formData.paymentMethod === 'stripe') {
-      const checkoutData = await apiFetch('/api/stripe/create-checkout-session', {
-        method: 'POST',
-        body: JSON.stringify({
-          email: formData.email,
-          priceId: selectedPlan.priceId[frequency.value],
-        }),
-      });
-
-      if (checkoutData.url) {
-        window.location.href = checkoutData.url;
-      } else {
-        toast.error('Stripe checkout session could not be created');
-      }
-    } else {
-      // Instead of toast + login redirect, navigate to confirmation page
-      navigate('/signup/confirm');
+    if (isPaidPlan) {
+      if (!formData.addressLine1) fieldErrors.addressLine1 = 'Address is required for paid plans';
+      if (!formData.paymentMethod) fieldErrors.paymentMethod = 'Select a payment method';
     }
 
-  } catch (err) {
-    toast.error(err instanceof Error ? err.message : t('register.errors.generic'));
-  }
-};
+    if (Object.keys(fieldErrors).length > 0) {
+      console.warn('[handleSubmit] Validation errors:', fieldErrors);
+      setErrors(fieldErrors);
+      return;
+    }
 
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { confirmPassword, paymentMethod, ...payload } = {
+        ...formData,
+        billingCycle: frequency.value === 'monthly' ? 'Monthly' : 'Annually',
+      };
 
+      await apiFetch('/api/account/register', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+
+      if (isPaidPlan && formData.paymentMethod === 'stripe') {
+        const checkoutData = await apiFetch<StripeCheckoutResponse>('/api/stripe/create-checkout-session', {
+          method: 'POST',
+          body: JSON.stringify({
+            email: formData.email,
+            priceId: selectedPlan.priceId[frequency.value],
+          }),
+        });
+
+        if (checkoutData?.url) {
+          window.location.href = checkoutData.url;
+        } else {
+          toast.error('Stripe checkout session could not be created');
+        }
+      } else {
+        navigate('/signup/confirm');
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t('register.errors.generic'));
+    }
+  };
 
   return (
     <form onSubmit={handleSubmit}>
@@ -229,15 +212,6 @@ export default function RegistrationForm({ selectedPlan, frequency }: Registrati
             />
             {errors.country && <p className="text-error text-xs">{errors.country}</p>}
           </div>
-
-          {/* <div className="mt-6">
-            <p className="text-base-content/70 mb-2">{t('register.paymentMethodLabel')}</p>
-            <PaymentSelector
-              selected={formData.paymentMethod}
-              onSelect={(method) => setFormData((prev) => ({ ...prev, paymentMethod: method }))}
-            />
-            {errors.paymentMethod && <p className="text-error text-xs">{errors.paymentMethod}</p>}
-          </div> */}
         </>
       )}
 
@@ -248,13 +222,10 @@ export default function RegistrationForm({ selectedPlan, frequency }: Registrati
         }`}
       >
         {isPaidPlan && <i className="fa-brands fa-cc-stripe"></i>}
-        {isPaidPlan 
-          ? 'Create Account and Pay with Stripe' 
-          : 'Create Account'
-        }
+        {isPaidPlan
+          ? 'Create Account and Pay with Stripe'
+          : 'Create Account'}
       </button>
-
-
     </form>
   );
 }

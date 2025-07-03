@@ -4,7 +4,9 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 
 export async function fetchDashboardSummary(month: number, year: number): Promise<DashboardSummary> {
-  return await apiFetch(`/api/dashboard/summary?month=${month}&year=${year}`);
+  const result = await apiFetch<DashboardSummary | null>(`/api/dashboard/summary?month=${month}&year=${year}`);
+  if (!result) throw new Error('Failed to fetch dashboard summary');
+  return result;
 }
 
 export function useDashboardSummary(month: number | undefined, year: number | undefined) {
@@ -13,7 +15,7 @@ export function useDashboardSummary(month: number | undefined, year: number | un
   return useQuery<DashboardSummary>({
     queryKey: ['dashboardSummary', month, year],
     queryFn: () => fetchDashboardSummary(month!, year!),
-    enabled: isLoggedIn && !!month && !!year, // Prevent when logged out or dates missing
+    enabled: isLoggedIn && !!month && !!year,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
   });

@@ -3,6 +3,7 @@ using Budgenix.Models.Categories;
 using Budgenix.Models.Users;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Budgenix.Models.Audit;
 
 namespace Budgenix.Data
 {
@@ -19,6 +20,8 @@ namespace Budgenix.Data
         public DbSet<Category> Categories { get; set; }
         public DbSet<RecurringItem> RecurringItems { get; set; }
         public DbSet<Goal> Goals { get; set; }
+        public DbSet<AuditLog> AuditLogs { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

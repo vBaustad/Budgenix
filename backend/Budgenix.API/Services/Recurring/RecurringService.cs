@@ -4,8 +4,10 @@ using Budgenix.Dtos.Expenses;
 using Budgenix.Dtos.Recurring;
 using Budgenix.Models.Finance;
 using Budgenix.Models.Shared;
-using Budgenix.Services.Recurring;
+using Budgenix.Services.Audit;
+using Budgenix.Models.Audit;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace Budgenix.Services.Recurring
 {
@@ -14,12 +16,14 @@ namespace Budgenix.Services.Recurring
         private readonly BudgenixDbContext _context;
         private readonly RecurringItemService _ruleEngine;
         private readonly IMapper _mapper;
+        private readonly IAuditService _audit;
 
-        public RecurringService(BudgenixDbContext context, RecurringItemService ruleEngine, IMapper mapper)
+        public RecurringService(BudgenixDbContext context, RecurringItemService ruleEngine, IMapper mapper, IAuditService audit)
         {
             _context = context;
             _ruleEngine = ruleEngine;
             _mapper = mapper;
+            _audit = audit;
         }
 
         public async Task<List<RecurringItemDto>> GetAllAsync(string userId)
@@ -134,6 +138,16 @@ namespace Budgenix.Services.Recurring
             _context.RecurringItems.Add(entity);
             await _context.SaveChangesAsync();
 
+            await _audit.LogAsync(userId, AuditActionEnum.CreateRecurringItem, "RecurringItem", entity.Id.ToString(),
+                newValues: JsonConvert.SerializeObject(new
+                {
+                    entity.Name,
+                    entity.Amount,
+                    entity.Type,
+                    entity.Frequency
+                }));
+
+
             return ToDto(entity, DateTime.Today);
         }
 
@@ -145,6 +159,19 @@ namespace Budgenix.Services.Recurring
             if (item == null)
                 return null;
 
+            var oldValues = JsonConvert.SerializeObject(new
+            {
+                item.Name,
+                item.Description,
+                item.Amount,
+                item.StartDate,
+                item.EndDate,
+                item.Frequency,
+                item.IsActive,
+                item.Type,
+                item.CategoryId
+            });
+
             item.Name = dto.Name;
             item.Description = dto.Description;
             item.Amount = dto.Amount;
@@ -155,7 +182,25 @@ namespace Budgenix.Services.Recurring
             item.Type = dto.Type;
             item.CategoryId = dto.CategoryId;
 
+            var newValues = JsonConvert.SerializeObject(new
+            {
+                item.Name,
+                item.Description,
+                item.Amount,
+                item.StartDate,
+                item.EndDate,
+                item.Frequency,
+                item.IsActive,
+                item.Type,
+                item.CategoryId
+            });
+
             await _context.SaveChangesAsync();
+
+            await _audit.LogAsync(userId, AuditActionEnum.UpdateRecurringItem, "RecurringItem", item.Id.ToString(),
+                oldValues: oldValues,
+                newValues: newValues);
+
             return ToDto(item, DateTime.Today);
         }
 
@@ -169,6 +214,21 @@ namespace Budgenix.Services.Recurring
 
             _context.RecurringItems.Remove(item);
             await _context.SaveChangesAsync();
+
+            await _audit.LogAsync(
+                userId,
+                AuditActionEnum.DeleteRecurringItem,
+                "RecurringItem",
+                item.Id.ToString(),
+                oldValues: JsonConvert.SerializeObject(new
+                {
+                    item.Name,
+                    item.Amount,
+                    item.Type,
+                    item.Frequency
+                })
+            );
+
             return true;
         }
 
@@ -191,6 +251,8 @@ namespace Budgenix.Services.Recurring
             _context.Expenses.Add(expense);
             await _context.SaveChangesAsync();
 
+            await _audit.LogAsync(userId, AuditActionEnum.TriggerRecurringItem, "RecurringItem", item.Id.ToString(), metadata: $"Triggered for {expense.Amount} on {DateTime.Today:yyyy-MM-dd}");
+
             return _mapper.Map<ExpenseDto>(expense);
         }
 
@@ -207,6 +269,9 @@ namespace Budgenix.Services.Recurring
             _ruleEngine.AdvanceStartDate(item);
 
             await _context.SaveChangesAsync();
+
+            await _audit.LogAsync(userId, AuditActionEnum.SkipRecurringItem, "RecurringItem", item.Id.ToString(), metadata: $"Skipped on {item.LastSkippedDate?.ToString("yyyy-MM-dd")}");
+
             return true;
         }
 

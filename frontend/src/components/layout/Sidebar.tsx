@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { sidebarNav } from '../../constants/SidebarNav';
+import { useSidebarNav  } from '../../constants/SidebarNav';
 import BudgenixLogo from '../../assets/Logo/BudgenixLogo.png';
 import { Dialog, DialogBackdrop, DialogPanel, TransitionChild } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
@@ -119,6 +119,7 @@ type SidebarContentProps = {
 
 function SidebarContent({ t, logout, isActive, setSidebarOpen }: SidebarContentProps) {
   const navigate = useNavigate();
+  const sidebarNav = useSidebarNav();
 
   const handleLogout = async () => {
     await logout();

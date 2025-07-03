@@ -3,6 +3,9 @@ using Budgenix.Data;
 using Budgenix.Models.Finance;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Budgenix.Services.Audit;
+using Budgenix.Models.Audit;
+using System.Text.Json;
 
 namespace Budgenix.Services.Goals
 {
@@ -11,12 +14,14 @@ namespace Budgenix.Services.Goals
         private readonly BudgenixDbContext _context;
         private readonly IMemoryCache _cache;
         private readonly ILogger<GoalService> _logger;
+        private readonly IAuditService _audit;
 
-        public GoalService(BudgenixDbContext context, IMemoryCache cache, ILogger<GoalService> logger)
+        public GoalService(BudgenixDbContext context, IMemoryCache cache, ILogger<GoalService> logger, IAuditService audit)
         {
             _context = context;
             _cache = cache;
             _logger = logger;
+            _audit = audit;
         }
 
         public async Task<IEnumerable<GoalDto>> GetAllGoalsAsync(string userId)
@@ -62,18 +67,7 @@ namespace Budgenix.Services.Goals
 
             if (g == null) return null;
 
-            var dto = new GoalDto
-            {
-                Id = g.Id,
-                Name = g.Name,
-                Description = g.Description,
-                TargetAmount = g.TargetAmount,
-                CurrentAmount = g.CurrentAmount,
-                TargetDate = g.TargetDate,
-                IsActive = g.IsActive,
-                Icon = g.Icon
-            };
-
+            var dto = ToDto(g);
             _cache.Set(cacheKey, dto, TimeSpan.FromMinutes(5));
             return dto;
         }
@@ -97,8 +91,21 @@ namespace Budgenix.Services.Goals
             _context.Goals.Add(goal);
             await _context.SaveChangesAsync();
 
-            InvalidateUserCache(userId);
+            await _audit.LogAsync(
+                userId: userId,
+                action: AuditActionEnum.CreateGoal,
+                entityType: "Goal",
+                entityId: goal.Id.ToString(),
+                newValues: JsonSerializer.Serialize(new
+                {
+                    goal.Name,
+                    goal.TargetAmount,
+                    goal.CurrentAmount,
+                    goal.TargetDate
+                })
+            );
 
+            InvalidateUserCache(userId);
             return ToDto(goal);
         }
 
@@ -110,6 +117,16 @@ namespace Budgenix.Services.Goals
 
             if (goal == null) return null;
 
+            var oldData = new
+            {
+                goal.Name,
+                goal.Description,
+                goal.TargetAmount,
+                goal.CurrentAmount,
+                goal.TargetDate,
+                goal.Icon
+            };
+
             goal.Name = dto.Name;
             goal.Description = dto.Description;
             goal.TargetAmount = dto.TargetAmount;
@@ -119,8 +136,24 @@ namespace Budgenix.Services.Goals
 
             await _context.SaveChangesAsync();
 
-            InvalidateUserCache(userId, goalId);
+            await _audit.LogAsync(
+                userId: userId,
+                action: AuditActionEnum.UpdateGoal,
+                entityType: "Goal",
+                entityId: goal.Id.ToString(),
+                oldValues: JsonSerializer.Serialize(oldData),
+                newValues: JsonSerializer.Serialize(new
+                {
+                    goal.Name,
+                    goal.Description,
+                    goal.TargetAmount,
+                    goal.CurrentAmount,
+                    goal.TargetDate,
+                    goal.Icon
+                })
+            );
 
+            InvalidateUserCache(userId, goalId);
             return ToDto(goal);
         }
 
@@ -135,6 +168,20 @@ namespace Budgenix.Services.Goals
             _context.Goals.Remove(goal);
             await _context.SaveChangesAsync();
 
+            await _audit.LogAsync(
+                userId: userId,
+                action: AuditActionEnum.DeleteGoal,
+                entityType: "Goal",
+                entityId: goal.Id.ToString(),
+                oldValues: JsonSerializer.Serialize(new
+                {
+                    goal.Name,
+                    goal.TargetAmount,
+                    goal.CurrentAmount,
+                    goal.TargetDate
+                })
+            );
+
             InvalidateUserCache(userId, goalId);
             return true;
         }
@@ -147,11 +194,25 @@ namespace Budgenix.Services.Goals
 
             if (goal == null) return null;
 
+            var previousAmount = goal.CurrentAmount;
             goal.CurrentAmount += dto.Amount;
+
             await _context.SaveChangesAsync();
 
-            InvalidateUserCache(userId, goalId);
+            await _audit.LogAsync(
+                userId: userId,
+                action: AuditActionEnum.UpdateGoal,
+                entityType: "GoalContribution",
+                entityId: goal.Id.ToString(),
+                metadata: JsonSerializer.Serialize(new
+                {
+                    AmountAdded = dto.Amount,
+                    PreviousAmount = previousAmount,
+                    NewAmount = goal.CurrentAmount
+                })
+            );
 
+            InvalidateUserCache(userId, goalId);
             return ToDto(goal);
         }
 

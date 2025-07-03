@@ -1,11 +1,16 @@
-import './styles/App.css'
-import './styles/components.css'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import './styles/App.css';
+import './styles/components.css';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import PrivateRoute from './components/routing/PrivateRoute'
-import AppLayout from './components/layout/AppLayout'
+
+import PrivateRoute from './components/routing/PrivateRoute';
+import AppLayout from './components/layout/AppLayout';
 import BaseLayout from './features/public/components/BaseLayout';
 import SignupConfirmationPage from './pages/public/SignupConfirmationPage';
+
+import AdminPage from '@/admin/AdminPage';
+import RequireAdmin from './admin/RequireAdmin';
+
 import {
   DashboardPage,
   BudgetsPage,
@@ -16,20 +21,19 @@ import {
   VacationModePage,
   ReportsPage,
   SettingsPage,
-} from './pages/app'
+} from './pages/app';
 
 import {
   LandingPage,
   LoginPage,
   SignUpPage,
-} from './pages/public'
-
-
+} from './pages/public';
 
 function App() {
   return (
     <Router>
       <Toaster position="top-right" />
+
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<BaseLayout><LandingPage /></BaseLayout>} />
@@ -37,8 +41,7 @@ function App() {
         <Route path="/signup" element={<BaseLayout><SignUpPage /></BaseLayout>} />
         <Route path="/signup/confirm" element={<BaseLayout><SignupConfirmationPage /></BaseLayout>} />
 
-
-        {/* Private Routes */}
+        {/* Authenticated Routes */}
         <Route element={<AppLayout />}>
           <Route element={<PrivateRoute />}>
             <Route path="/dashboard" element={<DashboardPage />} />
@@ -51,10 +54,16 @@ function App() {
             <Route path="/reports" element={<ReportsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Route>
+
+          {/* Admin Route */}
+          <Route path="/admin" element={
+            <RequireAdmin>
+              <AdminPage />
+            </RequireAdmin>
+          } />
         </Route>
       </Routes>
     </Router>
-
   );
 }
 

@@ -7,6 +7,9 @@ using Budgenix.Services.Recurring;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using Budgenix.Models.Audit;
+using Budgenix.Services.Audit;
+using System.Text.Json;
 
 namespace Budgenix.Services.Finance
 {
@@ -16,17 +19,20 @@ namespace Budgenix.Services.Finance
         private readonly ILogger<ExpenseService> _logger;
         private readonly RecurringItemService _recurringService;
         private readonly IMemoryCache _cache;
+        private readonly IAuditService _audit;
 
         public ExpenseService(
             BudgenixDbContext context,
             ILogger<ExpenseService> logger,
             RecurringItemService recurringService,
-            IMemoryCache cache)
+            IMemoryCache cache,
+            IAuditService audit)
         {
             _context = context;
             _logger = logger;
             _recurringService = recurringService;
             _cache = cache;
+            _audit = audit;
         }
 
         public async Task<List<ExpenseDto>> GetExpensesAsync(
@@ -192,8 +198,6 @@ namespace Budgenix.Services.Finance
         }
 
 
-
-
         public async Task<ExpenseDto> AddExpenseAsync(string userId, CreateExpenseDto dto)
         {
             _logger.LogInformation("Adding expense for user {UserId}", userId);
@@ -220,6 +224,15 @@ namespace Budgenix.Services.Finance
             _context.Expenses.Add(e);
             await _context.SaveChangesAsync();
 
+            await _audit.LogAsync(new AuditLog
+            {
+                UserId = userId,
+                Action = AuditActionEnum.CreateExpense,
+                EntityType = "Expense",
+                EntityId = e.Id.ToString(),
+                NewValues = JsonSerializer.Serialize(e)
+            });
+
             InvalidateExpenseOverviewCache(userId, e.Date);
 
             return new ExpenseDto
@@ -232,7 +245,6 @@ namespace Budgenix.Services.Finance
             };
         }
 
-
         public async Task<bool> UpdateExpenseAsync(string userId, Guid id, UpdateExpenseDto dto)
         {
             _logger.LogInformation("Updating expense {Id} for user {UserId}", id, userId);
@@ -243,7 +255,7 @@ namespace Budgenix.Services.Finance
             if (!categoryExists) throw new Exception("Invalid category");
 
             var oldDate = e.Date;
-
+            var oldValues = JsonSerializer.Serialize(e);
 
             e.Name = dto.Name;
             e.Amount = dto.Amount;
@@ -252,6 +264,16 @@ namespace Budgenix.Services.Finance
             e.CategoryId = dto.CategoryId;
 
             await _context.SaveChangesAsync();
+
+            await _audit.LogAsync(new AuditLog
+            {
+                UserId = userId,
+                Action = AuditActionEnum.UpdateExpense,
+                EntityType = "Expense",
+                EntityId = e.Id.ToString(),
+                OldValues = oldValues,
+                NewValues = JsonSerializer.Serialize(e)
+            });
 
             InvalidateExpenseOverviewCache(userId, oldDate);
             InvalidateExpenseOverviewCache(userId, e.Date);
@@ -272,17 +294,25 @@ namespace Budgenix.Services.Finance
                 return false;
             }
 
+            var oldValues = JsonSerializer.Serialize(e);
+
             _context.Expenses.Remove(e);
             await _context.SaveChangesAsync();
 
+            await _audit.LogAsync(new AuditLog
+            {
+                UserId = userId,
+                Action = AuditActionEnum.DeleteExpense,
+                EntityType = "Expense",
+                EntityId = e.Id.ToString(),
+                OldValues = oldValues
+            });
 
-          
             InvalidateExpenseOverviewCache(userId, e.Date);
 
             return true;
         }
 
-        // Consider creating a helper method:
         private void InvalidateExpenseOverviewCache(string userId, DateTime date)
         {
             var currentKey = $"expense-overview:{userId}:{date.Month}:{date.Year}";
@@ -294,6 +324,5 @@ namespace Budgenix.Services.Finance
 
             _logger.LogInformation("Invalidated cache for {0} and {1}", currentKey, lastMonthKey);
         }
-
     }
 }

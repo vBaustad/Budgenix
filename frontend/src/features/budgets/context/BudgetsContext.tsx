@@ -5,7 +5,9 @@ import { apiFetch } from '@/utils/api';
 import { useAuth } from '@/context/AuthContext';
 
 async function fetchBudgetProgress(): Promise<BudgetProgressDto[]> {
-  return await apiFetch('/api/budget/progress');
+  const result = await apiFetch<BudgetProgressDto[] | null>('/api/budget/progress');
+  if (!result) throw new Error('Failed to fetch budget progress');
+  return result;
 }
 
 interface BudgetsContextType {
@@ -26,13 +28,18 @@ const BudgetsContext = createContext<BudgetsContextType>({
 
 export const BudgetsProvider = ({ children }: { children: React.ReactNode }) => {
   const { isLoggedIn } = useAuth();
-  const { data, isLoading } = useQuery({
+  const [editTargetId, setEditTargetId] = useState<string | null>(null);
+
+  const {
+    data: budgets = [],
+    isLoading,
+  } = useQuery<BudgetProgressDto[]>({
     queryKey: ['budgets', 'progress'],
     queryFn: fetchBudgetProgress,
     enabled: isLoggedIn,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
-
-  const [editTargetId, setEditTargetId] = useState<string | null>(null);
 
   const openEditModal = (id: string) => setEditTargetId(id);
   const closeEditModal = () => setEditTargetId(null);
@@ -40,7 +47,7 @@ export const BudgetsProvider = ({ children }: { children: React.ReactNode }) => 
   return (
     <BudgetsContext.Provider
       value={{
-        budgets: data ?? [],
+        budgets,
         isLoading,
         editTargetId,
         openEditModal,

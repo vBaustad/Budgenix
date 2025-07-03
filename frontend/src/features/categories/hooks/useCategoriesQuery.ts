@@ -4,7 +4,9 @@ import { apiFetch } from '@/utils/api';
 import { useAuth } from '@/context/AuthContext';
 
 export async function fetchCategories(): Promise<Category[]> {
-  return await apiFetch('/api/categories');
+  const result = await apiFetch<Category[] | null>('/api/categories');
+  if (!result) throw new Error('Failed to fetch categories');
+  return result;
 }
 
 export function useCategoriesQuery() {

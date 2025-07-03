@@ -8,7 +8,7 @@ import {
 } from '@/types/finance/income';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useDateFilter } from '@/context/DateFilterContext';
-import { useAuth } from '@/context/AuthContext'; // 👈 added
+import { useAuth } from '@/context/AuthContext';
 
 type FetchIncomeOptions = {
   from?: string;
@@ -30,7 +30,9 @@ async function fetchIncomes(filters: FetchIncomeOptions = {}): Promise<Income[]>
   }
   if (filters.sort) params.append('sort', filters.sort);
 
-  return await apiFetch(`${API_BASE_URL}?${params.toString()}`);
+  const result = await apiFetch<Income[]>(`${API_BASE_URL}?${params.toString()}`);
+  if (!result) throw new Error('Failed to fetch incomes');
+  return result;
 }
 
 async function fetchIncomeOverview(month: number, year: number): Promise<IncomeOverviewDto> {
@@ -38,15 +40,24 @@ async function fetchIncomeOverview(month: number, year: number): Promise<IncomeO
     month: String(month),
     year: String(year),
   });
-  return await apiFetch(`${API_BASE_URL}/overview?${params}`);
+
+  const result = await apiFetch<IncomeOverviewDto>(`${API_BASE_URL}/overview?${params.toString()}`);
+  if (!result) throw new Error('Failed to fetch income overview');
+  return result;
 }
 
 async function createIncomeApi(income: CreateIncomeDto): Promise<Income> {
-  return await apiFetch(API_BASE_URL, {
+  const result = await apiFetch<Income>(API_BASE_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(income),
   });
+
+  if (!result) {
+    throw new Error('Failed to create income');
+  }
+
+  return result;
 }
 
 async function updateIncomeApi({
@@ -56,7 +67,7 @@ async function updateIncomeApi({
   id: string;
   data: UpdateIncomeDto;
 }): Promise<void> {
-  await apiFetch(`${API_BASE_URL}/${id}`, {
+  await apiFetch<void>(`${API_BASE_URL}/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -64,32 +75,32 @@ async function updateIncomeApi({
 }
 
 async function deleteIncomeApi(id: string): Promise<void> {
-  await apiFetch(`${API_BASE_URL}/${id}`, {
+  await apiFetch<void>(`${API_BASE_URL}/${id}`, {
     method: 'DELETE',
   });
 }
 
 // === REACT QUERY HOOKS ===
 export function useIncomes(filters: FetchIncomeOptions) {
-  const { isLoggedIn } = useAuth(); // 👈 added
+  const { isLoggedIn } = useAuth();
 
   return useQuery<Income[]>({
     queryKey: ['incomes', filters],
     queryFn: () => fetchIncomes(filters),
-    enabled: isLoggedIn, // 👈 prevents firing if not logged in
+    enabled: isLoggedIn,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
   });
 }
 
 export function useIncomeOverview() {
-  const { isLoggedIn } = useAuth(); // 👈 added
+  const { isLoggedIn } = useAuth();
   const { selectedMonth: month, selectedYear: year } = useDateFilter();
 
   return useQuery<IncomeOverviewDto>({
     queryKey: ['incomeOverview', month, year],
     queryFn: () => fetchIncomeOverview(month!, year!),
-    enabled: isLoggedIn && !!month && !!year, // 👈 prevents if logged out or missing date
+    enabled: isLoggedIn && !!month && !!year,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
   });

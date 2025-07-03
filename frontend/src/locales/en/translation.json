@@ -56,6 +56,7 @@
         "reports": "Reports",
         "system": "System",
         "settings": "Settings",
+        "admin": "Admin",
         "profile": "Your profile",
         "logout": "Log Out",
         "openSidebar": "Open sidebar",
@@ -252,7 +253,7 @@
             "network": "Something went wrong. Please try again."
         }
     },
-    "expenses": {
+    "expenses": {        
         "editTitle": "Edit Expense",
         "allExpenses": "All Expenses",
         "spendingByCategory": "Spending by Category",
@@ -264,7 +265,8 @@
             "updateError": "Failed to update expense",
             "invalidForm": "Please fill out all required fields correctly."
         },
-        "form": {
+        "form": {    
+            "title": "Add Expense",       
             "namePlaceholder": "Name",
             "amountPlaceholder": "Amount",
             "descriptionPlaceholder": "Description",
@@ -301,6 +303,7 @@
             "noEditItem": "No item selected for editing"
         },       
         "form": {
+            "title": "Add Income",
             "namePlaceholder": "Income name",
             "selectCategoryPlaceholder": "Select category",
             "descriptionPlaceholder": "Description",
@@ -322,12 +325,13 @@
         }
     },
     "goals": {
+        "addGoal":"Add Goal",
         "title": "Savings Goals",
         "noGoals": {
             "title": "No Goals Yet",
             "description": "Add your first savings goal and start tracking your progress!"
         },
-        "addGoal": {
+        "form": {
             "title": "Add New Goal",
             "nameLabel": "Goal Name *",
             "descriptionLabel": "Description",
@@ -382,6 +386,7 @@
             "noBudgets": "Create your first budget"
         },
         "form": {
+            "title":"Add Budget",
             "namePlaceholder": "Budget name",
             "selectCategoryPlaceholder": "Select category",
             "amountPlaceholder": "Allocated amount",
@@ -437,6 +442,9 @@
         "selectCategory": "Select category",
         "confirmDelete": "Confirm Delete",
         "unknown": "Unknown",
+        "country": "Country",
+        "email": "Email",
+        "ago": "ago",
         "recurrence": {
             "None": "Not Recurring",
             "Daily": "Daily",
@@ -445,6 +453,41 @@
             "Monthly": "Monthly",
             "Quarterly": "Quarterly",
             "Yearly": "Yearly"
+        }
+    },
+    "admin": {
+        "panel": {
+            "title": "Admin Panel",
+            "loading": "Loading users...",
+            "error": "Failed to load users.",
+            "columns": {
+                "email": "Email",
+                "role": "Role",
+                "tier": "Subscription Tier",
+                "signup": "Signup",
+                "lastActive": "Last Active",
+                "actions": "Actions"
+            }
+        },
+        "userDetails": {
+            "title": "User Details",
+            "loading": "Loading user details...",
+            "profile": "Profile",
+            "emailConfirmed": "Email Confirmed",
+            "role": "Role",
+            "signup": "Signup Date",
+            "lastLogin": "Last Login",
+            "subscription": "Subscription",
+            "active": "Active",
+            "start": "Start",
+            "end": "End",
+            "referral": "Referral Code",
+            "usage": "Usage Stats",
+            "recent": "Recent Activity",
+            "noLogs": "No logs found.",
+            "entity": "Entity",
+            "id": "ID",
+            "error": "Error"        
         }
     },
     "categories": {
