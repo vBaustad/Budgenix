@@ -15,6 +15,7 @@ const AdminPage = () => {
   const [selectedUserDetails, setSelectedUserDetails] = useState<AdminUserDetailsDto | null>(null);
   const [auditLogs, setAuditLogs] = useState<AuditLogDto[]>([]);
   const [loadingDetails, setLoadingDetails] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const openUserModal = async (userId: string) => {
     setLoadingDetails(true);
@@ -32,12 +33,28 @@ const AdminPage = () => {
     }
   };
 
+  const filteredUsers = users?.filter((user) =>
+    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.userName?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   if (isLoading) return <p className="p-6">{t('admin.panel.loading')}</p>;
   if (isError) return <p className="p-6 text-red-500">{t('admin.panel.error')}</p>;
 
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">{t('admin.panel.title')}</h1>
+
+      {/* Search Input */}
+      <div className="mb-4">
+        <input
+          type="text"
+          placeholder={t('admin.panel.searchPlaceholder')}
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="input input-bordered w-full max-w-sm"
+        />
+      </div>
 
       <table className="w-full table-auto border border-base-300">
         <thead>
@@ -51,7 +68,7 @@ const AdminPage = () => {
           </tr>
         </thead>
         <tbody>
-          {users?.map((user: AdminUserDto) => (
+          {filteredUsers?.map((user: AdminUserDto) => (
             <tr
               key={user.id}
               onClick={() => {
@@ -67,17 +84,15 @@ const AdminPage = () => {
               <td>
                 <span className="badge badge-secondary">{user.subscriptionTier}</span>
               </td>
-              <td className="p-2">
-                {new Date(user.signupDate).toLocaleDateString()}
-              </td>
+              <td className="p-2">{new Date(user.signupDate).toLocaleDateString()}</td>
               <td className="p-2">
                 {user.lastLogin
                   ? formatDistanceToNow(new Date(user.lastLogin), { addSuffix: true })
                   : '—'}
               </td>
-              <td className="p-2">
+              {/* <td className="p-2">
                 <button className="btn btn-xs btn-error">{t('buttons.delete')}</button>
-              </td>
+              </td> */}
             </tr>
           ))}
         </tbody>

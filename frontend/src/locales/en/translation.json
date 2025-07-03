@@ -458,6 +458,7 @@
     "admin": {
         "panel": {
             "title": "Admin Panel",
+            "searchPlaceholder": "Search...",
             "loading": "Loading users...",
             "error": "Failed to load users.",
             "columns": {
