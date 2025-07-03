@@ -6,7 +6,7 @@ import {
   UpdateGoalDto,
   GoalContributionDto
 } from '@/types/finance/goal';
-import { useAuth } from '@/context/AuthContext'; // 👈 added
+import { useAuth } from '@/context/AuthContext';
 
 const API_BASE_URL = '/api/goals';
 
@@ -14,20 +14,28 @@ const API_BASE_URL = '/api/goals';
 export async function fetchGoals(activeOnly?: boolean): Promise<GoalDto[]> {
   const params = new URLSearchParams();
   if (activeOnly !== undefined) params.append('activeOnly', String(activeOnly));
-  return await apiFetch(`/api/goals?${params.toString()}`);
+
+  const result = await apiFetch<GoalDto[]>(`/api/goals?${params.toString()}`);
+  if (!result) throw new Error('Failed to fetch goals');
+  return result;
 }
 
 export async function fetchGoalById(id: string): Promise<GoalDto> {
   if (!id) throw new Error('Goal ID is required');
-  return await apiFetch(`/api/goals/${id}`);
+  const result = await apiFetch<GoalDto>(`${API_BASE_URL}/${id}`);
+  if (!result) throw new Error('Goal not found');
+  return result;
 }
 
 async function createGoalApi(goal: CreateGoalDto): Promise<GoalDto> {
-  return await apiFetch(API_BASE_URL, {
+  const result = await apiFetch<GoalDto | null>(API_BASE_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(goal),
   });
+
+  if (!result) throw new Error('Failed to create goal');
+  return result;
 }
 
 async function updateGoalApi({
@@ -66,14 +74,15 @@ async function contributeGoalApi({
 
 // === REACT QUERY HOOKS ===
 export function useGoals(activeOnly?: boolean) {
-  const { isLoggedIn } = useAuth(); // 👈
+  const { isLoggedIn } = useAuth();
+
   return useQuery<GoalDto[]>({
     queryKey: ['goals', activeOnly],
     queryFn: ({ queryKey }) => {
       const [, activeOnlyVal] = queryKey as [string, boolean?];
       return fetchGoals(activeOnlyVal);
     },
-    enabled: isLoggedIn, // 👈 prevents firing when logged out
+    enabled: isLoggedIn,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
   });
@@ -90,7 +99,6 @@ export function useGoalById(id: string, options?: { enabled?: boolean }) {
     gcTime: 10 * 60 * 1000,
   });
 }
-
 
 export function useCreateGoal() {
   const queryClient = useQueryClient();

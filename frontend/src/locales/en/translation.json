@@ -442,6 +442,9 @@
         "selectCategory": "Select category",
         "confirmDelete": "Confirm Delete",
         "unknown": "Unknown",
+        "country": "Country",
+        "email": "Email",
+        "ago": "ago",
         "recurrence": {
             "None": "Not Recurring",
             "Daily": "Daily",
@@ -450,6 +453,41 @@
             "Monthly": "Monthly",
             "Quarterly": "Quarterly",
             "Yearly": "Yearly"
+        }
+    },
+    "admin": {
+        "panel": {
+            "title": "Admin Panel",
+            "loading": "Loading users...",
+            "error": "Failed to load users.",
+            "columns": {
+                "email": "Email",
+                "role": "Role",
+                "tier": "Subscription Tier",
+                "signup": "Signup",
+                "lastActive": "Last Active",
+                "actions": "Actions"
+            }
+        },
+        "userDetails": {
+            "title": "User Details",
+            "loading": "Loading user details...",
+            "profile": "Profile",
+            "emailConfirmed": "Email Confirmed",
+            "role": "Role",
+            "signup": "Signup Date",
+            "lastLogin": "Last Login",
+            "subscription": "Subscription",
+            "active": "Active",
+            "start": "Start",
+            "end": "End",
+            "referral": "Referral Code",
+            "usage": "Usage Stats",
+            "recent": "Recent Activity",
+            "noLogs": "No logs found.",
+            "entity": "Entity",
+            "id": "ID",
+            "error": "Error"        
         }
     },
     "categories": {

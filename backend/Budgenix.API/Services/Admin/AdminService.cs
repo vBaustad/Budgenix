@@ -27,7 +27,6 @@ namespace Budgenix.Services.Admin
             _auditService = auditService;
             _httpContextAccessor = httpContextAccessor;
         }
-
         public async Task<List<AdminUserDto>> GetAllUsersAsync()
         {
             var users = await _context.Users.OrderByDescending(u => u.CreatedAt).ToListAsync();
@@ -41,15 +40,20 @@ namespace Budgenix.Services.Admin
                 {
                     Id = user.Id,
                     Email = user.Email,
+                    UserName = user.UserName,
                     SignupDate = user.CreatedAt,
                     LastLogin = user.LastLogin,
                     SubscriptionTier = user.SubscriptionTier,
-                    Role = roles.FirstOrDefault() ?? "User"
+                    Role = roles.FirstOrDefault() ?? "User",
+                    IsActive = user.SubscriptionIsActive,
+                    Country = user.Country,
+                    EmailConfirmed = user.EmailConfirmed
                 });
             }
 
             return userDtos;
         }
+
 
         public async Task<AdminUserDetailsDto> GetUserDetailsAsync(string id)
         {
@@ -68,9 +72,20 @@ namespace Budgenix.Services.Admin
             {
                 Id = user.Id,
                 Email = user.Email,
+                UserName = user.UserName,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                EmailConfirmed = user.EmailConfirmed,
                 SignupDate = user.CreatedAt,
                 LastLogin = user.LastLogin,
+                Country = user.Country,
                 SubscriptionTier = user.SubscriptionTier,
+                SubscriptionIsActive = user.SubscriptionIsActive,
+                BillingCycle = user.BillingCycle,
+                SubscriptionStartDate = user.SubscriptionStartDate,
+                SubscriptionEndDate = user.SubscriptionEndDate,
+                PreferredCurrency = user.PreferredCurrency,
+                ReferralCode = user.ReferralCode,
                 Role = roles.FirstOrDefault() ?? "User",
                 Stats = new UserStatsDto
                 {
@@ -83,23 +98,33 @@ namespace Budgenix.Services.Admin
             };
         }
 
+
         public async Task<List<AdminAuditLogDto>> GetRecentUserActivityAsync(string userId, int limit = 20)
         {
             return await _context.AuditLogs
-                .Where(log => log.UserId == userId)
+                .Where(log => log.UserId == userId || log.TargetUserId == userId)
                 .OrderByDescending(log => log.Timestamp)
                 .Take(limit)
                 .Select(log => new AdminAuditLogDto
                 {
+                    Id = log.Id.ToString(),
+                    UserId = log.UserId,
                     Action = log.Action.ToString(),
                     EntityType = log.EntityType,
                     EntityId = log.EntityId,
-                    Timestamp = log.Timestamp,
+                    TargetUserId = log.TargetUserId,
+                    OldValues = log.OldValues,
+                    NewValues = log.NewValues,
+                    Metadata = log.Metadata,
+                    IpAddress = log.IpAddress,
+                    UserAgent = log.UserAgent,
                     Success = log.Success,
-                    Metadata = log.Metadata
+                    ErrorMessage = log.ErrorMessage,
+                    Timestamp = log.Timestamp
                 })
                 .ToListAsync();
         }
+
 
         public async Task<AdminDeleteResultDto> DeleteUserAsync(string id)
         {

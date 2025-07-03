@@ -17,10 +17,11 @@ const OVERVIEW_QUERY_KEY = (month: number, year: number) => ['recurring-overview
 
 // --- RAW FETCHERS ---
 async function fetchApiResponse<T>(url: string, options?: RequestInit): Promise<T> {
-  const res: ApiResponse<T> = await apiFetch(url, options);
-  if (!res.ok) throw new Error(res.message || 'Unknown API error');
+  const res = await apiFetch<ApiResponse<T> | null>(url, options);
+  if (!res || !res.ok) throw new Error(res?.message || 'Unknown API error');
   return res.data!;
 }
+
 
 async function fetchRecurringItems(): Promise<RecurringItemDto[]> {
   return fetchApiResponse<RecurringItemDto[]>('/api/recurring');

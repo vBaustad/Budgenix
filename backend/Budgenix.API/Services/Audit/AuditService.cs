@@ -67,13 +67,22 @@ namespace Budgenix.Services.Audit
 
             return logs.Select(x => new AdminAuditLogDto
             {
+                Id = x.Id.ToString(),
+                UserId = x.UserId,
                 Action = x.Action.ToString(),
                 EntityType = x.EntityType,
                 EntityId = x.EntityId,
-                Timestamp = x.Timestamp,
+                TargetUserId = x.TargetUserId,
+                OldValues = x.OldValues,
+                NewValues = x.NewValues,
+                Metadata = x.Metadata,
+                IpAddress = x.IpAddress,
+                UserAgent = x.UserAgent,
                 Success = x.Success,
-                Metadata = x.Metadata
+                ErrorMessage = x.ErrorMessage,
+                Timestamp = x.Timestamp
             }).ToList();
         }
+
     }
 }

@@ -1,7 +1,12 @@
-import { Expense, GroupedExpenses, CreateExpenseDto, UpdateExpenseDto } from '@/types/finance/expense';
+import {
+  Expense,
+  GroupedExpenses,
+  CreateExpenseDto,
+  UpdateExpenseDto
+} from '@/types/finance/expense';
 import { apiFetch } from '@/utils/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '@/context/AuthContext'; // 👈 Add this
+import { useAuth } from '@/context/AuthContext';
 
 type FetchExpenseOptions = {
   from?: string;
@@ -9,6 +14,13 @@ type FetchExpenseOptions = {
   categories?: string[];
   sort?: string;
   groupBy?: 'month' | 'year' | 'category';
+};
+
+type ExpensesOverviewApiResponse = {
+  totalExpense: number;
+  lastMonthExpense: number;
+  incomeReceived: number;
+  dailyTotals: { day: number; total: number }[];
 };
 
 type ExpensesOverviewResponse = {
@@ -31,12 +43,16 @@ export async function fetchExpenses(filters: FetchExpenseOptions = {}): Promise<
   }
   if (filters.sort) params.append('sort', filters.sort);
 
-  return await apiFetch(`${API_BASE_URL}?${params.toString()}`);
+  const result = await apiFetch<Expense[]>(`${API_BASE_URL}?${params.toString()}`);
+  if (!result) throw new Error('Failed to fetch expenses');
+  return result;
 }
 
 async function fetchExpensesOverview(month: number, year: number): Promise<ExpensesOverviewResponse> {
   const params = new URLSearchParams({ month: String(month), year: String(year) });
-  const res = await apiFetch(`/api/expenses/overview?${params}`);
+
+  const res = await apiFetch<ExpensesOverviewApiResponse>(`/api/expenses/overview?${params}`);
+  if (!res) throw new Error('Failed to fetch expenses overview');
 
   return {
     totalSpent: res.totalExpense,
@@ -47,7 +63,7 @@ async function fetchExpensesOverview(month: number, year: number): Promise<Expen
 }
 
 async function createExpenseApi(expense: CreateExpenseDto): Promise<Expense> {
-  return await apiFetch(API_BASE_URL, {
+  const result = await apiFetch<Expense | null>(API_BASE_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -55,6 +71,9 @@ async function createExpenseApi(expense: CreateExpenseDto): Promise<Expense> {
       description: expense.description || '',
     }),
   });
+
+  if (!result) throw new Error('Failed to create expense');
+  return result;
 }
 
 async function updateExpenseApi({
@@ -79,19 +98,19 @@ async function deleteExpenseApi(id: string): Promise<void> {
 
 // === REACT QUERY HOOKS ===
 export function useExpenses(filters: FetchExpenseOptions) {
-  const { isLoggedIn } = useAuth(); // 👈 
+  const { isLoggedIn } = useAuth();
 
   return useQuery<Expense[]>({
     queryKey: ['expenses', filters],
     queryFn: () => fetchExpenses(filters),
-    enabled: isLoggedIn, // 👈 Prevent if logged out
+    enabled: isLoggedIn,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
   });
 }
 
 export function useExpensesOverview(month: number | undefined, year: number | undefined) {
-  const { isLoggedIn } = useAuth(); // 👈
+  const { isLoggedIn } = useAuth();
 
   return useQuery<ExpensesOverviewResponse>({
     queryKey: ['expensesOverview', month, year],

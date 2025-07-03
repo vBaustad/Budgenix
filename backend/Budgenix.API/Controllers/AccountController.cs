@@ -65,6 +65,8 @@ namespace Budgenix.API.Controllers
                 SubscriptionIsActive = false,
                 BillingCycle = dto.BillingCycle,
                 ReferralCode = $"{dto.UserName}-{Guid.NewGuid().ToString().Substring(0, 6)}",
+
+                CreatedAt = DateTime.UtcNow,
             };
 
 
@@ -141,6 +143,10 @@ namespace Budgenix.API.Controllers
             {
                 return Unauthorized(_localizer["Auth_ConfirmEmailBeforeLogin"]);
             }
+
+            user.LastLogin = DateTime.UtcNow;
+            await _userManager.UpdateAsync(user);
+
 
             var token = await _jwtTokenService.CreateToken(user);
 

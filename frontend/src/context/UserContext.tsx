@@ -1,27 +1,44 @@
-import { createContext, useContext, useMemo, useEffect } from 'react';
+import { createContext, useContext, useMemo, useEffect, useState } from 'react';
 import { useUserQuery, User } from '@/features/user/hooks/useUserQuery';
 
 type UserContextType = {
-  user: User | undefined;
+  user: User | null | undefined;
   cachedUser: User | undefined;
   isLoading: boolean;
   refetchUser: () => void;
 };
 
+
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const { data: user, isLoading, refetch } = useUserQuery();
+  const [cachedUser, setCachedUser] = useState<User | undefined>(undefined);
 
+  // Store user in localStorage on successful load
   useEffect(() => {
     if (user) {
-      localStorage.setItem('budgenix_user', JSON.stringify(user));
+      try {
+        localStorage.setItem('budgenix_user', JSON.stringify(user));
+        setCachedUser(user);
+      } catch (err) {
+        console.warn('Failed to cache user', err);
+      }
     }
   }, [user]);
 
-  const cachedUser = useMemo(() => {
-    const stored = localStorage.getItem('budgenix_user');
-    return stored ? (JSON.parse(stored) as User) : undefined;
+  // Load from localStorage on initial mount (before API returns)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('budgenix_user');
+        if (stored) {
+          setCachedUser(JSON.parse(stored));
+        }
+      } catch (err) {
+        console.warn('Failed to parse cached user', err);
+      }
+    }
   }, []);
 
   const value = useMemo(() => ({
@@ -37,7 +54,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     </UserContext.Provider>
   );
 }
-
 
 export function useUser() {
   const context = useContext(UserContext);
