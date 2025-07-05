@@ -4,7 +4,7 @@ import { AppIcons } from '@/components/icons/AppIcons';
 type Column<T> = {
   label: string;
   accessor: keyof T;
-  format?: (value: T[keyof T]) => React.ReactNode;
+  format?: (value: T[keyof T], row?: T) => React.ReactNode;
   align?: 'left' | 'right' | 'center';
   width?: string;
   sortable?: boolean;
@@ -20,7 +20,9 @@ type DataTableProps<T> = {
     onEdit?: (row: T) => void;
     onDelete?: (row: T) => void;
   };
+  footer?: React.ReactNode;
 };
+
 
 export default function DataTable<T>({
   columns,
@@ -28,7 +30,8 @@ export default function DataTable<T>({
   rowKey,
   emptyMessage = 'No data found.',
   actionHandlers,
-}: DataTableProps<T>) {
+  footer,
+}: DataTableProps<T> & { footer?: React.ReactNode }) {
   const [sortConfig, setSortConfig] = useState<{ key: keyof T; direction: 'asc' | 'desc' } | null>(null);
   const [windowWidth, setWindowWidth] = useState<number>(typeof window !== 'undefined' ? window.innerWidth : 1024);
 
@@ -128,7 +131,7 @@ export default function DataTable<T>({
                     >
 
                       {col.format
-                        ? col.format(row[col.accessor])
+                        ? col.format?.(row[col.accessor], row)
                         : String(row[col.accessor] ?? '')}
                     </td>
                   ))}
@@ -158,6 +161,12 @@ export default function DataTable<T>({
               ))
             )}
           </tbody>
+          {footer && (
+            <tfoot>
+              {footer}
+            </tfoot>
+          )}
+
         </table>
       </div>
     </div>

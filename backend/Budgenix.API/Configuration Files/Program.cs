@@ -61,6 +61,7 @@ builder.Services.AddScoped<IRecurringService, RecurringService>();
 builder.Services.AddScoped<IInsightService, InsightService>();
 builder.Services.AddScoped<IExpenseService, ExpenseService>();
 builder.Services.AddScoped<IIncomeService, IncomeService>();
+builder.Services.AddScoped<ICashflowService, CashflowService>();
 builder.Services.AddScoped<IBudgetService, BudgetService>();
 builder.Services.AddScoped<IGoalService, GoalService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
@@ -160,8 +161,7 @@ try
     {
         var context = scope.ServiceProvider.GetRequiredService<BudgenixDbContext>();
         var scopedLogger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-
-        SeedData.Initialize(context);
+        
         scopedLogger.LogInformation("Database seeded successfully.");
         
         await IdentitySeeder.SeedRolesAsync(scope.ServiceProvider);

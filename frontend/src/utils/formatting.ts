@@ -78,5 +78,17 @@ export const formatCurrency = (
 export const formatDate = (val: unknown): string =>
   val ? new Date(val as string).toLocaleDateString() : '–';
 
-export const truncateText = (val: unknown, max = 60): string =>
-  typeof val === 'string' ? val.slice(0, max) + (val.length > max ? '...' : '') : '–';
+export const truncateText = (
+  val: string | number | null | undefined,
+  max = 60
+): string => {
+  if (typeof val === 'string') {
+    return val.length > max ? val.slice(0, max) + '…' : val;
+  }
+  if (typeof val === 'number') {
+    const str = val.toString();
+    return str.length > max ? str.slice(0, max) + '…' : str;
+  }
+  return '–';
+};
+

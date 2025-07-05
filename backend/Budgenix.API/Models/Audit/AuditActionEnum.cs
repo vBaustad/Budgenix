@@ -29,6 +29,11 @@
         TriggerRecurringItem,
         SkipRecurringItem,
 
+        // Cashflow
+        CreateCashflowItem,
+        UpdateCashflowItem,
+        DeleteCashflowItem,
+
         // Admin
         AdminDeleteUser,
         AdminResetPassword,

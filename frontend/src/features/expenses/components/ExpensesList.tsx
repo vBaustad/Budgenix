@@ -118,7 +118,7 @@ export default function ExpensesList({ expenses }: { expenses: Expense[] }) {
           {
             label: t('expenses.table.description'),
             accessor: 'description',
-            format: truncateText,
+            format: (val) => truncateText(val),
             width: 'w-[150px] sm:w-[180px] lg:w-[240px]',
             sortable: true,
             showOnMobile: false,

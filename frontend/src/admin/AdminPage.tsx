@@ -64,7 +64,7 @@ const AdminPage = () => {
             <th className="text-left p-2">{t('admin.panel.columns.tier')}</th>
             <th className="text-left p-2">{t('admin.panel.columns.signup')}</th>
             <th className="text-left p-2">{t('admin.panel.columns.lastActive')}</th>
-            <th className="text-left p-2">{t('admin.panel.columns.actions')}</th>
+            <th className="text-left p-2">{t('shared.actions')}</th>
           </tr>
         </thead>
         <tbody>

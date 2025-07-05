@@ -405,6 +405,48 @@
             "remaining": "Remaining"            
         }
     },
+    "cashflow": {
+        "title": "Cashflow Overview",
+        "description": "Track your recurring monthly income and expenses to understand what’s left each month.",
+        "monthlyIncome": "Monthly Income",
+        "monthlyExpenses": "Monthly Expenses",
+        "netMonthly": "Monthly Leftover",
+        "netAnnual": "Annual Leftover",
+        "annualIncome": "Annual Income",
+        "income": "Recurring Income",
+        "expenses": "Recurring Expenses",
+        "noItems": "No Items",
+        "unknownPerson": "Unknown",
+        "addIncome":"Add Income",
+        "editIncome":"Edit Income",
+        "addExpense":"Add Expense",
+        "editExpense":"Edit Expense",
+        "edit":"Edit Cashflow",
+        "perMonth": "Per Month",
+        "perYear": "Per Year",
+        "insights":{
+            "totalEntries": "Total entries: {{count}}",
+            "averageMonthly": "Average Monthly: {{value}}"
+        },
+        "categoryBreakdown": {
+            "title": "Breakdown by Category",
+            "Expense": "Expense",
+            "Income": "Income"
+        },
+        "frequency": {
+            "Monthly": "Monthly",
+            "Weekly": "Weekly",
+            "Yearly": "Yearly",
+            "Daily": "Daily"
+        },
+        "table": {
+            "name": "Name",
+            "amount": "Amount",
+            "person": "Person",
+            "frequency": "Frequency",
+            "actions": "Actions"
+        }
+    },
     "buttons": {
         "addBudget": "Add Budget",
         "createFirstBudget": "Create First Budget",
@@ -445,6 +487,9 @@
         "country": "Country",
         "email": "Email",
         "ago": "ago",
+        "actions": "Actions",
+        "signup": "Signup",
+        "role": "Role",
         "recurrence": {
             "None": "Not Recurring",
             "Daily": "Daily",
@@ -461,13 +506,9 @@
             "searchPlaceholder": "Search...",
             "loading": "Loading users...",
             "error": "Failed to load users.",
-            "columns": {
-                "email": "Email",
-                "role": "Role",
-                "tier": "Subscription Tier",
-                "signup": "Signup",
-                "lastActive": "Last Active",
-                "actions": "Actions"
+            "columns": {                
+                "tier": "Subscription Tier",                
+                "lastActive": "Last Active"                
             }
         },
         "userDetails": {
