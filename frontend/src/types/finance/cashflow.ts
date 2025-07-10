@@ -4,6 +4,7 @@ export type CashflowItemType = 'Income' | 'Expense';
 
 export interface CategoryBreakdownDto {
   categoryId: string | null;
+  categoryName: string | null;
   monthlyTotal: number;
   annualTotal: number;
   type: CashflowItemType;
@@ -30,10 +31,11 @@ export interface CashflowItem {
   frequency: RecurrenceFrequency;
   type: CashflowItemType;
   person?: string;
+  categoryId?: string;
   categoryName?: string;
   categoryColor?: string;
-  monthlyAmount: number;
 }
+
 
 export interface CreateCashflowItemDto {
   name: string;

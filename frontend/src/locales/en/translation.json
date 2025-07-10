@@ -310,14 +310,19 @@
             "successMessage": "Income added successfully!",
             "errorMessage": "Failed to add income"
         },
-          "overview": {
-            "incomeTitle": "Income",
+        "overview": {
+            "incomeTitle": "This Month's Income",
             "comparedToLastMonth": "Compared to last month",
             "moreThanLastMonth": "{{amount}} more than last month",
             "lessThanLastMonth": "{{amount}} less than last month",
             "total": "Total this month",
-            "lastMonth": "Last month",
-            "nextRecurring": "Next recurring income"
+            "lastMonthIncome": "Last Month's Income",
+            "nextRecurring": "Next Recurring Income",
+            "annualIncome": "Annual Income",
+            "avgMonthly": "Average Monthly",
+            "noIncome": "No income this month",
+            "spikeDetected": "Income spike detected!",
+            "dropDetected": "Significant drop from last month"
         },
         "insights": {
             "notCurrentMonth": "Insights are only available for the current month.",
@@ -410,8 +415,8 @@
         "description": "Track your recurring monthly income and expenses to understand what’s left each month.",
         "monthlyIncome": "Monthly Income",
         "monthlyExpenses": "Monthly Expenses",
-        "netMonthly": "Monthly Leftover",
-        "netAnnual": "Annual Leftover",
+        "monthlyLeftover": "Monthly Leftover",
+        "annualLeftover": "Annual Leftover",
         "annualIncome": "Annual Income",
         "income": "Recurring Income",
         "expenses": "Recurring Expenses",
@@ -425,8 +430,9 @@
         "perMonth": "Per Month",
         "perYear": "Per Year",
         "insights":{
-            "totalEntries": "Total entries: {{count}}",
-            "averageMonthly": "Average Monthly: {{value}}"
+            "title": "Insights",
+            "totalEntries": "Total entries: ",
+            "averageMonthly": "Average Monthly: "
         },
         "categoryBreakdown": {
             "title": "Breakdown by Category",
@@ -443,8 +449,10 @@
             "name": "Name",
             "amount": "Amount",
             "person": "Person",
+            "category": "Category",
             "frequency": "Frequency",
-            "actions": "Actions"
+            "actions": "Actions",
+            "total": "Total"
         }
     },
     "buttons": {
@@ -506,8 +514,11 @@
             "searchPlaceholder": "Search...",
             "loading": "Loading users...",
             "error": "Failed to load users.",
-            "columns": {                
-                "tier": "Subscription Tier",                
+            "columns": {         
+                "email": "Email address",
+                "role": "Role",       
+                "tier": "Subscription Tier",  
+                "signup": "Signup Date",              
                 "lastActive": "Last Active"                
             }
         },

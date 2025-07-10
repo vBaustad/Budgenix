@@ -96,7 +96,8 @@ export default function IncomesList({ incomes }: { incomes: Income[] }) {
     );
   };
 
-  const paddedIncomes = [...incomes];
+    const sortedIncomes = [...incomes].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const paddedIncomes = [...sortedIncomes];
   while (paddedIncomes.length < minRows) {
     paddedIncomes.push({
       id: `placeholder-${paddedIncomes.length}`,
@@ -132,7 +133,7 @@ export default function IncomesList({ incomes }: { incomes: Income[] }) {
           {
             label: t('shared.description'),
             accessor: 'description',
-            format: truncateText,
+            format: (val) => truncateText(val),
             width: 'w-[150px] sm:w-[180px] lg:w-[240px]',
             sortable: true,
             showOnMobile: false,

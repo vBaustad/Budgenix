@@ -1,8 +1,10 @@
 import { Dialog } from '@headlessui/react';
-
-import { RecurrenceFrequency } from '@/types/shared/recurrence';
 import { useTranslation } from 'react-i18next';
+import { useCategories } from '@/context/CategoryContext';
+
+import type { RecurrenceFrequency } from '@/types/shared/recurrence';
 import type { CashflowItem } from '@/types/finance/cashflow';
+
 import InputField from '@/components/common/forms/InputField';
 import SelectField from '@/components/common/forms/SelectField';
 
@@ -14,7 +16,6 @@ interface Props {
   onSubmit: () => void;
 }
 
-
 const frequencyOptions: { value: RecurrenceFrequency; label: string }[] = [
   { value: 'Daily', label: 'cashflow.frequency.Daily' },
   { value: 'Weekly', label: 'cashflow.frequency.Weekly' },
@@ -24,18 +25,20 @@ const frequencyOptions: { value: RecurrenceFrequency; label: string }[] = [
 
 export function EditCashflowModal({ open, item, onChange, onClose, onSubmit }: Props) {
   const { t } = useTranslation();
+  const { categories = [] } = useCategories();
 
   return (
     <Dialog open={open} onClose={onClose} className="fixed z-50 inset-0 flex items-center justify-center">
       <div className="fixed inset-0 bg-black opacity-30" />
       <div className="relative bg-base-100 rounded-lg p-6 shadow-lg w-full max-w-md">
         <Dialog.Title className="text-lg font-semibold">
-            {item.type === 'Income'
+          {item.type === 'Income'
             ? t('cashflow.editIncome')
             : item.type === 'Expense'
             ? t('cashflow.editExpense')
             : t('cashflow.edit')}
         </Dialog.Title>
+
         <div className="space-y-3 mt-4">
           <InputField
             name="name"
@@ -43,6 +46,7 @@ export function EditCashflowModal({ open, item, onChange, onClose, onSubmit }: P
             onChange={onChange}
             placeholder={t('cashflow.table.name')}
           />
+
           <InputField
             name="amount"
             type="number"
@@ -51,23 +55,38 @@ export function EditCashflowModal({ open, item, onChange, onClose, onSubmit }: P
             placeholder={t('cashflow.table.amount')}
             showCurrency
           />
+
           <InputField
             name="person"
             value={item.person ?? ''}
             onChange={onChange}
             placeholder={t('cashflow.table.person')}
           />
+
+          <SelectField
+            name="categoryId"
+            value={item.categoryId ?? ''}
+            onChange={onChange}
+            placeholder={t('shared.uncategorized')}
+            label={t('shared.category')}
+            options={categories.map(cat => ({
+              value: cat.id,
+              label: cat.name,
+            }))}
+          />
+
           <SelectField
             name="frequency"
             value={item.frequency ?? ''}
             onChange={onChange}
-            options={frequencyOptions.map((opt) => ({
+            placeholder={t('cashflow.table.frequency')}
+            options={frequencyOptions.map(opt => ({
               value: opt.value,
               label: t(opt.label),
             }))}
-            placeholder={t('cashflow.table.frequency')}
           />
         </div>
+
         <div className="flex justify-end gap-2 mt-4">
           <button onClick={onClose} className="btn btn-ghost">
             {t('shared.cancel')}

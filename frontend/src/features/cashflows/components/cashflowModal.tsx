@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCashflowContext } from '@/features/cashflows/context/CashflowContext';
-import { CreateCashflowItemDto  } from '@/types/finance/cashflow';
+import { CreateCashflowItemDto } from '@/types/finance/cashflow';
 import { useCategories } from '@/context/CategoryContext';
 import { RecurrenceFrequencyOptions, RecurrenceFrequency } from '@/types/shared/recurrence';
+import InputField from '@/components/common/forms/InputField';
+import SelectField from '@/components/common/forms/SelectField';
+
 
 export function CashflowModal({
   type,
@@ -16,7 +19,6 @@ export function CashflowModal({
   const { createItem } = useCashflowContext();
   const { categories = [] } = useCategories();
 
-
   const [name, setName] = useState('');
   const [amount, setAmount] = useState('');
   const [person, setPerson] = useState('');
@@ -27,14 +29,13 @@ export function CashflowModal({
     e.preventDefault();
 
     const dto: CreateCashflowItemDto = {
-        name,
-        amount: parseFloat(amount),
-        type: type === 'income' ? 'Income' : 'Expense',
-        frequency,
-        person: person ? person : undefined,
-        categoryId: categoryId ? categoryId : undefined,
+      name,
+      amount: parseFloat(amount),
+      type: type === 'income' ? 'Income' : 'Expense',
+      frequency,
+      person: person || undefined,
+      categoryId: categoryId || undefined,
     };
-
 
     try {
       await createItem(dto);
@@ -52,70 +53,53 @@ export function CashflowModal({
         </h3>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="label">{t('cashflow.table.name')}</label>
-            <input
-              className="input input-bordered w-full"
-              value={name}
-              onChange={e => setName(e.target.value)}
-              required
-            />
-          </div>
+          <InputField
+            name="name"
+            label={t('cashflow.table.name')}
+            value={name}
+            onChange={e => setName(e.target.value)}
+            required
+          />
 
-          <div>
-            <label className="label">{t('cashflow.table.amount')}</label>
-            <input
-              className="input input-bordered w-full"
-              type="number"
-              min={0}
-              step="0.01"
-              value={amount}
-              onChange={e => setAmount(e.target.value)}
-              required
-            />
-          </div>
+          <InputField
+            name="amount"
+            label={t('cashflow.table.amount')}
+            value={amount}
+            onChange={e => setAmount(e.target.value)}
+            type="number"
+            required
+            showCurrency
+          />
 
-          <div>
-            <label className="label">{t('cashflow.table.person')}</label>
-            <input
-              className="input input-bordered w-full"
-              value={person}
-              onChange={e => setPerson(e.target.value)}
-              placeholder={t('cashflow.unknownPerson') || 'Unknown'}
-            />
-          </div>
+          <InputField
+            name="person"
+            label={t('cashflow.table.person')}
+            value={person}
+            onChange={e => setPerson(e.target.value)}
+            placeholder={t('cashflow.unknownPerson') || 'Unknown'}
+          />
 
-          <div>
-            <label className="label">{t('cashflow.table.frequency')}</label>
-            <select
-              className="select select-bordered w-full"
-              value={frequency}
-              onChange={(e) => setFrequency(e.target.value as RecurrenceFrequency)}
-            >
-              {RecurrenceFrequencyOptions.map(option => (
-                <option key={option.value} value={option.value}>
-                  {t(`shared.recurrence.${option.value}`)}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="label">{t('shared.category')}</label>
-            <select
-              className="select select-bordered w-full"
-              value={categoryId}
-              onChange={e => setCategoryId(e.target.value)}
-            >
-              <option value="">{t('shared.uncategorized')}</option>
-              {categories.map(cat => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
+          <SelectField
+            name="categoryId"
+            label={t('shared.category')}
+            value={categoryId}
+            onChange={e => setCategoryId(e.target.value)}
+            placeholder={t('shared.uncategorized')}
+            options={categories.map(cat => ({
+              value: cat.id,
+              label: cat.name,
+            }))}
+          />
+          <SelectField
+            name="frequency"
+            label={t('cashflow.table.frequency')}
+            value={frequency}
+            onChange={e => setFrequency(e.target.value as RecurrenceFrequency)}
+            options={RecurrenceFrequencyOptions.map(option => ({
+              value: option.value,
+              label: t(`shared.recurrence.${option.value}`),
+            }))}
+          />
           <div className="flex justify-end gap-2 pt-4">
             <button
               type="button"
@@ -130,7 +114,6 @@ export function CashflowModal({
           </div>
         </form>
       </div>
-    </div>    
-  );  
+    </div>
+  );
 }
-

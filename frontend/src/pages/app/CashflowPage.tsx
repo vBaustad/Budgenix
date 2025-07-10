@@ -8,9 +8,11 @@ import { CashflowItem } from '@/types/finance/cashflow';
 
 import { CashflowModal } from '@/features/cashflows/components/cashflowModal';
 import { EditCashflowModal } from '@/features/cashflows/components/editCashflowModal';
-import { SummaryCard } from '@/features/cashflows/components/cashflowSummaryCard';
+import { CashflowOverview } from '@/features/cashflows/components/cashflowOverview';
 import { ConfirmDeleteDialog } from '@/components/common/ConfirmDeleteDialog';
 import DataTable from '@/components/common/tables/DataTable';
+import { AppIcons } from '@/components/icons/AppIcons';
+import { normalizeMonthly } from '@/types/shared/normalize';
 
 export type Column<T> = {
   label: string;
@@ -45,7 +47,10 @@ export default function CashflowPage() {
 
   const totalIncome = cashflowSummary?.monthlyIncome ?? 0;
   const netMonthly = cashflowSummary?.monthlyBalance ?? 0;
-  const netAnnual = cashflowSummary?.annualBalance ?? 0;
+  const annualIncome = cashflowSummary?.annualIncome ?? 0;
+  const annualLeftover = cashflowSummary?.annualBalance ?? 0;
+  const [viewMode, setViewMode] = useState<'monthly' | 'annual'>('monthly');
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
 
   const openIncomeModal = () => setModalType('income');
   const openExpenseModal = () => setModalType('expense');
@@ -94,6 +99,18 @@ export default function CashflowPage() {
     );
   };
 
+const toggleExpand = (categoryId: string) => {
+  setExpandedCategories(prev => {
+    const newSet = new Set(prev);
+    if (newSet.has(categoryId)) {
+      newSet.delete(categoryId);
+    } else {
+      newSet.add(categoryId);
+    }
+    return newSet;
+  });
+};
+
   const confirmDelete = (id: string) => setDeletePendingId(id);
   const handleDeleteConfirmed = () => {
     if (!deletePendingId) return;
@@ -106,117 +123,207 @@ export default function CashflowPage() {
   const cancelDelete = () => setDeletePendingId(null);
 
   return (
-    <div className="flex min-h-screen bg-base-200 text-base-content p-6">
-      <div className="w-full mx-auto max-w-7xl">
+    <div className="flex min-h-screen bg-base-100 text-base-content p-6">
+      <div className="w-full mx-auto">
+        <CashflowOverview
+          monthlyIncome={totalIncome}
+          monthlyLeftover={netMonthly}
+          annualLeftover={annualLeftover}
+          annualIncome={annualIncome}
+          loading={false}
+        />
+        <div className="grid grid-cols-1 gap-6">
+          {/* Tables & Buttons */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Expenses Table */}
+            <div className="flex flex-col h-[400px] bg-base-100 border border-base-300">
+              <div className="flex-1 overflow-auto">
+                <DataTable
+                  columns={getCashflowColumns(t)}
+                  data={expenses}
+                  rowKey="id"
+                  actionHandlers={{ onEdit: openEditModal, onDelete: row => confirmDelete(row.id) }}
+                />
+              </div>
+              <div className="flex-shrink-0 border-t border-base-300 px-4 py-3 font-semibold flex justify-between">
+                <span>{t('cashflow.table.total')}</span>
+                <span className="text-error">{expenses.reduce((sum, i) => sum + i.amount, 0).toLocaleString()} kr</span>
+              </div>
+            </div>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
-          <SummaryCard label={t('cashflow.monthlyIncome')} value={totalIncome} icon="💼" />
-          <SummaryCard label={t('cashflow.annualIncome')} value={cashflowSummary?.annualIncome ?? 0} icon="📈" />
-          <SummaryCard label={t('cashflow.monthlyLeftover')} value={netMonthly} icon="📊" highlight />
-          <SummaryCard label={t('cashflow.annualLeftover')} value={netAnnual} icon="📅" />
+            {/* Income Table */}
+            <div className="flex flex-col h-[400px] bg-base-100 border border-base-300">
+              <div className="flex-1 overflow-auto">
+                <DataTable
+                  columns={getCashflowColumns(t)}
+                  data={income}
+                  rowKey="id"
+                  actionHandlers={{ onEdit: openEditModal, onDelete: row => confirmDelete(row.id) }}
+                />
+              </div>
+              <div className="flex-shrink-0 border-t border-base-300 px-4 py-3 font-semibold flex justify-between">
+                <span>{t('cashflow.table.total')}</span>
+                <span className="text-success">{income.reduce((sum, i) => sum + i.amount, 0).toLocaleString()} kr</span>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <button onClick={openExpenseModal} className="btn btn-primary rounded w-full">
+              {t('buttons.addExpense')}
+            </button>
+            <button onClick={openIncomeModal} className="btn btn-primary rounded w-full">
+              {t('buttons.addIncome')}
+            </button>
+          </div>
         </div>
 
-        {/* Category Breakdown */}
-        {categoryBreakdown.length > 0 && (
-          <div className="mb-8">
-            <h3 className="text-lg font-semibold mb-3">{t('cashflow.categoryBreakdown.title')}</h3>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {categoryBreakdown.map((item, idx) => (
-                <div
-                  key={idx}
-                  className="border border-base-300 bg-base-100 p-4 rounded shadow-sm space-y-1"
-                >
-                  <div className="font-medium">
-                    {item.categoryId ? (
-                      <span>{item.categoryId}</span>
-                    ) : (
-                      <span className="italic text-base-content/60">{t('cashflow.unknownCategory')}</span>
-                    )}
-                  </div>
-                  <div className="text-sm text-base-content/70">
-                    {t('cashflow.categoryBreakdown.' + item.type)}:
-                  </div>
-                  <div className="text-sm">
-                    <strong>{item.monthlyTotal.toLocaleString()} kr</strong> / {t('cashflow.perMonth')}
-                  </div>
-                  <div className="text-sm">
-                    <strong>{item.annualTotal.toLocaleString()} kr</strong> / {t('cashflow.perYear')}
-                  </div>
-                </div>
-              ))}
-            </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-10">
+        {/* Breakdown */}
+        <div className="bg-base-100 border border-base-300 rounded-xl p-6 shadow-sm">
+          <div className="flex flex-wrap justify-end gap-2 mb-4">
+            <button
+              onClick={() => setViewMode('monthly')}
+              className={`btn btn-sm ${viewMode === 'monthly' ? 'btn-active' : ''}`}
+            >
+              {t('cashflow.perMonth')}
+            </button>
+            <button
+              onClick={() => setViewMode('annual')}
+              className={`btn btn-sm ${viewMode === 'annual' ? 'btn-active' : ''}`}
+            >
+              {t('cashflow.perYear')}
+            </button>
           </div>
-        )}
 
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 items-start pt-1">
+            {['Income', 'Expense'].map((type) => {
+              const isIncome = type === 'Income';
+              const items = categoryBreakdown.filter(i => i.type === type);
+              const color = isIncome ? 'success' : 'error';
+              return (
+                <div key={type}>
+                  <div className={`flex items-center gap-2 mb-4 text-${color}`}>
+                    {isIncome ? (
+                      <AppIcons.income className="w-5 h-5 text-success" />
+                    ) : (
+                      <AppIcons.expenses className="w-5 h-5 text-error" />
+                    )}
+                    <h4 className={`text-lg font-bold text-${color}`}>
+                      {t(`cashflow.categoryBreakdown.${type}`)}
+                    </h4>
+                  </div>
+
+                  {items.length === 0 ? (
+                    <p className="text-sm text-base-content/60">{t('shared.noData')}</p>
+                  ) : (
+                    <ul className="space-y-3">
+                      {items.map((item, idx) => {
+                        const categoryId = item.categoryId || '__uncategorized__';
+                        const expanded = expandedCategories.has(categoryId);
+                        const toggle = () => toggleExpand(categoryId);
+
+                        const filteredItems = cashflowItems.filter(
+                          i => (i.categoryId || '__uncategorized__') === categoryId && i.type === type
+                        );
+
+                        const displayAmount = viewMode === 'monthly'
+                          ? item.monthlyTotal
+                          : item.annualTotal;
+
+
+                        return (
+                          <li
+                            key={idx}
+                            className={`bg-${color}/5 rounded-md border border-${color}/20 transition overflow-hidden`}
+                          >
+                            <button
+                              onClick={toggle}
+                              className="w-full flex justify-between items-center px-4 py-3 cursor-pointer hover:bg-base-200 transition-all duration-200"
+                            >
+                              <span className={`transform transition-transform ${expanded ? 'rotate-180' : ''}`}>
+                                <AppIcons.up className="w-4 h-4" />
+                              </span>
+                              <span className="text-sm font-medium text-base-content text-left">
+                                {item.categoryName ?? t('shared.uncategorized')}
+                              </span>
+                              <span className={`text-sm text-${color} font-semibold`}>
+                                {displayAmount.toLocaleString()} kr
+                                <span className="ml-1 text-xs text-base-content/60">
+                                  / {t(viewMode === 'monthly' ? 'cashflow.perMonth' : 'cashflow.perYear')}
+                                </span>
+                              </span>
+                            </button>
+
+                            {expanded && (
+                              <div className="bg-base-100 border-t border-base-300 px-4 py-3 text-sm animate-fade-in space-y-2">
+                                {filteredItems.length > 0 ? (
+                                  filteredItems.map((entry, index) => {
+                                    const monthly = normalizeMonthly(entry.amount, entry.frequency);
+                                    const displayAmount = viewMode === 'monthly' ? monthly : monthly * 12;
+
+                                    return (
+                                      <div
+                                        key={entry.id}
+                                        className={`flex justify-between text-base-content/80 py-2 ${
+                                          index !== filteredItems.length - 1 ? 'border-b border-base-300' : ''
+                                        }`}
+                                      >
+                                        <span>{entry.name}</span>
+                                        <span className="text-xs">                                          
+                                          {displayAmount.toLocaleString()} kr · {t(viewMode === 'monthly' ? 'cashflow.frequency.Monthly' : 'cashflow.frequency.Yearly')}
+                                         
+                                        </span>
+                                      </div>
+                                    );
+                                  })
+                                ) : (
+                                  <div className="text-xs text-base-content/60">
+                                    {t('shared.noData')}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
 
         {/* Insights */}
-        {cashflowInsights.length > 0 && (
-          <div className="mb-8">
-            <h3 className="text-lg font-semibold mb-3">{t('cashflow.insights.title')}</h3>
+        <div className="space-y-6">
+          {cashflowInsights.length > 0 && (
             <ul className="space-y-3">
               {cashflowInsights.map((insight, idx) => (
-                <li key={idx} className="bg-base-200 border-l-4 border-info p-4 rounded shadow-sm">
-                  <div className="flex items-center gap-2 mb-1 font-medium text-base-content">
+                <li key={idx} className="border-l-4 bg-base-100 border border-info rounded hover:shadow-md transition p-4">
+                  <div className="flex items-center gap-2 font-semibold text-info">
                     <span>{insight.icon ?? '💡'}</span>
                     <span>{insight.title}</span>
                   </div>
-                  <p className="text-sm text-base-content/80">{insight.message}</p>
+                  <p className="text-sm text-base-content/70 mt-1">{insight.message}</p>
                 </li>
               ))}
             </ul>
-          </div>
-        )}
-
-        {/* Cashflow Tables */}
-        <div className="grid gap-6 border border-base-200 rounded-lg p-4 bg-base-100 shadow-sm">
-          <SectionHeader
-            title={t('cashflow.income')}
-            buttonLabel={t('buttons.addIncome')}
-            onAddClick={openIncomeModal}
-          />
-          <DataTable
-            columns={getCashflowColumns(t)}
-            data={income}
-            rowKey="id"
-            actionHandlers={{ onEdit: openEditModal, onDelete: row => confirmDelete(row.id) }}
-            footer={
-              <tr className="font-semibold border-t border-base-300">
-                <td colSpan={3}>{t('cashflow.table.total')}</td>
-                <td className="text-success">{income.reduce((sum, i) => sum + i.amount, 0).toLocaleString()} kr</td>
-              </tr>
-            }
-          />
-
-
-          <SectionHeader
-            title={t('cashflow.expenses')}
-            buttonLabel={t('buttons.addExpense')}
-            onAddClick={openExpenseModal}
-            className="pt-8"
-          />
-          <DataTable
-            columns={getCashflowColumns(t)}
-            data={expenses}
-            rowKey="id"
-            actionHandlers={{ onEdit: openEditModal, onDelete: row => confirmDelete(row.id) }}
-            footer={
-              <tr className="font-semibold border-t border-base-300">
-                <td colSpan={3}>{t('cashflow.table.total')}</td>
-                <td className="text-error">{expenses.reduce((sum, i) => sum + i.amount, 0).toLocaleString()} kr</td>
-
-              </tr>
-            }
-          />
-
+          )}
         </div>
+      </div>
 
-        {/* Footer Note */}
-        <div className="text-sm text-right text-base-content/70 mt-6">
-          {t('cashflow.insights.totalEntries', { count: cashflowItems.length })}
-          <br />
-          {t('cashflow.insights.averageMonthly', { value: netMonthly.toLocaleString() })}
+      {/* Footer */}
+      <div className="text-sm text-right text-base-content/70 mt-6 space-y-1">
+        <div>
+          📋 {t('cashflow.insights.totalEntries')} <strong>{cashflowItems.length}</strong>
         </div>
+        <div>
+          📆 {t('cashflow.insights.averageMonthly')}{' '}
+          <span className="text-primary font-semibold">{netMonthly.toLocaleString()} kr</span>
+        </div>
+      </div>
+
 
         {/* Modals */}
         {modalType && <CashflowModal type={modalType} onClose={closeModal} />}
@@ -244,33 +351,6 @@ export default function CashflowPage() {
     </div>
   );
 }
-
-// --------------------------
-// Section Header
-// --------------------------
-function SectionHeader({
-  title,
-  className = '',
-  buttonLabel,
-  onAddClick,
-}: {
-  title: string;
-  className?: string;
-  buttonLabel?: string;
-  onAddClick?: () => void;
-}) {
-  return (
-    <div className={`flex justify-between items-center ${className}`}>
-      <h2 className="text-md font-semibold">{title}</h2>
-      {buttonLabel && onAddClick && (
-        <button className="btn btn-sm btn-primary" onClick={onAddClick}>
-          {buttonLabel}
-        </button>
-      )}
-    </div>
-  );
-}
-
 // --------------------------
 // Column Definitions
 // --------------------------
@@ -289,6 +369,13 @@ function getCashflowColumns(t: TFunction): Column<CashflowItem>[] {
       showOnMobile: false,
       sortable: true,
       format: val => (typeof val === 'string' && val.trim() !== '' ? val : t('cashflow.unknownPerson')),
+    },    
+    {
+      label: t('cashflow.table.category'),
+      accessor: 'categoryName',
+      width: 'w-[140px]',
+      showOnMobile: false,
+      sortable: true,      
     },
     {
       label: t('cashflow.table.frequency'),

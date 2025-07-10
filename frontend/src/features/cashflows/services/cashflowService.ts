@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiFetch } from '@/utils/api';
-import { CashflowItem, CreateCashflowItemDto, UpdateCashflowItemDto } from '@/types/finance/cashflow';
+import { CashflowItem, CashflowSummaryDto, CreateCashflowItemDto, UpdateCashflowItemDto } from '@/types/finance/cashflow';
 import { InsightDto } from '@/types/insights/insight';
 import { useAuth } from '@/context/AuthContext';
 
@@ -137,15 +137,3 @@ export function useDeleteCashflowItem() {
   });
 }
 
-// === Types ===
-
-export interface CashflowSummaryDto {
-  monthlyIncome: number;
-  monthlyExpenses: number;
-  monthlySavings: number;
-  monthlyBalance: number;
-  annualIncome: number;
-  annualExpenses: number;
-  annualSavings: number;
-  annualBalance: number;
-}

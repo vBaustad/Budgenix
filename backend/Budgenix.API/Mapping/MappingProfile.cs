@@ -57,6 +57,7 @@ namespace Budgenix.Mapping
 
             // Cashflow mappings
             CreateMap<CashflowItem, CashflowItemDto>()
+                .ForMember(dest => dest.CategoryId, opt => opt.MapFrom(src => src.CategoryId))
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
                 .ForMember(dest => dest.CategoryColor, opt => opt.MapFrom(src => src.Category.ColorHex));
 

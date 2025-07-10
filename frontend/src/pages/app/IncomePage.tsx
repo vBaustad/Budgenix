@@ -1,24 +1,19 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useIncomes } from '@/features/Incomes/services/incomesService';
 import { Income } from '@/types/finance/income';
 import { useDateFilter } from '@/context/DateFilterContext';
 import { useIncomesContext } from '@/features/Incomes/context/IncomesContext';
-import { useRecurring } from '@/context/RecurringContext';
 import { useCategories } from '@/context/CategoryContext';
 import SectionShell from '@/components/layout/SectionShell';
 import { AppIcons } from '@/components/icons/AppIcons';
 import IncomeOverview from '@/features/Incomes/components/IncomeOverview';
-import AddIncomeForm from '@/features/Incomes/components/AddIncomeForm';
 import IncomesList from '@/features/Incomes/components/IncomesList';
 import CategoryFilter from '@/components/common/filters/CategoryFilter';
 import GroupByDropdown from '@/components/common/filters/GroupByDropdown';
 import BreakdownPieChart from '@/components/common/charts/BreakdownPieChart';
-import UpcomingRecurringList from '@/features/recurring/components/UpcomingRecurringList';
-import EditRecurringItemForm from '@/features/recurring/components/EditRecurringItemForm';
-import RecurringSummary from '@/features/recurring/components/RecurringSummary';
 import { useTranslation } from 'react-i18next';
 import { GROUP_OPTIONS } from '@/features/expenses/constants/grouping';
-import { formatCurrency } from '@/utils/formatting';
+import AddIncomeModal from '@/features/Incomes/components/AddIncomeModal';
 
 export default function IncomePage() {
   const { t } = useTranslation();
@@ -29,22 +24,11 @@ export default function IncomePage() {
     setGroupBy,
     selectedCategories,
     setSelectedCategories,
-    overview,
-    overviewLoading,
+    handleAddIncome
   } = useIncomesContext();
 
   const { categories } = useCategories();
 
-  const {
-    upcomingRecurringIncomes,
-    monthlyRecurringIncomeTotal,
-    lastTriggeredRecurringIncome,
-    nextRecurringIncome,
-    loadingRecurring,
-    refreshRecurring,
-    selectedRecurringItem,
-    setSelectedRecurringItem,
-  } = useRecurring();
 
   const { data: incomes = [], isLoading: loading } = useIncomes({
     from: new Date(selectedYear, selectedMonth - 1, 1).toISOString(),
@@ -54,22 +38,26 @@ export default function IncomePage() {
   });
 
   const chartData = useMemo(() => incomes, [incomes]);
-
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const categoryOptions = useMemo(
     () => categories.map((c) => ({ value: c.id, label: c.name })),
     [categories]
   );
 
-  const handleRecurringSave = async () => {
-    setSelectedRecurringItem(null);
-    await refreshRecurring();
-  };
-
   return (
     <div className="flex flex-col gap-4 p-4 w-full max-w-full overflow-hidden">
       <IncomeOverview />
 
-      <div className="flex flex-col lg:flex-row w-full max-w-full gap-4">
+      <button
+        className="btn btn-primary flex items-center gap-2"
+        onClick={() => setIsAddModalOpen(true)}
+      >
+        <AppIcons.add className="w-4 h-4" />
+        {t('buttons.addIncome')}
+      </button>
+
+
+      {/* <div className="flex flex-col lg:flex-row w-full max-w-full gap-4">
         <SectionShell title={t('buttons.addIncome')} icon={AppIcons.add}>
           <div className="flex flex-col lg:flex-row gap-4">
             <div className="lg:w-1/2">
@@ -139,7 +127,7 @@ export default function IncomePage() {
             </div>
           </div>
         </SectionShell>
-      </div>
+      </div> */}
 
       <div className="flex flex-col lg:flex-row w-full max-w-full gap-4">
         <SectionShell
@@ -179,6 +167,16 @@ export default function IncomePage() {
           />
         </SectionShell>
       </div>
+
+      {isAddModalOpen && (
+        <AddIncomeModal
+          onAdd={(income) => {
+            handleAddIncome(income);
+            setIsAddModalOpen(false);
+          }}
+          onClose={() => setIsAddModalOpen(false)}
+        />
+      )}
     </div>
   );
 }

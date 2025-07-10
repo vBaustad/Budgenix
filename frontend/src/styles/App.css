@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @plugin "daisyui";
 
-@plugin "daisyui/theme" {
+/* @plugin "daisyui/theme" {
   name: "budgenixLightGreen";
   default: false;
   prefersdark: false;
@@ -38,6 +38,45 @@
 
   --color-error: #D86363;
   --color-error-content: #2D2A26;
+} */
+
+@plugin "daisyui/theme" {
+  name: "budgenixLightGreen";
+  default: false;
+  prefersdark: false;
+  color-scheme: light;
+
+  --color-base-100: #FFFFFF;
+  --color-base-200: #F7F7F7;
+  --color-base-300: #E5E7EB;
+  --color-base-content: #1F2937;
+
+  --color-gradient-start: #F7F7F7;
+  --color-gradient-end: #ECECEC;
+
+  --color-primary: #3B855B;
+  --color-primary-content: #FFFFFF;
+
+  --color-secondary: #E1EDE3;
+  --color-secondary-content: #1F2937;
+
+  --color-accent: #A0C8A0;
+  --color-accent-content: #1F1F1F;
+
+  --color-neutral: #D1D5DB;
+  --color-neutral-content: #374151;
+
+  --color-info: #60A5FA;
+  --color-info-content: #FFFFFF;
+
+  --color-success: #22C55E;
+  --color-success-content: #FFFFFF;
+
+  --color-warning: #FACC15;
+  --color-warning-content: #1F2937;
+
+  --color-error: #D86363;
+  --color-error-content: #1F2937;
 }
 
 
@@ -170,6 +209,23 @@
   );
 }
 
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn .3s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-2px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
 
 
 /* Utility Fonts */

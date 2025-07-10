@@ -72,7 +72,7 @@ export default function DataTable<T>({
   }, [columns, windowWidth]);
 
   return (
-    <div className="rounded-xl bg-base-100 shadow-sm w-full">
+    <div className="rounded-xl bg-base-100 w-full">
       <div className="overflow-y-auto max-h-[600px]">
         <table className="w-full text-sm table-fixed divide-x divide-base-300">
           <thead className="bg-base-300 text-base-content font-semibold sticky top-0 z-10">
@@ -123,11 +123,10 @@ export default function DataTable<T>({
                   {visibleColumns.map((col) => (
                     <td
                       key={String(col.accessor)}
-                      className={`
-                        px-2 py-2 truncate whitespace-nowrap text-base-content
-                        ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'}
-                        ${col.width ?? ''}
-                      `}
+                        className={`px-2 py-2 truncate whitespace-nowrap text-base-content border-b border-base-300
+                          ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'}
+                          ${col.width ?? ''}
+                        `}
                     >
 
                       {col.format
@@ -136,7 +135,7 @@ export default function DataTable<T>({
                     </td>
                   ))}
                   {actionHandlers && (actionHandlers.onEdit || actionHandlers.onDelete) && (
-                    <td className="p-2 hidden sm:table-cell">
+                    <td className="p-2 hidden sm:table-cell border-b border-base-300">
                       <div className="flex justify-start gap-1">
                         {actionHandlers.onEdit && (
                           <button

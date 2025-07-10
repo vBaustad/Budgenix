@@ -32,7 +32,7 @@ export default function InsightCard({ insights }: Props) {
             return (
               <div
                 key={idx}
-                className={`border-l-4 p-4 rounded-xl bg-base-100 shadow-md w-full ${statusColor}`}
+                className={`border-l-4 p-4 border border-base-300 bg-base-100 w-full ${statusColor}`}
               >
                 <div className="flex items-start gap-3">
                   <Icon className={`w-5 h-5 mt-1 ${statusColor}`} />

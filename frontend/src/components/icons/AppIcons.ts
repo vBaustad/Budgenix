@@ -81,6 +81,8 @@ import {
   List,
   Table,
   AlignJustify,
+  ArrowLeft,
+  ArrowRight,
 } from 'lucide-react';
 
 export const AppIcons = {
@@ -154,6 +156,8 @@ export const AppIcons = {
   up: ChevronUp,
   arrowUp: ArrowUp,
   arrowDown: ArrowDown,
+  arrowLeft: ArrowLeft,
+  arrowRight: ArrowRight,
   left: ChevronLeft,
   right: ChevronRight,
   warning: AlertTriangle,

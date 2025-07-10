@@ -9,15 +9,16 @@ import {
   YAxis
 } from 'recharts';
 import { useIncomeMonthlySummary } from '../hooks/useIncomeMonthlySummary';
-import { subMonths, format } from 'date-fns';
+import { format } from 'date-fns';
 import { useCurrency } from '@/context/CurrencyContext';
 import { formatCurrency } from '@/utils/formatting';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { useTranslation } from 'react-i18next';
+  import { startOfYear, addMonths } from 'date-fns';
 
 export default function IncomeMonthlyChart() {
   const { t } = useTranslation();
-  const { data, isLoading } = useIncomeMonthlySummary(6);
+  const { data, isLoading } = useIncomeMonthlySummary(12);
   const { currency } = useCurrency();
 
   if (isLoading || !data) return <LoadingSpinner />;
@@ -44,9 +45,12 @@ export default function IncomeMonthlyChart() {
     categories.add(item.category);
   }
 
-  const monthLabels = Array.from({ length: 6 }, (_, i) =>
-    format(subMonths(new Date(), 5 - i), 'MMM yyyy')
+  const start = startOfYear(new Date());
+
+  const monthLabels = Array.from({ length: 12 }, (_, i) =>
+    format(addMonths(start, i), 'MMM yyyy')
   );
+
 
   const chartData = monthLabels.map((label) => {
     const monthData = grouped[label] || {};
@@ -61,7 +65,9 @@ export default function IncomeMonthlyChart() {
 
   return (
     <ResponsiveContainer width="100%" height={350}>
-      <BarChart data={chartData}>
+      <BarChart data={chartData}
+        margin={{ top: 10, right: 20, left: 60 }} 
+        >
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="month" />
         <YAxis tickFormatter={(val) => formatCurrency(val, currency)} />

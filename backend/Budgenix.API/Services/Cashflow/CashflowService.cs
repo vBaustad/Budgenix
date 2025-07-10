@@ -72,10 +72,11 @@ namespace Budgenix.Services.Finance
 
             var categoryBreakdown = items
                 .Where(i => i.CategoryId != null)
-                .GroupBy(i => new { i.CategoryId, i.Type })
+                .GroupBy(i => new { i.Type, i.Category })
                 .Select(g => new CategoryBreakdownDto
                 {
-                    CategoryId = g.Key.CategoryId,
+                    CategoryId = g.Key.Category.Id,
+                    CategoryName = g.Key.Category.Name,
                     Type = g.Key.Type,
                     MonthlyTotal = g.Sum(i => NormalizeMonthly(i.Amount, i.Frequency)),
                     AnnualTotal = g.Sum(i => NormalizeMonthly(i.Amount, i.Frequency)) * 12
