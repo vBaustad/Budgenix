@@ -45,7 +45,8 @@ export default function IncomePage() {
   );
 
   return (
-    <div className="flex flex-col gap-4 p-4 w-full max-w-full overflow-hidden">
+    <div className="flex flex-col gap-4 p-6 w-full max-w-full overflow-hidden">
+
       <IncomeOverview />
 
       <button
@@ -157,7 +158,7 @@ export default function IncomePage() {
           </div>
         </SectionShell>
 
-        <SectionShell title={t('incomes.byCategory')} icon={AppIcons.pieChart}>
+        <SectionShell title={t('incomes.byCategory')} icon={AppIcons.pieChart} className="hidden lg:block">
           <BreakdownPieChart
             data={chartData}
             groupBy={(e) => (e as Income).categoryName || t('shared.uncategorized')}

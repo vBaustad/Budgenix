@@ -52,7 +52,7 @@ export default function ExpensesPage() {
       <ExpensesOverview />
 
       <div>
-        <div className="bg-base-100 p-4">
+        <div className="hidden sm:block w-full overflow-x-auto">
           {overviewLoading ? (
             <div className="rounded animate-pulse h-40 bg-base-200" />
           ) : (

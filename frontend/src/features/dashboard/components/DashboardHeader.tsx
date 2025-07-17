@@ -13,6 +13,8 @@ import { useIncomesContext } from '@/features/Incomes/context/IncomesContext';
 
 export default function DashboardHeader({ summary }: { summary: DashboardSummary }) {
   const { t } = useTranslation();
+  const subtitles = t('dashboard.subtitles', { returnObjects: true }) as string[];
+  const subtitle = subtitles[Math.floor(Math.random() * subtitles.length)];
   const { user } = useUser();
   const today = format(new Date(), 'EEEE, MMMM d');
   const { handleAddExpense } = useExpensesContext();
@@ -35,7 +37,7 @@ export default function DashboardHeader({ summary }: { summary: DashboardSummary
             {t('dashboard.welcome', { name: user?.firstName ?? t('dashboard.fallbackName') })}
           </h1>
           <p className="text-base-content/70 text-lg italic">
-            {t('dashboard.subtitle')}
+            {subtitle}
           </p>
         </div>
         <div className="flex flex-col sm:items-end gap-1 text-sm text-base-content/80">

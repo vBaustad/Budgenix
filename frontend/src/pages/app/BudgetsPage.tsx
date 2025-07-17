@@ -17,7 +17,7 @@ export default function BudgetsPage() {
   });
 
   return (
-    <div className="min-h-screen p-6 relative">
+    <div className="p-6 relative">
       {isLoading ? (
         <div className="text-center text-base-content">{t('shared.loading')}</div>
       ) : (

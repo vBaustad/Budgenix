@@ -2,10 +2,8 @@ import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TFunction } from 'i18next';
 import toast from 'react-hot-toast';
-
 import { useCashflowContext } from '@/features/cashflows/context/CashflowContext';
 import { CashflowItem } from '@/types/finance/cashflow';
-
 import { CashflowModal } from '@/features/cashflows/components/cashflowModal';
 import { EditCashflowModal } from '@/features/cashflows/components/editCashflowModal';
 import { CashflowOverview } from '@/features/cashflows/components/cashflowOverview';
@@ -13,6 +11,8 @@ import { ConfirmDeleteDialog } from '@/components/common/ConfirmDeleteDialog';
 import DataTable from '@/components/common/tables/DataTable';
 import { AppIcons } from '@/components/icons/AppIcons';
 import { normalizeMonthly } from '@/types/shared/normalize';
+import { formatCurrency } from '@/utils/formatting';
+import { useCurrency } from '@/context/CurrencyContext';
 
 export type Column<T> = {
   label: string;
@@ -44,12 +44,11 @@ export default function CashflowPage() {
 
   const income = useMemo(() => cashflowItems.filter(i => i.type === 'Income'), [cashflowItems]);
   const expenses = useMemo(() => cashflowItems.filter(i => i.type === 'Expense'), [cashflowItems]);
-
+  const { currency: userCurrency } = useCurrency();
   const totalIncome = cashflowSummary?.monthlyIncome ?? 0;
   const netMonthly = cashflowSummary?.monthlyBalance ?? 0;
   const annualIncome = cashflowSummary?.annualIncome ?? 0;
   const annualLeftover = cashflowSummary?.annualBalance ?? 0;
-  const [viewMode, setViewMode] = useState<'monthly' | 'annual'>('monthly');
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
 
   const openIncomeModal = () => setModalType('income');
@@ -155,7 +154,7 @@ const toggleExpand = (categoryId: string) => {
             <div className="flex flex-col h-[400px] bg-base-100 border border-base-300">
               <div className="flex-1 overflow-auto">
                 <DataTable
-                  columns={getCashflowColumns(t)}
+                  columns={getCashflowColumns(t, userCurrency)}
                   data={income}
                   rowKey="id"
                   actionHandlers={{ onEdit: openEditModal, onDelete: row => confirmDelete(row.id) }}
@@ -177,29 +176,15 @@ const toggleExpand = (categoryId: string) => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-10">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-10">
         {/* Breakdown */}
         <div className="bg-base-100 border border-base-300 rounded-xl p-6 shadow-sm">
-          <div className="flex flex-wrap justify-end gap-2 mb-4">
-            <button
-              onClick={() => setViewMode('monthly')}
-              className={`btn btn-sm ${viewMode === 'monthly' ? 'btn-active' : ''}`}
-            >
-              {t('cashflow.perMonth')}
-            </button>
-            <button
-              onClick={() => setViewMode('annual')}
-              className={`btn btn-sm ${viewMode === 'annual' ? 'btn-active' : ''}`}
-            >
-              {t('cashflow.perYear')}
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 items-start pt-1">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 items-start">
             {['Income', 'Expense'].map((type) => {
               const isIncome = type === 'Income';
               const items = categoryBreakdown.filter(i => i.type === type);
               const color = isIncome ? 'success' : 'error';
+
               return (
                 <div key={type}>
                   <div className={`flex items-center gap-2 mb-4 text-${color}`}>
@@ -226,11 +211,6 @@ const toggleExpand = (categoryId: string) => {
                           i => (i.categoryId || '__uncategorized__') === categoryId && i.type === type
                         );
 
-                        const displayAmount = viewMode === 'monthly'
-                          ? item.monthlyTotal
-                          : item.annualTotal;
-
-
                         return (
                           <li
                             key={idx}
@@ -246,10 +226,11 @@ const toggleExpand = (categoryId: string) => {
                               <span className="text-sm font-medium text-base-content text-left">
                                 {item.categoryName ?? t('shared.uncategorized')}
                               </span>
-                              <span className={`text-sm text-${color} font-semibold`}>
-                                {displayAmount.toLocaleString()} kr
-                                <span className="ml-1 text-xs text-base-content/60">
-                                  / {t(viewMode === 'monthly' ? 'cashflow.perMonth' : 'cashflow.perYear')}
+                              <span className={`text-sm text-${color} font-semibold text-right`}>
+                                {formatCurrency(item.monthlyTotal, userCurrency)} / {t('cashflow.perMonth')}
+                                <br />
+                                <span className="text-xs text-base-content/60">
+                                  ({formatCurrency(item.annualTotal, userCurrency)} / {t('cashflow.perYear')})
                                 </span>
                               </span>
                             </button>
@@ -259,7 +240,7 @@ const toggleExpand = (categoryId: string) => {
                                 {filteredItems.length > 0 ? (
                                   filteredItems.map((entry, index) => {
                                     const monthly = normalizeMonthly(entry.amount, entry.frequency);
-                                    const displayAmount = viewMode === 'monthly' ? monthly : monthly * 12;
+                                    const annual = monthly * 12;
 
                                     return (
                                       <div
@@ -269,9 +250,12 @@ const toggleExpand = (categoryId: string) => {
                                         }`}
                                       >
                                         <span>{entry.name}</span>
-                                        <span className="text-xs">                                          
-                                          {displayAmount.toLocaleString()} kr · {t(viewMode === 'monthly' ? 'cashflow.frequency.Monthly' : 'cashflow.frequency.Yearly')}
-                                         
+                                        <span className="text-xs text-right">
+                                          {formatCurrency(monthly, userCurrency)} / {t('cashflow.perMonth')}
+                                          <br />
+                                          <span className="text-base-content/60">
+                                            ({formatCurrency(annual, userCurrency)} / {t('cashflow.perYear')})
+                                          </span>
                                         </span>
                                       </div>
                                     );
@@ -283,7 +267,6 @@ const toggleExpand = (categoryId: string) => {
                                 )}
                               </div>
                             )}
-
                           </li>
                         );
                       })}
@@ -300,7 +283,10 @@ const toggleExpand = (categoryId: string) => {
           {cashflowInsights.length > 0 && (
             <ul className="space-y-3">
               {cashflowInsights.map((insight, idx) => (
-                <li key={idx} className="border-l-4 bg-base-100 border border-info rounded hover:shadow-md transition p-4">
+                <li
+                  key={idx}
+                  className="border-l-4 bg-base-100 border border-info rounded hover:shadow-md transition p-4"
+                >
                   <div className="flex items-center gap-2 font-semibold text-info">
                     <span>{insight.icon ?? '💡'}</span>
                     <span>{insight.title}</span>
@@ -354,7 +340,7 @@ const toggleExpand = (categoryId: string) => {
 // --------------------------
 // Column Definitions
 // --------------------------
-function getCashflowColumns(t: TFunction): Column<CashflowItem>[] {
+function getCashflowColumns(t: TFunction, currency?: string): Column<CashflowItem>[] {
   return [
     {
       label: t('cashflow.table.name'),
@@ -396,7 +382,7 @@ function getCashflowColumns(t: TFunction): Column<CashflowItem>[] {
       format: (val, row) => {
         const value = val as number;
         const className = row?.type === 'Expense' ? 'text-error' : 'text-success';
-        return <span className={className}>{value.toLocaleString()} kr</span>;
+        return <span className={className}>{formatCurrency(value, currency)}</span>;
       },
     },
   ];

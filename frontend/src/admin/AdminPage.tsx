@@ -56,47 +56,56 @@ const AdminPage = () => {
         />
       </div>
 
-      <table className="w-full table-auto border border-base-300">
-        <thead>
-          <tr className="bg-base-200">
-            <th className="text-left p-2">{t('admin.panel.columns.email')}</th>
-            <th className="text-left p-2">{t('admin.panel.columns.role')}</th>
-            <th className="text-left p-2">{t('admin.panel.columns.tier')}</th>
-            <th className="text-left p-2">{t('admin.panel.columns.signup')}</th>
-            <th className="text-left p-2">{t('admin.panel.columns.lastActive')}</th>
-            <th className="text-left p-2">{t('shared.actions')}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredUsers?.map((user: AdminUserDto) => (
-            <tr
-              key={user.id}
-              onClick={() => {
-                setSelectedUser(user);
-                openUserModal(user.id);
-              }}
-              className="border-t border-base-300 hover:bg-base-200 cursor-pointer"
-            >
-              <td className="p-2">{user.email}</td>
-              <td className="p-2 capitalize">
-                <span className="badge badge-info">{user.role}</span>
-              </td>
-              <td>
-                <span className="badge badge-secondary">{user.subscriptionTier}</span>
-              </td>
-              <td className="p-2">{new Date(user.signupDate).toLocaleDateString()}</td>
-              <td className="p-2">
-                {user.lastLogin
-                  ? formatDistanceToNow(new Date(user.lastLogin), { addSuffix: true })
-                  : '—'}
-              </td>
-              {/* <td className="p-2">
-                <button className="btn btn-xs btn-error">{t('buttons.delete')}</button>
-              </td> */}
+      <div className="w-full overflow-x-auto"> 
+        <table className="min-w-full table-auto border border-base-300">
+          <thead>
+            <tr className="bg-base-200">
+              <th className="text-left p-2">{t('admin.panel.columns.email')}</th>
+              <th className="text-left p-2">{t('admin.panel.columns.role')}</th>
+              <th className="text-left p-2 hidden md:table-cell">
+                {t('admin.panel.columns.tier')}
+              </th>
+              <th className="text-left p-2 hidden md:table-cell">
+                {t('admin.panel.columns.signup')}
+              </th>
+              <th className="text-left p-2">{t('admin.panel.columns.lastActive')}</th>
+              {/* <th className="text-left p-2">{t('shared.actions')}</th> */}
+
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {filteredUsers?.map((user: AdminUserDto) => (
+              <tr
+                key={user.id}
+                onClick={() => {
+                  setSelectedUser(user);
+                  openUserModal(user.id);
+                }}
+                className="border-t border-base-300 hover:bg-base-200 cursor-pointer"
+              >
+                <td className="p-2">{user.email.split('@')[0]}</td>
+                <td className="p-2 capitalize">
+                  <span className="badge badge-sm badge-info">{user.role}</span>
+                </td>
+                <td className="p-2 hidden md:table-cell">
+                  <span className="badge badge-secondary">{user.subscriptionTier}</span>
+                </td>
+                <td className="p-2 hidden md:table-cell">
+                  {new Date(user.signupDate).toLocaleDateString()}
+                </td>
+                <td className="p-2">
+                  {user.lastLogin
+                    ? formatDistanceToNow(new Date(user.lastLogin), { addSuffix: true })
+                    : '—'}
+                </td>
+                {/* <td className="p-2">
+                  <button className="btn btn-xs btn-error">{t('buttons.delete')}</button>
+                </td> */}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       {selectedUser && (
         <UserDetailsModal

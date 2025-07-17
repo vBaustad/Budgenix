@@ -20,9 +20,9 @@ export const getDefaultLocaleForCurrency = (currency: string): string => {
     case 'NOK':
     case 'SEK':
     case 'DKK':
-      return 'nb-NO'; // Norwegian style
+      return 'nb-NO';
     case 'EUR':
-      return 'de-DE'; // or 'fr-FR', 'es-ES', etc.
+      return 'de-DE';
     case 'GBP':
       return 'en-GB';
     case 'USD':
@@ -54,9 +54,8 @@ export const formatCurrency = (
   currency: string = 'USD',
   locale?: string
 ): string => {
-  if (typeof val !== 'number') return '–';
+  if (typeof val !== 'number' || isNaN(val)) return '–';
 
-  // Auto-assign common locale if none provided
   const resolvedLocale = locale ?? getDefaultLocaleForCurrency(currency);
 
   try {
@@ -68,9 +67,13 @@ export const formatCurrency = (
       maximumFractionDigits: 2,
     }).format(val);
   } catch {
-    return `${getCurrencySymbol(currency)}${val.toFixed(2)}`;
+    return `${getCurrencySymbol(currency)} ${val.toLocaleString(undefined, {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    })}`;
   }
 };
+
 
 
 

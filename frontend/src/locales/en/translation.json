@@ -94,7 +94,18 @@
         },
         "welcome": "Welcome back, {{name}}",
         "fallbackName": "Friend",
-        "subtitle": "Budget with vision. Spend with power. Save with purpose.",
+        "subtitles": [
+            "Budget with vision. Spend with power. Save with purpose.",
+            "Every krone counts. Make yours powerful.",
+            "Control your money, or it will control you.",
+            "Spend smarter. Stress less.",
+            "Savings today, freedom tomorrow.",
+            "Your goals. Your money. Your way.",
+            "Track it. Tame it. Thrive.",
+            "Small steps. Big impact.",
+            "Crush debt. Build wealth.",
+            "Let your money tell a better story."
+        ],
         "lastUpdated": "Last updated",
         "budgets": {
             "nearLimit": "{{count}} budget{{count > 1 ? 's' : ''}} near limit",

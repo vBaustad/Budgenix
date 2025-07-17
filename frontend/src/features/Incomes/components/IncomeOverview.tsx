@@ -11,7 +11,7 @@ export default function IncomeOverview() {
   }, [refreshOverview]);
 
   return (
-    <div className="flex flex-col gap-4 w-full max-w-full overflow-hidden">
+    <div className="flex flex-col gap-4 w-full overflow-hidden">
       <IncomeOverviewStats
         totalIncome={overview?.totalIncome ?? 0}
         lastMonthIncome={overview?.lastMonthIncome ?? 0}
@@ -20,7 +20,7 @@ export default function IncomeOverview() {
         loading={overviewLoading}
       />
 
-      <div className="-ml-6">
+      <div className="hidden sm:block w-full overflow-x-auto">
         <IncomeMonthlyChart />
       </div>
     </div>

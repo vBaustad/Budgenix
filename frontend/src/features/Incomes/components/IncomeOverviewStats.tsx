@@ -24,10 +24,9 @@ export default function IncomeOverviewStats({
   const { currency: userCurrency } = useCurrency();
 
   return (
-    <div className="overflow-hidden bg-base-100 mb-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-base-300 p-6 items-center text-sm">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-base-300 bg-base-100 p-6 rounded-xl overflow-hidden">
         {/* Total Income (This Month) */}
-        <div className="flex items-center gap-4 px-4">
+        <div className="flex items-center gap-4 px-2 sm:px-4">
           <AppIcons.income className="w-6 h-6 text-success" />
           <div>
             <div className="text-base-content/70">{t('incomes.overview.incomeTitle')}</div>
@@ -38,7 +37,7 @@ export default function IncomeOverviewStats({
         </div>
 
         {/* Last Month Income */}
-        <div className="flex items-center gap-4 px-4">
+        <div className="flex items-center gap-4 px-2 sm:px-4">
           <AppIcons.arrowLeft className="w-6 h-6 text-accent" />
           <div>
             <div className="text-base-content/70">{t('incomes.overview.lastMonthIncome')}</div>
@@ -49,7 +48,7 @@ export default function IncomeOverviewStats({
         </div>
 
         {/* Annual Income */}
-        <div className="flex items-center gap-4 px-4">
+        <div className="flex items-center gap-4 px-2 sm:px-4">
           <AppIcons.lineChart className="w-6 h-6 text-info" />
           <div>
             <div className="text-base-content/70">{t('incomes.overview.annualIncome')}</div>
@@ -60,7 +59,7 @@ export default function IncomeOverviewStats({
         </div>
 
         {/* Avg Monthly */}
-        <div className="flex items-center gap-4 px-4">
+        <div className="flex items-center gap-4 px-2 sm:px-4">
           <AppIcons.growth className="w-6 h-6 text-primary" />
           <div>
             <div className="text-base-content/70">{t('incomes.overview.avgMonthly')}</div>
@@ -70,6 +69,5 @@ export default function IncomeOverviewStats({
           </div>
         </div>
       </div>
-    </div>
   );
 }
