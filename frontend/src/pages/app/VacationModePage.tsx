@@ -32,7 +32,7 @@ export default function VacationModePage() {
   };
 
   return (
-    <div className="min-h-screen max-w-7xl mx-auto p-6 space-y-10 relative">
+    <div className="max-w-7xl mx-auto p-6 space-y-10 relative">
       <div className="text-center">
         <h1 className="text-5xl font-bold">🌴 Vacation Mode</h1>
         <p className="text-sm text-base-content/70">All data is demo / mock for concept preview.</p>

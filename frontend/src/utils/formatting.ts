@@ -20,9 +20,9 @@ export const getDefaultLocaleForCurrency = (currency: string): string => {
     case 'NOK':
     case 'SEK':
     case 'DKK':
-      return 'nb-NO'; // Norwegian style
+      return 'nb-NO';
     case 'EUR':
-      return 'de-DE'; // or 'fr-FR', 'es-ES', etc.
+      return 'de-DE';
     case 'GBP':
       return 'en-GB';
     case 'USD':
@@ -54,9 +54,8 @@ export const formatCurrency = (
   currency: string = 'USD',
   locale?: string
 ): string => {
-  if (typeof val !== 'number') return '–';
+  if (typeof val !== 'number' || isNaN(val)) return '–';
 
-  // Auto-assign common locale if none provided
   const resolvedLocale = locale ?? getDefaultLocaleForCurrency(currency);
 
   try {
@@ -68,9 +67,13 @@ export const formatCurrency = (
       maximumFractionDigits: 2,
     }).format(val);
   } catch {
-    return `${getCurrencySymbol(currency)}${val.toFixed(2)}`;
+    return `${getCurrencySymbol(currency)} ${val.toLocaleString(undefined, {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    })}`;
   }
 };
+
 
 
 
@@ -78,5 +81,17 @@ export const formatCurrency = (
 export const formatDate = (val: unknown): string =>
   val ? new Date(val as string).toLocaleDateString() : '–';
 
-export const truncateText = (val: unknown, max = 60): string =>
-  typeof val === 'string' ? val.slice(0, max) + (val.length > max ? '...' : '') : '–';
+export const truncateText = (
+  val: string | number | null | undefined,
+  max = 60
+): string => {
+  if (typeof val === 'string') {
+    return val.length > max ? val.slice(0, max) + '…' : val;
+  }
+  if (typeof val === 'number') {
+    const str = val.toString();
+    return str.length > max ? str.slice(0, max) + '…' : str;
+  }
+  return '–';
+};
+

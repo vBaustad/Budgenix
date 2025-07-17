@@ -94,7 +94,18 @@
         },
         "welcome": "Welcome back, {{name}}",
         "fallbackName": "Friend",
-        "subtitle": "Budget with vision. Spend with power. Save with purpose.",
+        "subtitles": [
+            "Budget with vision. Spend with power. Save with purpose.",
+            "Every krone counts. Make yours powerful.",
+            "Control your money, or it will control you.",
+            "Spend smarter. Stress less.",
+            "Savings today, freedom tomorrow.",
+            "Your goals. Your money. Your way.",
+            "Track it. Tame it. Thrive.",
+            "Small steps. Big impact.",
+            "Crush debt. Build wealth.",
+            "Let your money tell a better story."
+        ],
         "lastUpdated": "Last updated",
         "budgets": {
             "nearLimit": "{{count}} budget{{count > 1 ? 's' : ''}} near limit",
@@ -310,14 +321,19 @@
             "successMessage": "Income added successfully!",
             "errorMessage": "Failed to add income"
         },
-          "overview": {
-            "incomeTitle": "Income",
+        "overview": {
+            "incomeTitle": "This Month's Income",
             "comparedToLastMonth": "Compared to last month",
             "moreThanLastMonth": "{{amount}} more than last month",
             "lessThanLastMonth": "{{amount}} less than last month",
             "total": "Total this month",
-            "lastMonth": "Last month",
-            "nextRecurring": "Next recurring income"
+            "lastMonthIncome": "Last Month's Income",
+            "nextRecurring": "Next Recurring Income",
+            "annualIncome": "Annual Income",
+            "avgMonthly": "Average Monthly",
+            "noIncome": "No income this month",
+            "spikeDetected": "Income spike detected!",
+            "dropDetected": "Significant drop from last month"
         },
         "insights": {
             "notCurrentMonth": "Insights are only available for the current month.",
@@ -405,6 +421,51 @@
             "remaining": "Remaining"            
         }
     },
+    "cashflow": {
+        "title": "Cashflow Overview",
+        "description": "Track your recurring monthly income and expenses to understand what’s left each month.",
+        "monthlyIncome": "Monthly Income",
+        "monthlyExpenses": "Monthly Expenses",
+        "monthlyLeftover": "Monthly Leftover",
+        "annualLeftover": "Annual Leftover",
+        "annualIncome": "Annual Income",
+        "income": "Recurring Income",
+        "expenses": "Recurring Expenses",
+        "noItems": "No Items",
+        "unknownPerson": "Unknown",
+        "addIncome":"Add Income",
+        "editIncome":"Edit Income",
+        "addExpense":"Add Expense",
+        "editExpense":"Edit Expense",
+        "edit":"Edit Cashflow",
+        "perMonth": "Per Month",
+        "perYear": "Per Year",
+        "insights":{
+            "title": "Insights",
+            "totalEntries": "Total entries: ",
+            "averageMonthly": "Average Monthly: "
+        },
+        "categoryBreakdown": {
+            "title": "Breakdown by Category",
+            "Expense": "Expense",
+            "Income": "Income"
+        },
+        "frequency": {
+            "Monthly": "Monthly",
+            "Weekly": "Weekly",
+            "Yearly": "Yearly",
+            "Daily": "Daily"
+        },
+        "table": {
+            "name": "Name",
+            "amount": "Amount",
+            "person": "Person",
+            "category": "Category",
+            "frequency": "Frequency",
+            "actions": "Actions",
+            "total": "Total"
+        }
+    },
     "buttons": {
         "addBudget": "Add Budget",
         "createFirstBudget": "Create First Budget",
@@ -445,6 +506,9 @@
         "country": "Country",
         "email": "Email",
         "ago": "ago",
+        "actions": "Actions",
+        "signup": "Signup",
+        "role": "Role",
         "recurrence": {
             "None": "Not Recurring",
             "Daily": "Daily",
@@ -461,13 +525,12 @@
             "searchPlaceholder": "Search...",
             "loading": "Loading users...",
             "error": "Failed to load users.",
-            "columns": {
-                "email": "Email",
-                "role": "Role",
-                "tier": "Subscription Tier",
-                "signup": "Signup",
-                "lastActive": "Last Active",
-                "actions": "Actions"
+            "columns": {         
+                "email": "Email address",
+                "role": "Role",       
+                "tier": "Subscription Tier",  
+                "signup": "Signup Date",              
+                "lastActive": "Last Active"                
             }
         },
         "userDetails": {

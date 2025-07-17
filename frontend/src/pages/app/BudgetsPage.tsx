@@ -17,7 +17,7 @@ export default function BudgetsPage() {
   });
 
   return (
-    <div className="min-h-screen p-6 relative">
+    <div className="p-6 relative">
       {isLoading ? (
         <div className="text-center text-base-content">{t('shared.loading')}</div>
       ) : (
@@ -37,7 +37,7 @@ export default function BudgetsPage() {
 
       {editTargetId && isLoadingBudget && (
         <div className="fixed inset-0 bg-base-content/30 flex items-center justify-center z-50">
-          <div className="p-4 bg-base-100 rounded-xl shadow-xl">
+          <div className="p-4 bg-base-100">
             <span className="loading loading-spinner loading-lg"></span>
           </div>
         </div>

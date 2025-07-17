@@ -19,6 +19,7 @@
     "@tanstack/react-query-devtools": "^5.80.7",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "dayjs": "^1.11.13",
     "framer-motion": "^12.14.0",
     "i18n-iso-countries": "^7.14.0",
     "i18next": "^25.1.2",

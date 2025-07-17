@@ -103,6 +103,46 @@ namespace Budgenix.API.Migrations
                     b.ToTable("Categories");
                 });
 
+            modelBuilder.Entity("Budgenix.Models.Finance.CashflowItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid?>("CategoryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Frequency")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Person")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("UserId", "Name");
+
+                    b.ToTable("CashflowItems");
+                });
+
             modelBuilder.Entity("Budgenix.Models.Finance.Expense", b =>
                 {
                     b.Property<Guid>("Id")
@@ -656,6 +696,22 @@ namespace Budgenix.API.Migrations
                     b.HasIndex("UserId", "StartDate");
 
                     b.ToTable("RecurringItems");
+                });
+
+            modelBuilder.Entity("Budgenix.Models.Finance.CashflowItem", b =>
+                {
+                    b.HasOne("Budgenix.Models.Categories.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId");
+
+                    b.HasOne("Budgenix.Models.Users.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Category");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Budgenix.Models.Finance.Expense", b =>

@@ -202,12 +202,29 @@ namespace Budgenix.Services.Finance
                     Total = g.Sum(i => i.Amount)
                 })
                 .ToList();
+               
+                var monthlySums = await _context.Incomes
+                    .Where(i => i.UserId == userId && i.Date.Year == year)
+                    .GroupBy(i => i.Date.Month)
+                    .Select(g => new
+                    {
+                        Month = g.Key,
+                        Total = g.Sum(i => i.Amount)
+                    })
+                    .ToListAsync();
+
+                var annualIncome = monthlySums.Sum(m => m.Total);
+                var avgMonthly = monthlySums.Count > 0
+                    ? monthlySums.Average(m => m.Total)
+                    : 0m;
 
             var result = new IncomeOverviewDto
             {
                 TotalIncome = totalIncome,
                 LastMonthIncome = lastMonthIncome,
-                DailyTotals = dailyTotals
+                DailyTotals = dailyTotals,
+                AnnualIncome = annualIncome,
+                AvgMonthly = avgMonthly
             };
 
             _cache.Set(cacheKey, result, TimeSpan.FromMinutes(5));

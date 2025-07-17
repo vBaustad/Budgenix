@@ -22,7 +22,10 @@ export type IncomeOverviewDto = {
   totalIncome: number;
   lastMonthIncome: number;
   dailyTotals: number[];
+  annualIncome: number;
+  avgMonthly: number;
 };
+
 
 export type GroupedIncomeItem = {
   groupName: string;

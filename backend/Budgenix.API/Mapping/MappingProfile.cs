@@ -7,6 +7,8 @@ using Budgenix.Models.Categories;
 using Budgenix.Dtos.Categories;
 using Budgenix.Dtos.Recurring;
 using Budgenix.Dtos.Goals;
+using Budgenix.Dtos.Cashflow;
+using Budgenix.Models.Shared;
 
 namespace Budgenix.Mapping
 {
@@ -53,8 +55,20 @@ namespace Budgenix.Mapping
             CreateMap<CreateGoalDto, Goal>();
             CreateMap<UpdateGoalDto, Goal>();
 
+            // Cashflow mappings
+            CreateMap<CashflowItem, CashflowItemDto>()
+                .ForMember(dest => dest.CategoryId, opt => opt.MapFrom(src => src.CategoryId))
+                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
+                .ForMember(dest => dest.CategoryColor, opt => opt.MapFrom(src => src.Category.ColorHex));
+
+            CreateMap<CreateCashflowItemDto, CashflowItem>();
+            CreateMap<UpdateCashflowItemDto, CashflowItem>();
+
 
 
         }
+
+
+
     }
 }

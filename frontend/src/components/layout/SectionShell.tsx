@@ -36,7 +36,7 @@ export default function SectionShell({
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className={`w-full max-w-full overflow-hidden ${background} shadow-md p-2 rounded-2xl ${className}`}
+      className={`w-full max-w-full overflow-hidden ${background} border border-base-300 p-2 ${className}`}
     >
       <div className="flex flex-wrap items-center justify-between gap-2 min-h-[2.5rem]">
         <h2 className={`text-xl ${titleTextColor} font-semibold flex items-center gap-2 min-w-0 truncate`}>

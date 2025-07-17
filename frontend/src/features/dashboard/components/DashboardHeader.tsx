@@ -2,22 +2,28 @@ import { useState } from 'react';
 import { useUser } from '@/context/UserContext';
 import { DashboardSummary } from '@/types/finance/DashboardSummary';
 import { format } from 'date-fns';
-import { Link } from 'react-router-dom';
 import AddGoalModal from '@/features/goals/components/AddGoalModal';
 import AddExpenseModal from '@/features/expenses/components/AddExpenseModal';
 import AddBudgetModal from '@/features/budgets/components/AddBudgetModal';
 import { AppIcons } from '@/components/icons/AppIcons';
 import { useTranslation } from 'react-i18next';
 import { useExpensesContext } from '@/features/expenses/context/ExpensesContext';
+import AddIncomeModal from '@/features/Incomes/components/AddIncomeModal';
+import { useIncomesContext } from '@/features/Incomes/context/IncomesContext';
 
 export default function DashboardHeader({ summary }: { summary: DashboardSummary }) {
   const { t } = useTranslation();
+  const subtitles = t('dashboard.subtitles', { returnObjects: true }) as string[];
+  const subtitle = subtitles[Math.floor(Math.random() * subtitles.length)];
   const { user } = useUser();
-  const { handleAddExpense } = useExpensesContext();
   const today = format(new Date(), 'EEEE, MMMM d');
+  const { handleAddExpense } = useExpensesContext();
+  const { handleAddIncome } = useIncomesContext();
+  
 
   const [showAddGoal, setShowAddGoal] = useState(false);
   const [showAddExpense, setShowAddExpense] = useState(false);
+  const [showAddIncome, setShowAddIncome] = useState(false);
   const [showAddBudget, setShowAddBudget] = useState(false);
 
   return (
@@ -31,7 +37,7 @@ export default function DashboardHeader({ summary }: { summary: DashboardSummary
             {t('dashboard.welcome', { name: user?.firstName ?? t('dashboard.fallbackName') })}
           </h1>
           <p className="text-base-content/70 text-lg italic">
-            {t('dashboard.subtitle')}
+            {subtitle}
           </p>
         </div>
         <div className="flex flex-col sm:items-end gap-1 text-sm text-base-content/80">
@@ -64,9 +70,9 @@ export default function DashboardHeader({ summary }: { summary: DashboardSummary
         <button onClick={() => setShowAddExpense(true)} className="btn btn-primary btn-sm shadow-md gap-2">
           <AppIcons.add className="w-4 h-4" /> {t('buttons.addExpense')}
         </button>
-        <Link to="/income" className="btn btn-accent btn-sm shadow-md gap-2">
+        <button onClick={() => setShowAddIncome(true)} className="btn btn-primary btn-sm shadow-md gap-2">
           <AppIcons.add className="w-4 h-4" /> {t('buttons.addIncome')}
-        </Link>
+        </button>
         <button onClick={() => setShowAddBudget(true)} className="btn btn-secondary btn-sm shadow-md gap-2">
           <AppIcons.add className="w-4 h-4" /> {t('buttons.addBudget')}
         </button>
@@ -83,6 +89,15 @@ export default function DashboardHeader({ summary }: { summary: DashboardSummary
           onAdd={(expense) => {
             handleAddExpense(expense);
             setShowAddExpense(false);
+          }}
+        />
+      )}
+      {showAddIncome && (
+        <AddIncomeModal
+          onClose={() => setShowAddIncome(false)}
+          onAdd={(income) => {
+            handleAddIncome(income);
+            setShowAddIncome(false);
           }}
         />
       )}

@@ -114,6 +114,7 @@ export function useCreateIncome() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['incomes'] });
       queryClient.invalidateQueries({ queryKey: ['incomeOverview'] });
+      queryClient.invalidateQueries({ queryKey: ['incomeMonthlySummary'], exact: false });
     },
   });
 }
@@ -126,6 +127,7 @@ export function useUpdateIncome() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['incomes'] });
       queryClient.invalidateQueries({ queryKey: ['incomeOverview'] });
+      queryClient.invalidateQueries({ queryKey: ['incomeMonthlySummary'], exact: false });
     },
   });
 }
@@ -138,6 +140,7 @@ export function useDeleteIncome() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['incomes'] });
       queryClient.invalidateQueries({ queryKey: ['incomeOverview'] });
+      queryClient.invalidateQueries({ queryKey: ['incomeMonthlySummary'], exact: false });
     },
   });
 }

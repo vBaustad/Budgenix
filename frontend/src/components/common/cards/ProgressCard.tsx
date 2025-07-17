@@ -16,7 +16,7 @@ export default function ProgressCard({
   const [textClass = 'text-base-content', bgClass = 'bg-base-300'] = colorClass.split(' ');
 
   return (
-    <div className="bg-base-100 rounded-xl p-4 shadow-md space-y-2 w-full max-w-full overflow-hidden">
+    <div className="bg-base-100 p-4 border border-base-300 space-y-2 w-full max-w-full overflow-hidden">
       <p className="text-sm text-base-content font-medium truncate">{label}</p>
 
       <div className="w-full bg-base-200 h-2 rounded-full overflow-hidden">

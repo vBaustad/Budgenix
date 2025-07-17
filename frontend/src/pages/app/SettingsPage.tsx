@@ -87,7 +87,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-base-100 text-base-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="bg-base-100 text-base-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       <h1 className="text-2xl font-bold">{t('settings.title')}</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

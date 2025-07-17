@@ -18,6 +18,7 @@ namespace Budgenix.Data
         public DbSet<Expense> Expenses { get; set; }
         public DbSet<Budget> Budgets { get; set; }
         public DbSet<Category> Categories { get; set; }
+        public DbSet<CashflowItem> CashflowItems { get; set; }
         public DbSet<RecurringItem> RecurringItems { get; set; }
         public DbSet<Goal> Goals { get; set; }
         public DbSet<AuditLog> AuditLogs { get; set; }
@@ -53,13 +54,27 @@ namespace Budgenix.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<Goal>()
-            .HasOne(g => g.User)
-            .WithMany(u => u.Goals)
-            .HasForeignKey(g => g.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
+                .HasOne(g => g.User)
+                .WithMany(u => u.Goals)
+                .HasForeignKey(g => g.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<CashflowItem>()
+                .HasOne(c => c.User)
+                .WithMany()
+                .HasForeignKey(c => c.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<RecurringItem>()
                 .Property(r => r.Type)
+                .HasConversion<string>();
+
+            builder.Entity<CashflowItem>()
+                .Property(c => c.Type)
+                .HasConversion<string>();
+
+            builder.Entity<CashflowItem>()
+                .Property(c => c.Frequency)
                 .HasConversion<string>();
 
             // === Indexes ===
@@ -71,6 +86,9 @@ namespace Budgenix.Data
 
             builder.Entity<RecurringItem>()
                 .HasIndex(r => new { r.UserId, r.StartDate });
+
+            builder.Entity<CashflowItem>()
+                .HasIndex(c => new { c.UserId, c.Name });
         }
     }
 }

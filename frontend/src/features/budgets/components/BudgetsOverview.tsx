@@ -16,8 +16,9 @@ export default function BudgetOverview({ budgets }: Props) {
   const isOverBudget = totalRemaining < 0;
 
   return (
-    <div className="mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 bg-base-100 p-6 rounded-xl shadow items-center">
-      <div className="flex items-center gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-base-300 bg-base-100 p-6 rounded-xl overflow-hidden">
+      {/* Allocated */}
+      <div className="flex items-center gap-4 px-4 py-3">
         <WalletIcon className="w-6 h-6 text-primary" />
         <div>
           <div className="text-sm text-base-content/70">Allocated</div>
@@ -27,7 +28,8 @@ export default function BudgetOverview({ budgets }: Props) {
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
+      {/* Spent */}
+      <div className="flex items-center gap-4 px-4 py-3">
         <ArrowUpIcon className="w-6 h-6 text-warning" />
         <div>
           <div className="text-sm text-base-content/70">Spent</div>
@@ -37,7 +39,8 @@ export default function BudgetOverview({ budgets }: Props) {
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
+      {/* Remaining */}
+      <div className="flex items-center gap-4 px-4 py-3">
         <ArrowDownIcon
           className={`w-6 h-6 ${isOverBudget ? 'text-error' : 'text-success'}`}
         />

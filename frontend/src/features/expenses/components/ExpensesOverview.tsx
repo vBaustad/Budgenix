@@ -39,66 +39,65 @@ export default function ExpensesOverview() {
   const avgDailySpend = totalSpent / (daysSoFar || 1);
 
   return (
-    <div className="flex flex-col gap-4 w-full max-w-full overflow-hidden">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 bg-base-100 p-6 rounded-xl shadow items-center">
-        {/* Spent */}
-        <div className="flex items-center gap-4">
-          <AppIcons.expenses className="w-6 h-6 text-error" />
-          <div>
-            <div className="text-sm text-base-content/70">{t('expenses.overview.spent')}</div>
-            <div className="text-xl font-semibold">
-              {overviewLoading ? t('shared.loading') : formatCurrency(totalSpent, userCurrency)}
-            </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-base-300 bg-base-100 p-6 rounded-xl overflow-hidden">
+      {/* Spent */} 
+      <div className="flex items-center gap-4 px-4 py-3">
+        <AppIcons.expenses className="w-6 h-6 text-error" />
+        <div>
+          <div className="text-sm text-base-content/70">{t('expenses.overview.spent')}</div>
+          <div className="text-xl font-semibold">
+            {overviewLoading ? t('shared.loading') : formatCurrency(totalSpent, userCurrency)}
           </div>
         </div>
+      </div>
 
-        {/* Upcoming Recurring */}
-        <div className="flex items-center gap-4">
-          <AppIcons.recurring className="w-6 h-6 text-warning" />
-          <div>
-            <div className="text-sm text-base-content/70">{t('expenses.overview.upcoming')}</div>
-            <div className="text-xl font-semibold">
-              {isCurrentMonth
-                ? overviewLoading
-                  ? t('shared.loading')
-                  : formatCurrency(upcomingRecurringExpenseTotal, userCurrency)
-                : 'N/A'}
-            </div>
-          </div>
-        </div>
-
-        {/* Vs Last Month */}
-        <div className="flex items-center gap-4">
-          <AppIcons.growth className="w-6 h-6 text-info" />
-          <div>
-            <div className="text-sm text-base-content/70">{t('expenses.overview.vsLastMonth')}</div>
-            <div
-              className={`text-xl font-semibold ${
-                spendingUp ? 'text-error' : 'text-success'
-              }`}
-            >
-              {overviewLoading
+      {/* Upcoming Recurring */}
+      <div className="flex items-center gap-4 px-4 py-3">
+        <AppIcons.recurring className="w-6 h-6 text-warning" />
+        <div>
+          <div className="text-sm text-base-content/70">{t('expenses.overview.upcoming')}</div>
+          <div className="text-xl font-semibold">
+            {isCurrentMonth
+              ? overviewLoading
                 ? t('shared.loading')
-                : spendingUp
-                ? `+${formatCurrency(spendingDiff, userCurrency)}`
-                : `-${formatCurrency(Math.abs(spendingDiff), userCurrency)}`}
-            </div>
+                : formatCurrency(upcomingRecurringExpenseTotal, userCurrency)
+              : 'N/A'}
           </div>
         </div>
+      </div>
 
-        {/* Avg Daily Spend */}
-        <div className="flex items-center gap-4">
-          <AppIcons.lineChart className="w-6 h-6 text-primary" />
-          <div>
-            <div className="text-sm text-base-content/70">
-              {t('expenses.overview.avgDailySpend')}
-            </div>
-            <div className="text-xl font-semibold">
-              {overviewLoading ? t('shared.loading') : formatCurrency(avgDailySpend, userCurrency)}
-            </div>
+      {/* Vs Last Month */}
+      <div className="flex items-center gap-4 px-4 py-3">
+        <AppIcons.growth className="w-6 h-6 text-info" />
+        <div>
+          <div className="text-sm text-base-content/70">{t('expenses.overview.vsLastMonth')}</div>
+          <div
+            className={`text-xl font-semibold ${
+              spendingUp ? 'text-error' : 'text-success'
+            }`}
+          >
+            {overviewLoading
+              ? t('shared.loading')
+              : spendingUp
+              ? `+${formatCurrency(spendingDiff, userCurrency)}`
+              : `-${formatCurrency(Math.abs(spendingDiff), userCurrency)}`}
+          </div>
+        </div>
+      </div>
+
+      {/* Avg Daily Spend */}
+      <div className="flex items-center gap-4 px-4 py-3">
+        <AppIcons.lineChart className="w-6 h-6 text-primary" />
+        <div>
+          <div className="text-sm text-base-content/70">
+            {t('expenses.overview.avgDailySpend')}
+          </div>
+          <div className="text-xl font-semibold">
+            {overviewLoading ? t('shared.loading') : formatCurrency(avgDailySpend, userCurrency)}
           </div>
         </div>
       </div>
     </div>
+
   );
 }
