@@ -2,10 +2,12 @@ import { useAuth } from "../../context/AuthContext";
 import { CheckCircle2 } from "lucide-react";
 
 const lightThemes = [
+  { id: "budgenixLight", label: "Light" },
   { id: "budgenixLightGreen", label: "Light Green" },
   { id: "budgenixLightOrange", label: "Light Orange" },
 ];
 const darkThemes = [
+  { id: "budgenixDark", label: "Dark" },
   { id: "budgenixDarkGreen", label: "Dark Green" },
   { id: "budgenixDarkOrange", label: "Dark Orange" },
 ];
@@ -22,10 +24,6 @@ export function ThemeDropdown() {
         theme === t.id ? "ring-1 ring-primary ring-offset-1" : ""
       }`}
     >
-      <div
-        data-theme={t.id}
-        className="w-4 h-4 rounded-full border border-base-content bg-primary"
-      ></div>
       <span className="text-sm">{t.label}</span>
       {theme === t.id && (
         <CheckCircle2 className="w-4 h-4 text-primary absolute right-2" />
@@ -40,10 +38,6 @@ export function ThemeDropdown() {
         className="btn btn-sm btn-outline flex items-center gap-2 min-w-[10rem] justify-between"
       >
         <div className="flex items-center gap-2">
-          <div
-            data-theme={theme}
-            className="w-4 h-4 rounded-full border border-base-content bg-primary"
-          ></div>
           <span className="text-sm">
             {currentTheme ? currentTheme.label : "Select Theme"}
           </span>

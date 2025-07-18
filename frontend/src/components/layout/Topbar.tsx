@@ -9,7 +9,7 @@ export default function Topbar({ onMenuClick }: { onMenuClick?: () => void }) {
   const { selectedMonth, setSelectedMonth, selectedYear, setSelectedYear } = useDateFilter();
 
   return (
-    <div className="bg-primary text-base-content z-30 w-full">
+    <div className="bg-base-200 text-base-content z-30 w-full">
       <div className="h-16 flex items-center justify-between px-4 sm:px-6 w-full max-w-full">
         {/* Left: hamburger always visible on mobile */}
         <div className="flex items-center gap-2 flex-1 min-w-0">

@@ -33,14 +33,14 @@ export default function Sidebar({
     <>
       {/* Mobile Sidebar */}
       <Dialog open={sidebarOpen} onClose={setSidebarOpen} className="relative z-50 lg:hidden">
-        <DialogBackdrop className="fixed inset-0 bg-base-300/80 transition-opacity" />
+        <DialogBackdrop className="fixed inset-0 bg-base-200 transition-opacity" />
         <div className="fixed inset-0 flex">
           <DialogPanel className="relative flex w-full max-w-xs flex-1 transform bg-primary p-4 ring-1 ring-primary-content/10 transition duration-300 ease-in-out">
             <TransitionChild>
               <div className="absolute top-0 left-full flex w-16 justify-center pt-5">
                 <button type="button" onClick={() => setSidebarOpen(false)} className="-m-2.5 p-2.5">
                   <span className="sr-only">Close sidebar</span>
-                  <XMarkIcon aria-hidden="true" className="size-6 text-primary-content" />
+                  <XMarkIcon aria-hidden="true" className="size-6 text-base-content" />
                 </button>
               </div>
             </TransitionChild>
@@ -58,7 +58,7 @@ export default function Sidebar({
       </Dialog>
 
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-primary text-primary-content px-4 py-6 text-sm font-medium">
+      <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-base-200 text-base-content px-4 py-6 text-sm font-medium">
         <SidebarProfile user={user} cachedUser={cachedUser} />
         <nav className="flex-1 flex flex-col gap-8 pt-4 overflow-y-auto">
           <SidebarContent t={t} logout={logout} isActive={isActive} />
@@ -102,7 +102,7 @@ const SidebarProfile = React.memo(function SidebarProfile({
         <div className="font-medium">
           {`${displayUser.firstName} ${displayUser.lastName}`}
         </div>
-        <div className="text-xs text-primary-content/70 truncate">
+        <div className="text-xs text-base-content/70 truncate">
           {displayUser.email}
         </div>
       </div>
@@ -131,30 +131,17 @@ function SidebarContent({ t, logout, isActive, setSidebarOpen }: SidebarContentP
     <>
       {sidebarNav.map((section: SidebarSection) => (
         <div key={section.section} className="space-y-1">
-          <p className="text-xs font-semibold uppercase text-primary-content/50 tracking-wide mb-1 px-1">
+          <p className="text-xs font-semibold uppercase tracking-wide mb-1 px-1">
             {t(section.section)}
           </p>
           <ul className="space-y-1">
             {section.items.map((item) => {
-              if ('collapsible' in item && item.collapsible) {
-                return (
-                  <SidebarCollapsibleItem
-                    key={item.label}
-                    item={item}
-                    isActive={isActive}
-                    t={t}
-                    setSidebarOpen={setSidebarOpen}
-                  />
-                );
-              }
-
               if ('action' in item && item.action === 'logout') {
                 return (
                   <li key={item.label}>
                     <button
                       onClick={handleLogout}
-                      className="flex items-center w-full gap-2 px-2 py-2 rounded-md transition hover:bg-primary-content/10 text-primary-content/90"
-                    >
+                      className="flex items-center w-full gap-2 px-2 py-2 rounded-md transition hover:bg-base-300 hover:text-base-content cursor-pointer">
                       <item.icon className="w-4 h-4 shrink-0" />
                       {t(item.label)}
                     </button>
@@ -169,10 +156,10 @@ function SidebarContent({ t, logout, isActive, setSidebarOpen }: SidebarContentP
                       to={item.path}
                       onClick={() => setSidebarOpen?.(false)}
                       className={classNames(
-                        'flex items-center gap-2 px-2 py-2 rounded-md transition',
+                        'flex items-center gap-2 px-2 py-2 rounded-md transition-colors',
                         isActive(item.path)
-                          ? 'bg-base-100 text-base-content font-semibold'
-                          : 'hover:bg-primary-content/10 text-primary-content/90'
+                          ? 'bg-base-300 border-l-4 border-primary text-base-content'
+                          : 'text-base-content/80 hover:bg-base-300 hover:text-base-content'
                       )}
                     >
                       <item.icon className="w-4 h-4 shrink-0" />
@@ -188,67 +175,5 @@ function SidebarContent({ t, logout, isActive, setSidebarOpen }: SidebarContentP
         </div>
       ))}
     </>
-  );
-}
-
-function SidebarCollapsibleItem({
-  item,
-  isActive,
-  t,
-  setSidebarOpen,
-}: {
-  item: SidebarItem;
-  isActive: (path?: string) => boolean;
-  t: (key: string) => string;
-  setSidebarOpen?: (open: boolean) => void;
-}) {
-  const isInitiallyOpen =
-    'children' in item && Array.isArray(item.children)
-      ? item.children.some((child) => isActive(child.path))
-      : false;
-
-  const [open, setOpen] = useState(isInitiallyOpen);
-
-  if (!('children' in item)) return null;
-
-  return (
-    <li>
-      <button
-        onClick={() => setOpen((prev) => !prev)}
-        className={classNames(
-          'flex items-center justify-between w-full px-2 py-2 rounded-md transition',
-          'hover:bg-primary-content/10 text-primary-content/90',
-          open && 'bg-primary-content/10'
-        )}
-      >
-        <span className="flex items-center gap-2">
-          <item.icon className="w-4 h-4 shrink-0" />
-          {t(item.label)}
-        </span>
-        <span className="text-xs">{open ? '▾' : '▸'}</span>
-      </button>
-
-      {open && (
-        <ul className="mt-1 ml-6 space-y-1">
-          {item.children.map((child) => (
-            <li key={child.label}>
-              <Link
-                to={child.path}
-                onClick={() => setSidebarOpen?.(false)}
-                className={classNames(
-                  'flex items-center gap-2 px-2 py-1 rounded-md text-sm transition',
-                  isActive(child.path)
-                    ? 'bg-base-100 text-base-content font-semibold'
-                    : 'hover:bg-primary-content/10 text-primary-content/80'
-                )}
-              >
-                <child.icon className="w-4 h-4 shrink-0" />
-                {t(child.label)}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
-    </li>
   );
 }
