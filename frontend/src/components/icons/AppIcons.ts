@@ -83,6 +83,10 @@ import {
   AlignJustify,
   ArrowLeft,
   ArrowRight,
+  PanelRightClose,
+  PanelLeftOpen,
+  PanelRightOpen,
+  PanelLeftClose,
 } from 'lucide-react';
 
 export const AppIcons = {
@@ -96,6 +100,10 @@ export const AppIcons = {
   help: HelpCircle,
   logout: LogOut,
   loading: Loader2,
+  panelRightClose: PanelRightClose,
+  panelRightOpen: PanelRightOpen,
+  panelLeftClose: PanelLeftClose,
+  panelLeftOpen: PanelLeftOpen,
 
   // User / Auth
   user: User,
