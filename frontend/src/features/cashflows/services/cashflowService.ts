@@ -20,7 +20,6 @@ export const CashflowQueryKeys = {
 
 export async function fetchCashflowItems(): Promise<CashflowItem[]> {
   const result = await apiFetch<CashflowItem[]>(API_URL);
-  console.log('cashflowItems:', result);
   if (!result) throw new Error('Failed to fetch cashflow items');
   return result;
 }

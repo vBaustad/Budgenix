@@ -48,7 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const me = await apiFetch<User>('/api/account/me');
+        const me = await apiFetch<User>('/api/user/me');
         setUser(me);
         setIsLoggedIn(true);
       } catch {
@@ -69,7 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       body: JSON.stringify({ login, password }),
     });
 
-    const me = await apiFetch<User>('/api/account/me');
+    const me = await apiFetch<User>('/api/user/me');
     setUser(me);
     setIsLoggedIn(true);
   };

@@ -25,7 +25,7 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
 
 const { mutate: updateCurrency } = useMutation({
   mutationFn: async (newCurrency: string) => {
-    return apiFetch('/api/account/me/currency', {
+    return apiFetch('/api/user/me/currency', {
       method: 'PUT',
       body: JSON.stringify({ currency: newCurrency }),
     });

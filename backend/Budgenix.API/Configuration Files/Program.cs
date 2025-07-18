@@ -1,6 +1,5 @@
 ﻿using Budgenix.Services;
 using Budgenix.Services.Dashboard;
-using Budgenix.Services.User;
 using Budgenix.Data;
 using Budgenix.Helpers;
 using Budgenix.Mapping;
@@ -23,6 +22,7 @@ using Budgenix.Services.Goals;
 using Budgenix.Services.Admin;
 using Budgenix.Infrastructure.Identity;
 using Budgenix.Services.Audit;
+using Budgenix.Services.User;
 
 var builder = WebApplication.CreateBuilder(args);
 

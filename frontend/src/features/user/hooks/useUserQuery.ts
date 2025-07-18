@@ -28,7 +28,7 @@ export function useUserQuery() {
 
 return useQuery<User | null>({
   queryKey: ['user'],
-  queryFn: async () => await apiFetch('/api/account/me'),
+  queryFn: async () => await apiFetch('/api/user/me'),
   enabled: authChecked && isLoggedIn,
   staleTime: 1000 * 60 * 10,
   refetchOnWindowFocus: false,
