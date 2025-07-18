@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -9,7 +9,8 @@ import BudgenixLogo from '../../assets/Logo/BudgenixLogo.png';
 import { Dialog, DialogBackdrop, DialogPanel, TransitionChild } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { useUser } from '@/context/UserContext';
-import type { SidebarItem, SidebarSection } from '@/types/shared/sidebar';
+import type {  SidebarSection } from '@/types/shared/sidebar';
+
 
 function classNames(...classes: (string | undefined | null | false)[]) {
   return classes.filter(Boolean).join(' ');
