@@ -98,7 +98,8 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="bg-base-100 text-base-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="min-h-screen overflow-y-auto bg-base-100 text-base-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
       <h1 className="text-2xl font-bold">{t('settings.title')}</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -192,8 +193,8 @@ export default function SettingsPage() {
                 <label className="block text-sm font-semibold mb-1">{t('settings.app.theme')}</label>
                 <ThemeDropdown />
               </div>
-              <hr className="border-base-300 my-4" />
-              <div className="text-sm text-base-content/70">
+              <hr className="border-base-300 mt-4" />
+              <div className="text-sm text-base-content/70 mt-12">
                 <p><strong>{t('settings.app.dateFormat')}:</strong> {t('shared.comingSoon')}</p>
                 <p><strong>{t('settings.app.language')}:</strong> {t('shared.comingSoon')}</p>
                 <p><strong>{t('settings.app.timeZone')}:</strong> {t('shared.comingSoon')}</p>
