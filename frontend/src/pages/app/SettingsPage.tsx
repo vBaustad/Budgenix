@@ -10,7 +10,7 @@ import { apiFetch } from '@/utils/api';
 
 export default function SettingsPage() {
   const { t } = useTranslation();
-  const { user, isLoading } = useUser();
+  const { user, isLoading, refetchUser } = useUser();
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -28,8 +28,7 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (user) {
-      setFormData(prev => ({
-        ...prev,
+      const updated = {
         firstName: user.firstName || '',
         lastName: user.lastName || '',
         addressLine1: user.addressLine1 || '',
@@ -38,7 +37,8 @@ export default function SettingsPage() {
         stateOrProvince: user.stateOrProvince || '',
         zipOrPostalCode: user.zipOrPostalCode || '',
         country: user.country || '',
-      }));
+      };
+      setFormData(prev => ({ ...prev, ...updated }));
     }
   }, [user]);
 
@@ -48,18 +48,21 @@ export default function SettingsPage() {
   };
 
   const handleUserSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await apiFetch('/api/account/me', {
-        method: 'PUT',
-        body: JSON.stringify(formData),
-      });
-      toast.success(t('settings.messages.profileSuccess'));
-    } catch (err) {
-      console.error('[SettingsPage] Failed to update profile', err);
-      toast.error(t('settings.messages.profileFail'));
-    }
-  };
+  e.preventDefault();
+  try {
+    await apiFetch('/api/user/me', {
+      method: 'PUT',
+      body: JSON.stringify(formData),
+    });
+
+    await refetchUser();
+
+    toast.success(t('settings.messages.profileSuccess'));
+  } catch (err) {
+    console.error('[SettingsPage] Failed to update profile', err);
+    toast.error(t('settings.messages.profileFail'));
+  }
+};
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,14 +71,22 @@ export default function SettingsPage() {
       return;
     }
     try {
-      await apiFetch('/api/account/me/password', {
+      await apiFetch('/api/user/me/password', {
         method: 'PUT',
         body: JSON.stringify({
           currentPassword: formData.currentPassword,
           newPassword: formData.newPassword,
         }),
       });
+      
       toast.success(t('settings.messages.passwordSuccess'));
+
+      setFormData(prev => ({
+        ...prev,
+        currentPassword: '',
+        newPassword: '',
+        confirmNewPassword: '',
+      }));
     } catch (err) {
       console.error('[SettingsPage] Failed to update password', err);
       toast.error(t('settings.messages.passwordFail'));
@@ -102,27 +113,30 @@ export default function SettingsPage() {
               <p><strong>{t('settings.profile.fields.email')}</strong> {user?.email}</p>
               <p><strong>{t('settings.profile.fields.username')}</strong> {user?.userName}</p>
               <p>
-                <strong>{t('settings.profile.fields.address')}</strong> {user?.addressLine1}, {user?.addressLine2} {user?.city} {user?.stateOrProvince} {user?.zipOrPostalCode}, {user?.country}
+                <strong>{t('settings.profile.fields.address')}</strong>{' '}
+                {[user?.addressLine1, user?.addressLine2, user?.city, user?.stateOrProvince, user?.zipOrPostalCode, user?.country]
+                  .filter(Boolean)
+                  .join(', ')}
               </p>
               <p><strong>{t('settings.profile.fields.tier')}</strong> {user?.subscriptionTier}</p>
               <p><strong>{t('settings.profile.fields.billingCycle')}</strong> {user?.billingCycle}</p>
               <p><strong>{t('settings.profile.fields.nextPayment')}</strong> {user?.subscriptionEndDate || 'N/A'}</p>
             </div>
           </div>
-
+          
           <div className="card bg-base-200 p-6 shadow space-y-4">
             <h2 className="text-lg font-semibold">{t('settings.updateProfile.title')}</h2>
             <form onSubmit={handleUserSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <InputField name="firstName" placeholder={t('register.fields.firstName')} value={formData.firstName} onChange={handleChange} />
-              <InputField name="lastName" placeholder={t('register.fields.lastName')} value={formData.lastName} onChange={handleChange} />
-              <InputField name="addressLine1" placeholder={t('register.fields.address')} value={formData.addressLine1} onChange={handleChange} />
-              <InputField name="addressLine2" placeholder="Address line 2" value={formData.addressLine2} onChange={handleChange} />
-              <InputField name="city" placeholder={t('register.fields.city', 'City')} value={formData.city} onChange={handleChange} />
-              <InputField name="stateOrProvince" placeholder={t('register.fields.stateOrProvince', 'State/Province')} value={formData.stateOrProvince} onChange={handleChange} />
-              <InputField name="zipOrPostalCode" placeholder={t('register.fields.zipOrPostalCode', 'ZIP/Postal Code')} value={formData.zipOrPostalCode} onChange={handleChange} />
-              <InputField name="country" placeholder={t('register.fields.country')} value={formData.country} onChange={handleChange} />
-              <div className="col-span-full">
-                <button type="submit" className="btn btn-primary">{t('settings.updateProfile.save')}</button>
+              <InputField name="firstName" placeholder={t('settings.updateProfile.placeholders.firstName')} value={formData.firstName} onChange={handleChange} />
+              <InputField name="lastName" placeholder={t('settings.updateProfile.placeholders.lastName')} value={formData.lastName} onChange={handleChange} />
+              <InputField name="addressLine1" placeholder={t('settings.updateProfile.placeholders.addressLine1')} value={formData.addressLine1} onChange={handleChange} />
+              <InputField name="addressLine2" placeholder={t('settings.updateProfile.placeholders.addressLine2')} value={formData.addressLine2} onChange={handleChange} />
+              <InputField name="city" placeholder={t('settings.updateProfile.placeholders.city')} value={formData.city} onChange={handleChange} />
+              <InputField name="stateOrProvince" placeholder={t('settings.updateProfile.placeholders.stateOrProvince')} value={formData.stateOrProvince} onChange={handleChange} />
+              <InputField name="zipOrPostalCode" placeholder={t('settings.updateProfile.placeholders.zipOrPostalCode')} value={formData.zipOrPostalCode} onChange={handleChange} />
+              <InputField name="country" placeholder={t('settings.updateProfile.placeholders.country')} value={formData.country} onChange={handleChange} />
+              <div>
+                <button type="submit" className="btn btn-primary w-1/2">{t('settings.updateProfile.save')}</button>
               </div>
             </form>
           </div>
@@ -130,14 +144,38 @@ export default function SettingsPage() {
           <div className="card bg-base-200 p-6 shadow space-y-4">
             <h2 className="text-lg font-semibold">{t('settings.password.title')}</h2>
             <form onSubmit={handlePasswordSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <InputField name="currentPassword" type="password" placeholder={t('login.password')} value={formData.currentPassword} onChange={handleChange} />
-              <InputField name="newPassword" type="password" placeholder={t('register.fields.password')} value={formData.newPassword} onChange={handleChange} />
-              <InputField name="confirmNewPassword" type="password" placeholder={t('register.fields.confirmPassword')} value={formData.confirmNewPassword} onChange={handleChange} />
-              <div className="col-span-full">
-                <button type="submit" className="btn btn-primary">{t('settings.password.update')}</button>
+              <div className="md:col-span-1">
+                <InputField
+                  name="currentPassword"
+                  type="password"
+                  placeholder={t('settings.password.placeholders.old')}
+                  value={formData.currentPassword}
+                  onChange={handleChange}
+                />
+              </div>
+              <div></div>
+              <InputField
+                name="newPassword"
+                type="password"
+                placeholder={t('settings.password.placeholders.new')}
+                value={formData.newPassword}
+                onChange={handleChange}
+              />
+              <InputField
+                name="confirmNewPassword"
+                type="password"
+                placeholder={t('settings.password.placeholders.confirm')}
+                value={formData.confirmNewPassword}
+                onChange={handleChange}
+              />
+              <div>
+                <button type="submit" className="btn btn-primary w-1/2">
+                  {t('settings.password.update')}
+                </button>
               </div>
             </form>
           </div>
+
         </div>
 
         <div className="space-y-6">

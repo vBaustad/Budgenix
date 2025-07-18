@@ -1,4 +1,5 @@
-﻿using Budgenix.Models.Shared;
+﻿using Budgenix.Dtos.Users;
+using Budgenix.Models.Shared;
 using Budgenix.Models.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Localization;
@@ -35,7 +36,85 @@ namespace Budgenix.Services.User
         public async Task<ApplicationUser?> GetCurrentUserAsync()
         {
             return await _userManager.GetUserAsync(_contextAccessor.HttpContext?.User);
+        }
 
+        public async Task<UserDto?> GetUserDetailsAsync()
+        {
+            var user = await GetCurrentUserAsync();
+            if (user == null) return null;
+
+            var roles = await _userManager.GetRolesAsync(user);
+            var isAdmin = roles.Contains("Admin");
+
+            return new UserDto
+            {
+                Id = user.Id,
+                UserName = user.UserName,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                AddressLine1 = user.AddressLine1,
+                AddressLine2 = user.AddressLine2,
+                City = user.City,
+                StateOrProvince = user.StateOrProvince,
+                ZipOrPostalCode = user.ZipOrPostalCode,
+                Country = user.Country,
+                SubscriptionTier = user.SubscriptionTier,
+                SubscriptionIsActive = user.SubscriptionIsActive,
+                SubscriptionStartDate = user.SubscriptionStartDate,
+                SubscriptionEndDate = user.SubscriptionEndDate,
+                BillingCycle = user.BillingCycle,
+                ReferralCode = user.ReferralCode,
+                PreferredCurrency = user.PreferredCurrency ?? "USD",
+                IsAdmin = isAdmin
+            };
+        }
+
+        public async Task UpdateUserAsync(UpdateUserDto dto)
+        {
+            var user = await GetCurrentUserAsync();
+            if (user == null) throw new UnauthorizedAccessException();
+
+            user.FirstName = dto.FirstName;
+            user.LastName = dto.LastName;
+            user.AddressLine1 = dto.AddressLine1;
+            user.AddressLine2 = dto.AddressLine2;
+            user.City = dto.City;
+            user.StateOrProvince = dto.StateOrProvince;
+            user.ZipOrPostalCode = dto.ZipOrPostalCode;
+            user.Country = dto.Country;
+
+            await _userManager.UpdateAsync(user);
+        }
+
+        public async Task ChangePasswordAsync(UpdatePasswordDto dto)
+        {
+            var user = await GetCurrentUserAsync();
+            if (user == null)
+                throw new UnauthorizedAccessException(_localizer["Shared_UserNotFound"]);
+
+            var result = await _userManager.ChangePasswordAsync(user, dto.CurrentPassword, dto.NewPassword);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join("; ", result.Errors.Select(e => e.Description));
+                throw new ApplicationException(_localizer["Settings_PasswordChangeFailed"] + ": " + errors);
+            }
+        }
+
+
+        public async Task<string> GetCurrencyAsync()
+        {
+            var user = await GetCurrentUserAsync();
+            return user?.PreferredCurrency ?? "USD";
+        }
+
+        public async Task UpdateCurrencyAsync(string currency)
+        {
+            var user = await GetCurrentUserAsync();
+            if (user == null) throw new UnauthorizedAccessException();
+
+            user.PreferredCurrency = currency;
+            await _userManager.UpdateAsync(user);
         }
     }
 }

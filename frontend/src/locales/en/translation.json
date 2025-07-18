@@ -3,45 +3,62 @@
         "name": "Budgenix"
     },
     "settings": {
-        "title": "Settings",
-        "profile": {
-            "title": "Profile",
-            "description": "Review your personal details and subscription.",
-            "fields": {
-            "name": "Name:",
-            "email": "Email:",
-            "username": "Username:",
-            "address": "Address:",
-            "tier": "Tier:",
-            "billingCycle": "Billing cycle:",
-            "nextPayment": "Next payment:"
-            }
-        },
-        "updateProfile": {
-            "title": "Update Profile",
-            "save": "Save Changes"
-        },
-        "password": {
-            "title": "Change Password",
-            "update": "Update Password",
-            "errorMismatch": "Passwords do not match"
-        },
-        "app": {
-            "title": "App Settings",
-            "description": "Configure your app preferences.",
-            "currency": "Currency",
-            "theme": "Theme",
-            "dateFormat": "Date Format",
-            "language": "Language",
-            "timeZone": "Time Zone",
-            "notifications": "Notifications"
-        },
-        "messages": {
-            "profileSuccess": "Profile updated successfully!",
-            "profileFail": "Failed to update profile",
-            "passwordSuccess": "Password updated!",
-            "passwordFail": "Failed to update password"
+    "title": "Settings",
+    "profile": {
+        "title": "Profile",
+        "description": "Review your personal details and subscription.",
+        "fields": {
+        "name": "Name:",
+        "email": "Email:",
+        "username": "Username:",
+        "address": "Address:",
+        "addressLine2": "Address Line 2",
+        "tier": "Tier:",
+        "billingCycle": "Billing cycle:",
+        "nextPayment": "Next payment:"
         }
+    },
+    "updateProfile": {
+        "title": "Update Profile",
+        "save": "Save Changes",
+        "placeholders": {
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "addressLine1": "Address",
+        "addressLine2": "Address Line 2",
+        "city": "City",
+        "stateOrProvince": "State / Province",
+        "zipOrPostalCode": "ZIP / Postal Code",
+        "country": "Country"
+        }
+    },
+    "password": {
+        "title": "Change Password",
+        "update": "Update Password",
+        "placeholders": {
+        "old": "Old Password",
+        "new": "New Password",
+        "confirm": "Confirm Password"
+        },
+        "errorMismatch": "New password and confirmation do not match."
+    },
+    "app": {
+        "title": "App Settings",
+        "description": "Configure your app preferences.",
+        "currency": "Currency",
+        "theme": "Theme",
+        "dateFormat": "Date Format",
+        "language": "Language",
+        "timeZone": "Time Zone",
+        "notifications": "Notifications"
+    },
+    "messages": {
+        "profileSuccess": "Profile updated successfully!",
+        "profileFail": "Failed to update profile.",
+        "passwordSuccess": "Password updated successfully!",
+        "passwordFail": "Failed to update password.",
+        "currencyUpdated": "Currency updated successfully."
+    }
     },
     "sidebar": {
         "main": "Main",

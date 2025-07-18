@@ -224,6 +224,33 @@ namespace Budgenix.API.Controllers
             });
         }
 
+        [Authorize]
+        [HttpPut("me")]
+        public async Task<IActionResult> UpdateCurrentUser([FromBody] UpdateUserDto dto)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Unauthorized();
+
+            user.FirstName = dto.FirstName;
+            user.LastName = dto.LastName;
+            user.AddressLine1 = dto.AddressLine1;
+            user.AddressLine2 = dto.AddressLine2;
+            user.City = dto.City;
+            user.StateOrProvince = dto.StateOrProvince;
+            user.ZipOrPostalCode = dto.ZipOrPostalCode;
+            user.Country = dto.Country;
+
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+            {
+                return BadRequest(result.Errors);
+            }
+
+            return NoContent();
+        }
+
 
         [Authorize]
         [HttpGet("me/currency")]

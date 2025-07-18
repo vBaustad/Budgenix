@@ -15,7 +15,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const { data: user, isLoading, refetch } = useUserQuery();
   const [cachedUser, setCachedUser] = useState<User | undefined>(undefined);
 
-  // Store user in localStorage on successful load
+
   useEffect(() => {
     if (user) {
       try {
@@ -27,7 +27,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user]);
 
-  // Load from localStorage on initial mount (before API returns)
   useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
