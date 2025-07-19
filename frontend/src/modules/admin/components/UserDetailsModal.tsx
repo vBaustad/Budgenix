@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
-import { AuditLogDto } from '@/admin/types/auditLogDto';
-import { AdminUserDetailsDto } from '@/admin/types/admin';
+import { AuditLogDto } from '@/modules/admin/types/auditLogDto';
+import { AdminUserDetailsDto } from '@/modules/admin/types/admin';
 import { formatDistanceToNow } from 'date-fns';
 import { AppIcons } from '@/components/icons/AppIcons';
 import { useTranslation } from 'react-i18next';

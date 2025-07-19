@@ -23,6 +23,8 @@ using Budgenix.Services.Admin;
 using Budgenix.Infrastructure.Identity;
 using Budgenix.Services.Audit;
 using Budgenix.Services.User;
+using Budgenix.Services.System;
+using Budgenix.Services.Email;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -66,6 +68,7 @@ builder.Services.AddScoped<IBudgetService, BudgetService>();
 builder.Services.AddScoped<IGoalService, GoalService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IAuditService, AuditService>();
+builder.Services.AddScoped<ISystemNotificationsService, SystemNotificationsService>();
 
 
 
@@ -185,8 +188,7 @@ app.UseAuthorization();
 app.MapControllers();
 
 try
-{
-    logger.LogInformation("🚀 Starting Budgenix.API...");
+{    
     app.Run();
 }
 catch (Exception ex)

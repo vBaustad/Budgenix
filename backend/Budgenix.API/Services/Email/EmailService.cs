@@ -1,4 +1,6 @@
-﻿namespace Budgenix.Services
+﻿using System.Net;
+
+namespace Budgenix.Services.Email
 {
     public interface IEmailService
     {
@@ -77,8 +79,8 @@
 
 
             var response = await client.Transmissions.Send(transmission);
-            if (response.StatusCode != System.Net.HttpStatusCode.OK &&
-                response.StatusCode != System.Net.HttpStatusCode.Accepted)
+            if (response.StatusCode != HttpStatusCode.OK &&
+                response.StatusCode != HttpStatusCode.Accepted)
             {
                 throw new Exception("Failed to send confirmation email.");
             }

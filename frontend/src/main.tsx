@@ -10,6 +10,7 @@ import { UserLayer } from './context/UserLayer.tsx';
 import { CoreProvider } from './context/CoreContext.tsx';
 import { FinanceProvider } from './context/FinanceContext.tsx';
 import { InsightsProvider } from './context/InsightContext.tsx';
+import { SystemNotificationProvider } from './modules/systemNotifications/context/SystemNotificationContext.tsx';
 
 
 createRoot(document.getElementById('root')!).render(
@@ -20,7 +21,9 @@ createRoot(document.getElementById('root')!).render(
           <CoreProvider>
             <FinanceProvider>
               <InsightsProvider>
-                <App />
+                <SystemNotificationProvider>
+                  <App />
+                </SystemNotificationProvider>
               </InsightsProvider>
             </FinanceProvider>
           </CoreProvider>

@@ -8,8 +8,8 @@ import AppLayout from './components/layout/AppLayout';
 import BaseLayout from './features/public/components/BaseLayout';
 import SignupConfirmationPage from './pages/public/SignupConfirmationPage';
 
-import AdminPage from '@/admin/AdminPage';
-import RequireAdmin from './admin/RequireAdmin';
+import AdminPage from '@/modules/admin/AdminPage';
+import RequireAdmin from './modules/admin/RequireAdmin';
 
 import {
   DashboardPage,

@@ -13,7 +13,6 @@ using Budgenix.Models.Shared;
 using Budgenix.Dtos.Stripe;
 using Newtonsoft.Json;
 using Microsoft.IdentityModel.Tokens;
-using Budgenix.API.Models.Users;
 using Budgenix.Models.Users;
 
 //FOR DEV: stripe listen --forward-to localhost:5035/api/stripe/webhook

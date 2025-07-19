@@ -3,7 +3,7 @@ import {
   AdminUserDto,
   AdminUserDetailsDto,
   AdminDeleteResultDto,
-} from '@/admin/types/admin';
+} from '@/modules/admin/types/admin';
 
 import { AuditLogDto } from '../types/auditLogDto';
 

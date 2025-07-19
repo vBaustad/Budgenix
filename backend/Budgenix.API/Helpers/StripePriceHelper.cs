@@ -1,5 +1,4 @@
-﻿using Budgenix.API.Models.Users;
-using Budgenix.Models.Users;
+﻿using Budgenix.Models.Users;
 
 namespace Budgenix.Helpers
 {

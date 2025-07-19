@@ -4,6 +4,7 @@ using Budgenix.Models.Users;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Budgenix.Models.Audit;
+using Budgenix.Models.System;
 
 namespace Budgenix.Data
 {
@@ -22,6 +23,9 @@ namespace Budgenix.Data
         public DbSet<RecurringItem> RecurringItems { get; set; }
         public DbSet<Goal> Goals { get; set; }
         public DbSet<AuditLog> AuditLogs { get; set; }
+
+        public DbSet<SystemNotification> SystemNotifications { get; set; }
+        public DbSet<UserNotificationRead> UserNotificationReads { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder builder)
