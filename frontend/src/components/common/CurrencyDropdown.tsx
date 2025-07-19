@@ -15,7 +15,7 @@ export default function CurrencyDropdown() {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const current = currencies.find(c => c.code === currency);
+  const current = currencies.find(c => c.code === currency);  
 
   const handleSelect = async (code: string) => {
     setOpen(false);

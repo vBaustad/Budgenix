@@ -84,7 +84,7 @@ namespace Budgenix.Services.Admin
                 BillingCycle = user.BillingCycle,
                 SubscriptionStartDate = user.SubscriptionStartDate,
                 SubscriptionEndDate = user.SubscriptionEndDate,
-                PreferredCurrency = user.PreferredCurrency,
+                Currency = user.Currency,
                 ReferralCode = user.ReferralCode,
                 Role = roles.FirstOrDefault() ?? "User",
                 Stats = new UserStatsDto

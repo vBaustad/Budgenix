@@ -249,12 +249,12 @@ namespace Budgenix.API.Controllers
 
             if (!string.IsNullOrEmpty(session.Currency))
             {
-                user.PreferredCurrency = session.Currency.ToUpper();
+                user.Currency = session.Currency.ToUpper();
             }
 
             await _context.SaveChangesAsync();
 
-            Console.WriteLine($"User {user.Email} updated: active subscription, customerId {customerId}, billingCycle {user.BillingCycle}, currency {user.PreferredCurrency}");
+            Console.WriteLine($"User {user.Email} updated: active subscription, customerId {customerId}, billingCycle {user.BillingCycle}, currency {user.Currency}");
         }
 
 

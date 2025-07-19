@@ -19,7 +19,7 @@ namespace Budgenix.Dtos.Admin
         public BillingCycleEnum? BillingCycle { get; set; }
         public DateTime? SubscriptionStartDate { get; set; }
         public DateTime? SubscriptionEndDate { get; set; }
-        public string? PreferredCurrency { get; set; }
+        public string? Currency { get; set; }
         public string? ReferralCode { get; set; }
         public string? Country { get; set; }
     }

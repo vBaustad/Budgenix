@@ -31,7 +31,7 @@ namespace Budgenix.Services.Insights.Rules
                 .SumAsync(r => (decimal?)r.Amount) ?? 0;
 
             var user = await _userService.GetCurrentUserAsync();
-            var currency = user?.PreferredCurrency ?? "USD";
+            var currency = user?.Currency ?? "USD";
 
             if (income < upcomingRecurring)
             {

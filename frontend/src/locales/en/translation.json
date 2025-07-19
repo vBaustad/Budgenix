@@ -545,7 +545,8 @@
             "Monthly": "Monthly",
             "Quarterly": "Quarterly",
             "Yearly": "Yearly"
-        }
+        },
+        "comingSoon": "Coming Soon..."
     },
     "admin": {
         "panel": {
