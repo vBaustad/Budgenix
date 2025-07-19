@@ -1,5 +1,4 @@
-﻿using Budgenix.API.Models.Users;
-using Budgenix.Models.Finance;
+﻿using Budgenix.Models.Finance;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;

@@ -182,9 +182,7 @@ namespace Budgenix.Services.Finance
                     Total = expenseByDay.TryGetValue(day, out var total) ? total : 0
                 })
                 .ToList();
-
-            _logger.LogInformation("Daily totals generated: {DailyTotals}", string.Join(", ", dailyTotals.Select(d => $"{d.Day}:{d.Total}")));
-
+                        
             var result = new ExpenseOverviewDto
             {
                 TotalExpense = totalExpense,

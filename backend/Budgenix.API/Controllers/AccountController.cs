@@ -1,10 +1,9 @@
-﻿using Budgenix.API.Models.Users;
+﻿using Budgenix.Models.Users;
+using Budgenix.Services.Email;
 using Budgenix.Dtos.Shared;
 using Budgenix.Dtos.Users;
 using Budgenix.Helpers;
 using Budgenix.Models.Shared;
-using Budgenix.Models.Users;
-using Budgenix.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;

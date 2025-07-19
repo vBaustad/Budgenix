@@ -2,6 +2,15 @@
     "app":{
         "name": "Budgenix"
     },
+    "systemUpdates": {
+        "cashflowV1": {
+            "title": "New Cashflow Page!",
+            "message": "You can now track your income and expenses side-by-side in a single view.\n\nQuickly compare monthly and annual totals, breakdowns, and more!"
+        }
+    },        
+    "systemNotifications": {
+        "counter": "{{current}} of {{total}}"
+    },
     "settings": {
     "title": "Settings",
     "profile": {
@@ -494,6 +503,8 @@
         "cancel": "Cancel",
         "delete": "Delete",
         "edit": "Edit",
+        "next": "Next",
+        "dismiss": "Dismiss",
         "update": "Update",
         "close": "Close",
         "confirm": "Confirm",

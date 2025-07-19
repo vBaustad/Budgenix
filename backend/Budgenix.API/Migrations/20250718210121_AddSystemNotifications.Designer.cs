@@ -4,6 +4,7 @@ using Budgenix.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Budgenix.API.Migrations
 {
     [DbContext(typeof(BudgenixDbContext))]
-    partial class BudgenixDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250718210121_AddSystemNotifications")]
+    partial class AddSystemNotifications
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -280,9 +283,6 @@ namespace Budgenix.API.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("Message")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("MessageKey")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -291,9 +291,6 @@ namespace Budgenix.API.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TitleKey")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

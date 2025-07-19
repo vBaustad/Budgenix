@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Topbar from './Topbar';
 import Sidebar from './Sidebar';
+import { SystemNotificationModal } from '@/modules/systemNotifications/components/SystemNotificationModal';
+
 
 export default function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(() => {
@@ -39,6 +41,7 @@ export default function AppLayout() {
 
         <div className="flex-1 bg-base-100 overflow-hidden">
           <main>
+            <SystemNotificationModal />
             <Outlet />
           </main>
         </div>

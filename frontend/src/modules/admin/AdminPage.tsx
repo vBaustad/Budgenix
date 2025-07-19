@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAdminUsers } from './hooks/useAdminUsers';
-import { AdminUserDto, AdminUserDetailsDto } from '@/admin/types/admin';
-import { AuditLogDto } from '@/admin/types/auditLogDto';
+import { AdminUserDto, AdminUserDetailsDto } from '@/modules/admin/types/admin';
+import { AuditLogDto } from '@/modules/admin/types/auditLogDto';
 import UserDetailsModal from './components/UserDetailsModal';
 import { getAdminUserDetails, getAuditLogsForUser } from './services/adminService';
 import { formatDistanceToNow } from 'date-fns';
