@@ -21,7 +21,7 @@ namespace Budgenix.Dtos.Users
         public DateTime? SubscriptionEndDate { get; set; }
         public BillingCycleEnum BillingCycle { get; set; }
         public string? ReferralCode { get; set; }
-        public string PreferredCurrency { get; set; } = "USD";
+        public string Currency { get; set; } = "USD";
         public bool IsAdmin { get; set; }
     }
 }

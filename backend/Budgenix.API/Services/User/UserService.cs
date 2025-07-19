@@ -65,7 +65,7 @@ namespace Budgenix.Services.User
                 SubscriptionEndDate = user.SubscriptionEndDate,
                 BillingCycle = user.BillingCycle,
                 ReferralCode = user.ReferralCode,
-                PreferredCurrency = user.PreferredCurrency ?? "USD",
+                Currency = user.Currency ?? "USD",
                 IsAdmin = isAdmin
             };
         }
@@ -105,7 +105,7 @@ namespace Budgenix.Services.User
         public async Task<string> GetCurrencyAsync()
         {
             var user = await GetCurrentUserAsync();
-            return user?.PreferredCurrency ?? "USD";
+            return user?.Currency ?? "USD";
         }
 
         public async Task UpdateCurrencyAsync(string currency)
@@ -113,7 +113,7 @@ namespace Budgenix.Services.User
             var user = await GetCurrentUserAsync();
             if (user == null) throw new UnauthorizedAccessException();
 
-            user.PreferredCurrency = currency;
+            user.Currency = currency;
             await _userManager.UpdateAsync(user);
         }
     }

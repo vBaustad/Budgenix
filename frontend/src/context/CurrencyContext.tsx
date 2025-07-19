@@ -13,39 +13,53 @@ const CurrencyContext = createContext<CurrencyContextType>({
 });
 
 export function CurrencyProvider({ children }: { children: React.ReactNode }) {
-  const { user } = useUser();
+  const { user, cachedUser, isLoading } = useUser();
   const queryClient = useQueryClient();
-  const [currency, setLocalCurrency] = useState<string | undefined>(user?.currency);
 
+  const [currency, setLocalCurrency] = useState<string | undefined>(
+    user?.currency || cachedUser?.currency
+  );
+  
   useEffect(() => {
-    if (user?.currency !== currency) {
-      setLocalCurrency(user?.currency);
+    console.log('[CurrencyProvider] useEffect: user?.currency =', user?.currency);
+    if (user?.currency && user.currency !== currency) {
+      console.log('[CurrencyProvider] Setting localCurrency from user.currency');
+      setLocalCurrency(user.currency);
     }
   }, [user?.currency]);
 
-const { mutate: updateCurrency } = useMutation({
-  mutationFn: async (newCurrency: string) => {
-    return apiFetch('/api/user/me/currency', {
-      method: 'PUT',
-      body: JSON.stringify({ currency: newCurrency }),
-    });
-  },
-  onSuccess: async () => {
-    await queryClient.invalidateQueries({ queryKey: ['user'] });
-    await queryClient.refetchQueries({ queryKey: ['user'] });
-  },
-  onError: (err) => {
-    console.error('[CurrencyProvider] Currency change failed:', err);
-  },
-});
 
+  const { mutateAsync: updateCurrency } = useMutation({
+    mutationFn: async (newCurrency: string) => {
+      return apiFetch('/api/user/me/currency', {
+        method: 'PUT',
+        body: JSON.stringify({ currency: newCurrency }),
+      });
+    },
+    onSuccess: async (_, newCurrency) => {
+      setLocalCurrency(newCurrency);
+      await queryClient.invalidateQueries({ queryKey: ['user'] });
+    },
+    onError: (err) => {
+      console.error('[CurrencyProvider] Currency change failed:', err);
+    },
+  });
+
+  const handleSetCurrency = (newCurrency: string) => {
+    updateCurrency(newCurrency);
+  };
+
+ 
+  if (!currency && isLoading) return null;
 
   return (
-    <CurrencyContext.Provider value={{ currency, setCurrency: updateCurrency }}>
+    <CurrencyContext.Provider value={{ currency, setCurrency: handleSetCurrency }}>
       {children}
     </CurrencyContext.Provider>
   );
 }
+
+
 
 export const useCurrency = () => useContext(CurrencyContext);
 

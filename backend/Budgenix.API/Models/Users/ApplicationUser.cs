@@ -82,7 +82,7 @@ namespace Budgenix.Models.Users
         public DateTime? DiscountEndDate { get; set; }
 
         //Financial
-        public string PreferredCurrency { get; set; } = "USD"; // Default fallback
+        public string Currency { get; set; } = "USD"; // Default fallback
 
         //Admin related tracking
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
