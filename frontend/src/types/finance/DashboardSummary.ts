@@ -24,6 +24,9 @@ export type DashboardSummary = {
   savingsGoalProgressPercent: number;
   nextGoalName: string | null;
   nextGoalDueDate: string | null;
+  monthlyCashflowBalance: number;
+  monthlyCashflowIncome: number;
+  monthlyCashflowExpenses: number;
   lastUpdated: string;
   alertsCount: number;
 };

@@ -82,19 +82,34 @@ async function updateExpenseApi({
 }: {
   id: string;
   data: UpdateExpenseDto;
-}): Promise<void> {
-  await apiFetch(`${API_BASE_URL}/${id}`, {
+}): Promise<Expense> {
+  const result = await apiFetch<Expense | null>(`${API_BASE_URL}/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
+
+  if (!result) {
+    throw new Error('Failed to update expense');
+  }
+
+  return result;
 }
 
-async function deleteExpenseApi(id: string): Promise<void> {
+
+
+async function deleteExpenseApi({
+  id,
+}: {
+  id: string;
+  date: string;
+}): Promise<void> {
   await apiFetch(`${API_BASE_URL}/${id}`, {
     method: 'DELETE',
   });
 }
+
+
 
 // === REACT QUERY HOOKS ===
 export function useExpenses(filters: FetchExpenseOptions) {
@@ -126,9 +141,18 @@ export function useCreateExpense() {
 
   return useMutation({
     mutationFn: createExpenseApi,
-    onSuccess: () => {
+    onSuccess: (createdExpense) => {
+      const date = new Date(createdExpense.date);
+      const month = date.getMonth() + 1;      
+      const year = date.getFullYear();
+
+      const lastMonth = month === 1 ? 12 : month - 1;
+      const lastMonthYear = month === 1 ? year - 1 : year;
+
       queryClient.invalidateQueries({ queryKey: ['expenses'] });
-      queryClient.invalidateQueries({ queryKey: ['expensesOverview'] });
+      queryClient.invalidateQueries({queryKey: ['expensesOverview', month, year]});
+      queryClient.invalidateQueries({queryKey: ['expensesOverview', lastMonth, lastMonthYear]});
+      queryClient.invalidateQueries({queryKey: ['dashboardSummary', month, year]});
     },
   });
 }
@@ -138,10 +162,19 @@ export function useUpdateExpense() {
 
   return useMutation({
     mutationFn: (payload: { id: string; data: UpdateExpenseDto }) => updateExpenseApi(payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['expenses'] });
-      queryClient.invalidateQueries({ queryKey: ['expensesOverview'] });
-    },
+      onSuccess: (updatedExpense) => {
+        const date = new Date(updatedExpense.date);
+        const month = date.getMonth() + 1;
+        const year = date.getFullYear();
+
+        const lastMonth = month === 1 ? 12 : month - 1;
+        const lastMonthYear = month === 1 ? year - 1 : year;
+
+        queryClient.invalidateQueries({ queryKey: ['expenses'] });
+        queryClient.invalidateQueries({ queryKey: ['expensesOverview', month, year] });
+        queryClient.invalidateQueries({ queryKey: ['expensesOverview', lastMonth, lastMonthYear] });
+        queryClient.invalidateQueries({ queryKey: ['dashboardSummary', month, year] });
+      },
   });
 }
 
@@ -150,12 +183,22 @@ export function useDeleteExpense() {
 
   return useMutation({
     mutationFn: deleteExpenseApi,
-    onSuccess: () => {
+    onSuccess: (_, { date }) => {
+      const d = new Date(date);
+      const month = d.getMonth() + 1;
+      const year = d.getFullYear();
+      const lastMonth = month === 1 ? 12 : month - 1;
+      const lastMonthYear = month === 1 ? year - 1 : year;
+
       queryClient.invalidateQueries({ queryKey: ['expenses'] });
-      queryClient.invalidateQueries({ queryKey: ['expensesOverview'] });
+      queryClient.invalidateQueries({ queryKey: ['expensesOverview', month, year] });
+      queryClient.invalidateQueries({ queryKey: ['expensesOverview', lastMonth, lastMonthYear] });
+      queryClient.invalidateQueries({ queryKey: ['dashboardSummary', month, year] });
+      queryClient.invalidateQueries({ queryKey: ['dashboardSummary', lastMonth, lastMonthYear] });
     },
   });
 }
+
 
 // === UTILITY ===
 export function isGroupedExpenses(data: Expense[] | GroupedExpenses): data is GroupedExpenses {

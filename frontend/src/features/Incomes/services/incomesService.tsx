@@ -66,13 +66,20 @@ async function updateIncomeApi({
 }: {
   id: string;
   data: UpdateIncomeDto;
-}): Promise<void> {
-  await apiFetch<void>(`${API_BASE_URL}/${id}`, {
+}): Promise<Income> {
+  const result = await apiFetch<Income>(`${API_BASE_URL}/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
+
+   if (!result) {
+    throw new Error('Failed to update income');
+  }
+
+  return result;
 }
+
 
 async function deleteIncomeApi(id: string): Promise<void> {
   await apiFetch<void>(`${API_BASE_URL}/${id}`, {
@@ -111,10 +118,21 @@ export function useCreateIncome() {
 
   return useMutation({
     mutationFn: createIncomeApi,
-    onSuccess: () => {
+    onSuccess: (createdIncome) => {
+
+      const date = new Date(createdIncome.date);
+      const month = date.getMonth() + 1;      
+      const year = date.getFullYear();
+
+      const lastMonth = month === 1 ? 12 : month - 1;
+      const lastMonthYear = month === 1 ? year - 1 : year;
+
+
       queryClient.invalidateQueries({ queryKey: ['incomes'] });
-      queryClient.invalidateQueries({ queryKey: ['incomeOverview'] });
-      queryClient.invalidateQueries({ queryKey: ['incomeMonthlySummary'], exact: false });
+      queryClient.invalidateQueries({ queryKey: ['incomeOverview', month, year] });
+      queryClient.invalidateQueries({ queryKey: ['incomeMonthlySummary', month, year]});
+      queryClient.invalidateQueries({ queryKey: ['incomeMonthlySummary', lastMonth, lastMonthYear]});
+      queryClient.invalidateQueries({ queryKey: ['dashboardSummary', month, year]})
     },
   });
 }
@@ -124,10 +142,19 @@ export function useUpdateIncome() {
 
   return useMutation({
     mutationFn: (payload: { id: string; data: UpdateIncomeDto }) => updateIncomeApi(payload),
-    onSuccess: () => {
+    onSuccess: (updateIncome) => {
+        const date = new Date(updateIncome.date);
+        const month = date.getMonth() + 1;
+        const year = date.getFullYear();
+
+        const lastMonth = month === 1 ? 12 : month - 1;
+        const lastMonthYear = month === 1 ? year - 1 : year;
+
       queryClient.invalidateQueries({ queryKey: ['incomes'] });
-      queryClient.invalidateQueries({ queryKey: ['incomeOverview'] });
-      queryClient.invalidateQueries({ queryKey: ['incomeMonthlySummary'], exact: false });
+      queryClient.invalidateQueries({ queryKey: ['incomeOverview', month, year] });
+      queryClient.invalidateQueries({ queryKey: ['incomeMonthlySummary', month, year]});
+      queryClient.invalidateQueries({ queryKey: ['incomeMonthlySummary', lastMonth, lastMonthYear]});
+      queryClient.invalidateQueries({ queryKey: ['dashboardSummary', month, year]})
     },
   });
 }
@@ -136,14 +163,27 @@ export function useDeleteIncome() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: deleteIncomeApi,
-    onSuccess: () => {
+    mutationFn: async ({ id, date }: { id: string; date: string }) => {
+      await deleteIncomeApi(id);
+      return date;
+    },
+    onSuccess: (deletedDate) => {
+      const date = new Date(deletedDate);
+      const month = date.getMonth() + 1;
+      const year = date.getFullYear();
+
+      const lastMonth = month === 1 ? 12 : month - 1;
+      const lastMonthYear = month === 1 ? year - 1 : year;
+
       queryClient.invalidateQueries({ queryKey: ['incomes'] });
-      queryClient.invalidateQueries({ queryKey: ['incomeOverview'] });
-      queryClient.invalidateQueries({ queryKey: ['incomeMonthlySummary'], exact: false });
+      queryClient.invalidateQueries({ queryKey: ['incomeOverview', month, year] });
+      queryClient.invalidateQueries({ queryKey: ['incomeMonthlySummary', month, year] });
+      queryClient.invalidateQueries({ queryKey: ['incomeMonthlySummary', lastMonth, lastMonthYear] });
+      queryClient.invalidateQueries({ queryKey: ['dashboardSummary', month, year] });
     },
   });
 }
+
 
 // === UTILITY ===
 export function isGroupedIncomes(data: Income[] | GroupedIncomes): data is GroupedIncomes {

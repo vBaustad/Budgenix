@@ -6,6 +6,7 @@ using Budgenix.Helpers.Query;
 using Budgenix.Models.Audit;
 using Budgenix.Models.Finance;
 using Budgenix.Services.Audit;
+using Budgenix.Services.Shared;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
@@ -16,12 +17,14 @@ namespace Budgenix.Services.Budgets
         private readonly BudgenixDbContext _context;
         private readonly IMapper _mapper;
         private readonly IAuditService _audit;
+        private readonly ICacheInvalidatorService _cacheInvalidatorService;
 
-        public BudgetService(BudgenixDbContext context, IMapper mapper, IAuditService audit)
+        public BudgetService(BudgenixDbContext context, IMapper mapper, IAuditService audit, ICacheInvalidatorService cacheInvalidatorService)
         {
             _context = context;
             _mapper = mapper;
             _audit = audit;
+            _cacheInvalidatorService = cacheInvalidatorService;
         }
 
         public async Task<IEnumerable<BudgetDto>> GetBudgetsAsync(string userId, string? category, BudgetTypeEnum? type, string sort, int skip, int take)
@@ -125,8 +128,10 @@ namespace Budgenix.Services.Budgets
 
             _context.Budgets.Add(budget);
             await _context.SaveChangesAsync();
-
             await _audit.LogAsync(userId, AuditActionEnum.CreateBudget, "Budget", budget.Id.ToString(), null, JsonSerializer.Serialize(budget));
+
+            _cacheInvalidatorService.InvalidateBudgets(userId);
+            _cacheInvalidatorService.InvalidateDashboard(userId, DateTime.UtcNow);
 
             return _mapper.Map<BudgetDto>(budget);
         }
@@ -157,11 +162,11 @@ namespace Budgenix.Services.Budgets
 
             _mapper.Map(dto, budget);
             budget.Category = category;
-
             await _context.SaveChangesAsync();
-
             await _audit.LogAsync(userId, AuditActionEnum.UpdateBudget, "Budget", budget.Id.ToString(), oldValues, JsonSerializer.Serialize(budget));
 
+            _cacheInvalidatorService.InvalidateBudgets(userId);
+            _cacheInvalidatorService.InvalidateDashboard(userId, DateTime.UtcNow);
             return _mapper.Map<BudgetDto>(budget);
         }
 
@@ -174,8 +179,10 @@ namespace Budgenix.Services.Budgets
 
             _context.Budgets.Remove(budget);
             await _context.SaveChangesAsync();
-
             await _audit.LogAsync(userId, AuditActionEnum.DeleteBudget, "Budget", id.ToString(), oldValues, null);
+
+            _cacheInvalidatorService.InvalidateBudgets(userId);
+            _cacheInvalidatorService.InvalidateDashboard(userId, DateTime.UtcNow);
 
             return true;
         }

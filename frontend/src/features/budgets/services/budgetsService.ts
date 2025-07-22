@@ -94,30 +94,50 @@ export function useBudgetProgress(id: string, periodStart: string, periodEnd: st
 
 export function useCreateBudget() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: createBudget,
     onSuccess: () => {
+      const now = new Date();
+      const month = now.getMonth() + 1;
+      const year = now.getFullYear();
+
       queryClient.invalidateQueries({ queryKey: ['budgets'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboardSummary', month, year] });
     },
   });
 }
 
+
 export function useUpdateBudget() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: updateBudget,
     onSuccess: () => {
+      const now = new Date();
+      const month = now.getMonth() + 1;
+      const year = now.getFullYear();
+
       queryClient.invalidateQueries({ queryKey: ['budgets'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboardSummary', month, year] });
     },
   });
 }
 
 export function useDeleteBudget() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: deleteBudget,
     onSuccess: () => {
+      const now = new Date();
+      const month = now.getMonth() + 1;
+      const year = now.getFullYear();
+
       queryClient.invalidateQueries({ queryKey: ['budgets'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboardSummary', month, year] });
     },
   });
 }
+

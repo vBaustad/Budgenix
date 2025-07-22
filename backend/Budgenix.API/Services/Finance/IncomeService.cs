@@ -6,6 +6,7 @@ using Budgenix.Models.Finance;
 using Budgenix.Models.Shared;
 using Budgenix.Services.Audit;
 using Budgenix.Services.Recurring;
+using Budgenix.Services.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
@@ -20,19 +21,21 @@ namespace Budgenix.Services.Finance
         private readonly RecurringItemService _recurringService;
         private readonly IMemoryCache _cache;
         private readonly IAuditService _audit;
+        private readonly ICacheInvalidatorService _cacheInvalidatorService;
 
         public IncomeService(
             BudgenixDbContext context,
             ILogger<IncomeService> logger,
             RecurringItemService recurringService,
             IMemoryCache cache,
-            IAuditService audit)
+            IAuditService audit, ICacheInvalidatorService cacheInvalidatorService)
         {
             _context = context;
             _logger = logger;
             _recurringService = recurringService;
             _cache = cache;
             _audit = audit;
+            _cacheInvalidatorService = cacheInvalidatorService;
         }
 
         public async Task<List<IncomeDto>> GetIncomesAsync(
@@ -260,7 +263,8 @@ namespace Budgenix.Services.Finance
 
             await _audit.LogAsync(userId, AuditActionEnum.CreateIncome, "Income", i.Id.ToString(), null, JsonSerializer.Serialize(i));
 
-            InvalidateIncomeOverviewCache(userId, i.Date);
+            _cacheInvalidatorService.InvalidateIncomeOverview(userId, i.Date);
+            _cacheInvalidatorService.InvalidateDashboard(userId, i.Date);
 
             return new IncomeDto
             {
@@ -296,7 +300,8 @@ namespace Budgenix.Services.Finance
 
             await _audit.LogAsync(userId, AuditActionEnum.UpdateIncome, "Income", i.Id.ToString(), oldValues, JsonSerializer.Serialize(i));
 
-            InvalidateIncomeOverviewCache(userId, i.Date);
+            _cacheInvalidatorService.InvalidateIncomeOverview(userId, i.Date);
+            _cacheInvalidatorService.InvalidateDashboard(userId, i.Date);
 
             return true;
         }
@@ -315,17 +320,10 @@ namespace Budgenix.Services.Finance
 
             await _audit.LogAsync(userId, AuditActionEnum.DeleteIncome, "Income", i.Id.ToString(), oldValues, null);
 
-            InvalidateIncomeOverviewCache(userId, i.Date);
+            _cacheInvalidatorService.InvalidateIncomeOverview(userId, i.Date);
+            _cacheInvalidatorService.InvalidateDashboard(userId, i.Date);
 
             return true;
-        }
-
-
-        private void InvalidateIncomeOverviewCache(string userId, DateTime date)
-        {
-            var key = $"income-overview:{userId}:{date.Month}:{date.Year}";
-            _cache.Remove(key);
-            _logger.LogInformation("Invalidated cache: {CacheKey}", key);
         }
     }
 }

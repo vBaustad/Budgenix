@@ -5,9 +5,12 @@ import LoadingSpinner from '@/components/common/LoadingSpinner';
 import DashboardHeader from '@/features/dashboard/components/DashboardHeader';
 import RecentActivity from '@/features/dashboard/components/RecentActivity';
 import DashboardInsights from '@/features/dashboard/components/DashboardInsights';
+import { formatCurrency } from '@/utils/formatting';
+import { useCurrency } from '@/context/CurrencyContext';
 
 export default function DashboardPage() {
   const { data: summary, isLoading } = useDashboardSummary();
+  const { currency } = useCurrency();
 
   if (isLoading || !summary) return <LoadingSpinner />;
 
@@ -20,37 +23,33 @@ export default function DashboardPage() {
           title="Expenses This Month"
           value={summary.totalSpentThisMonth}
           showCurrency
+          showProgress={false}
           icon={<AppIcons.wallet className="w-6 h-6 text-red-400" />}
           to="/expenses"
           bg="from-red-500/50 to-red-900/70"
           border="border-red-500/20"
-          progress={summary.spendingIsUp ? 80 : 50}
         />
 
         <DashboardCard
           title="Income Received"
           value={summary.incomeReceivedThisMonth}
           showCurrency
+          showProgress={false}
           icon={<AppIcons.income className="w-6 h-6 text-green-400" />}
           to="/income"
           bg="from-green-500/50 to-green-900/70"
           border="border-green-500/20"
-          progress={100}
         />
 
         <DashboardCard
           title="Active Budgets"
           value={summary.activeBudgets}
           suffix={summary.activeBudgets ? 'active' : ''}
+          showProgress={false}
           icon={<AppIcons.landmark className="w-6 h-6 text-blue-400" />}
           to="/budgets"
           bg="from-blue-500/50 to-blue-900/70"
           border="border-blue-500/20"
-          progress={
-            summary.activeBudgets && summary.budgetAllocatedTotal
-              ? Math.min((summary.budgetSpentTotal / summary.budgetAllocatedTotal) * 100, 100)
-              : 0
-          }
           emptyMessage={summary.activeBudgets === 0 ? 'Create your first budget' : undefined}
         />
 
@@ -58,6 +57,7 @@ export default function DashboardPage() {
           title="Savings Total"
           value={summary.totalSavings}
           showCurrency
+          showProgress={false}
           icon={<AppIcons.savings className="w-6 h-6 text-orange-300" />}
           to="/goals"
           bg="from-orange-500/50 to-orange-900/70"
@@ -69,28 +69,26 @@ export default function DashboardPage() {
         <DashboardCard
           title="Financial Goals"
           value={summary.totalGoals}
-          suffix={summary.totalGoals ? 'Goals' : ''}
+          suffix={summary.totalGoals ? 'Goals' : ''}          
+          showProgress={false}
           icon={<AppIcons.goal className="w-6 h-6 text-pink-400" />}
           to="/goals"
           bg="from-pink-500/50 to-pink-900/70"
-          border="border-pink-500/20"
-          progress={
-            summary.totalGoals
-              ? Math.min((summary.goalsNearCompletion / summary.totalGoals) * 100, 100)
-              : 0
-          }
+          border="border-pink-500/20"          
           emptyMessage={summary.totalGoals === 0 ? 'Set up your first goal' : undefined}
         />
 
         <DashboardCard
-          title="Cashflow Stats"
-          value={0}
+          title="Cashflow Balance"
+          value={summary.monthlyCashflowBalance}
+          showCurrency
+          showProgress={false}
           icon={<AppIcons.goal className="w-6 h-6 text-purple-400" />}
           to="/cashflow"
           bg="from-purple-500/50 to-purple-900/70"
           border="border-purple-500/20"
-          progress={0}
           emptyMessage="Cashflow stats coming soon"
+          subtext={`Income: ${formatCurrency(summary.monthlyCashflowIncome,currency)}, – Expenses: ${formatCurrency(summary.monthlyCashflowExpenses, currency)}`}
         />
       </div>
 

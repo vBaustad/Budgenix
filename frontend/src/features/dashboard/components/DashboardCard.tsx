@@ -10,11 +10,13 @@ type Props = {
   value: number;
   prefix?: string;
   suffix?: string;
-  showCurrency?: boolean;
+  showCurrency?: boolean;  
+  subtext?: string;
   to?: string;
   icon: React.ReactNode;
   bg: string;
   border: string;
+  showProgress: boolean;
   progress?: number;
   emptyMessage?: string;
   animate?: boolean;
@@ -30,9 +32,11 @@ export default function DashboardCard({
   icon,
   bg,
   border,
+  showProgress,
   progress = 100,
   emptyMessage,
   animate = true,
+  subtext, // NEW
 }: Props) {
   const { currency } = useCurrency();
   const { t } = useTranslation();
@@ -72,10 +76,18 @@ export default function DashboardCard({
         border
       )}
     >
-      <div className="flex items-center gap-4 mb-3">
+    <div className="flex items-start justify-between mb-3">
+      <div className="flex items-center gap-3">
         <div className="p-2 bg-white/80 rounded-full">{icon}</div>
         <h3 className="text-xl font-semibold text-base-content">{title}</h3>
       </div>
+      {subtext && (
+        <div className="text-sm text-base-content/60 mt-1 text-right">
+          {subtext}
+        </div>
+      )}
+    </div>
+
 
       <div className="text-3xl font-bold mb-1">
         {value === 0 && emptyMessage ? (
@@ -88,15 +100,17 @@ export default function DashboardCard({
           </>
         )}
       </div>
+        {showProgress && (      
+          <div className="w-full h-2 mt-3 bg-white/20 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-white/80 transition-all duration-700"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        )}
 
-      <div className="w-full h-2 mt-3 bg-white/20 rounded-full overflow-hidden">
-        <div
-          className="h-full bg-white/80 transition-all duration-700"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
 
-      <div className="text-sm text-base-content mt-2 group-hover:text-white/90 transition">
+      <div className="text-sm text-base-content mt-1 group-hover:text-white/90 transition">
         {t('dashboard.tapToView')}
       </div>
     </div>

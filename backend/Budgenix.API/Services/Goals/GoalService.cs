@@ -6,6 +6,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Budgenix.Services.Audit;
 using Budgenix.Models.Audit;
 using System.Text.Json;
+using Budgenix.Services.Shared;
 
 namespace Budgenix.Services.Goals
 {
@@ -15,13 +16,15 @@ namespace Budgenix.Services.Goals
         private readonly IMemoryCache _cache;
         private readonly ILogger<GoalService> _logger;
         private readonly IAuditService _audit;
+        private readonly ICacheInvalidatorService _cacheInvalidatorService;
 
-        public GoalService(BudgenixDbContext context, IMemoryCache cache, ILogger<GoalService> logger, IAuditService audit)
+        public GoalService(BudgenixDbContext context, IMemoryCache cache, ILogger<GoalService> logger, IAuditService audit, ICacheInvalidatorService cacheInvalidatorService)
         {
             _context = context;
             _cache = cache;
             _logger = logger;
             _audit = audit;
+            _cacheInvalidatorService = cacheInvalidatorService;
         }
 
         public async Task<IEnumerable<GoalDto>> GetAllGoalsAsync(string userId)
@@ -74,6 +77,8 @@ namespace Budgenix.Services.Goals
 
         public async Task<GoalDto> CreateGoalAsync(string userId, CreateGoalDto dto)
         {
+            _logger.LogInformation("Creating goal for user {UserId}", userId);
+
             var goal = new Goal
             {
                 Id = Guid.NewGuid(),
@@ -91,41 +96,32 @@ namespace Budgenix.Services.Goals
             _context.Goals.Add(goal);
             await _context.SaveChangesAsync();
 
-            await _audit.LogAsync(
-                userId: userId,
-                action: AuditActionEnum.CreateGoal,
-                entityType: "Goal",
-                entityId: goal.Id.ToString(),
-                newValues: JsonSerializer.Serialize(new
-                {
-                    goal.Name,
-                    goal.TargetAmount,
-                    goal.CurrentAmount,
-                    goal.TargetDate
-                })
-            );
+            await _audit.LogAsync(new AuditLog
+            {
+                UserId = userId,
+                Action = AuditActionEnum.CreateGoal,
+                EntityType = "Goal",
+                EntityId = goal.Id.ToString(),
+                NewValues = JsonSerializer.Serialize(goal)
+            });
 
-            InvalidateUserCache(userId);
+            _cacheInvalidatorService.InvalidateGoals(userId, goal.Id);
+            _cacheInvalidatorService.InvalidateDashboard(userId, DateTime.UtcNow);
+
             return ToDto(goal);
         }
 
         public async Task<GoalDto?> UpdateGoalAsync(string userId, Guid goalId, UpdateGoalDto dto)
         {
+            _logger.LogInformation("Updating goal {GoalId} for user {UserId}", goalId, userId);
+
             var goal = await _context.Goals
                 .Where(g => g.UserId == userId && g.Id == goalId)
                 .FirstOrDefaultAsync();
 
             if (goal == null) return null;
 
-            var oldData = new
-            {
-                goal.Name,
-                goal.Description,
-                goal.TargetAmount,
-                goal.CurrentAmount,
-                goal.TargetDate,
-                goal.Icon
-            };
+            var oldData = JsonSerializer.Serialize(goal);
 
             goal.Name = dto.Name;
             goal.Description = dto.Description;
@@ -136,58 +132,56 @@ namespace Budgenix.Services.Goals
 
             await _context.SaveChangesAsync();
 
-            await _audit.LogAsync(
-                userId: userId,
-                action: AuditActionEnum.UpdateGoal,
-                entityType: "Goal",
-                entityId: goal.Id.ToString(),
-                oldValues: JsonSerializer.Serialize(oldData),
-                newValues: JsonSerializer.Serialize(new
-                {
-                    goal.Name,
-                    goal.Description,
-                    goal.TargetAmount,
-                    goal.CurrentAmount,
-                    goal.TargetDate,
-                    goal.Icon
-                })
-            );
+            await _audit.LogAsync(new AuditLog
+            {
+                UserId = userId,
+                Action = AuditActionEnum.UpdateGoal,
+                EntityType = "Goal",
+                EntityId = goal.Id.ToString(),
+                OldValues = oldData,
+                NewValues = JsonSerializer.Serialize(goal)
+            });
 
-            InvalidateUserCache(userId, goalId);
+            _cacheInvalidatorService.InvalidateGoals(userId, goal.Id);
+            _cacheInvalidatorService.InvalidateDashboard(userId, DateTime.UtcNow);
+
             return ToDto(goal);
         }
 
         public async Task<bool> DeleteGoalAsync(string userId, Guid goalId)
         {
+            _logger.LogInformation("Deleting goal {GoalId} for user {UserId}", goalId, userId);
+
             var goal = await _context.Goals
                 .Where(g => g.UserId == userId && g.Id == goalId)
                 .FirstOrDefaultAsync();
 
             if (goal == null) return false;
 
+            var oldData = JsonSerializer.Serialize(goal);
+
             _context.Goals.Remove(goal);
             await _context.SaveChangesAsync();
 
-            await _audit.LogAsync(
-                userId: userId,
-                action: AuditActionEnum.DeleteGoal,
-                entityType: "Goal",
-                entityId: goal.Id.ToString(),
-                oldValues: JsonSerializer.Serialize(new
-                {
-                    goal.Name,
-                    goal.TargetAmount,
-                    goal.CurrentAmount,
-                    goal.TargetDate
-                })
-            );
+            await _audit.LogAsync(new AuditLog
+            {
+                UserId = userId,
+                Action = AuditActionEnum.DeleteGoal,
+                EntityType = "Goal",
+                EntityId = goal.Id.ToString(),
+                OldValues = oldData
+            });
 
-            InvalidateUserCache(userId, goalId);
+            _cacheInvalidatorService.InvalidateGoals(userId, goal.Id);
+            _cacheInvalidatorService.InvalidateDashboard(userId, DateTime.UtcNow);
+
             return true;
         }
 
         public async Task<GoalDto?> ContributeToGoalAsync(string userId, Guid goalId, GoalContributionDto dto)
         {
+            _logger.LogInformation("Contributing to goal {GoalId} for user {UserId}", goalId, userId);
+
             var goal = await _context.Goals
                 .Where(g => g.UserId == userId && g.Id == goalId)
                 .FirstOrDefaultAsync();
@@ -199,30 +193,24 @@ namespace Budgenix.Services.Goals
 
             await _context.SaveChangesAsync();
 
-            await _audit.LogAsync(
-                userId: userId,
-                action: AuditActionEnum.UpdateGoal,
-                entityType: "GoalContribution",
-                entityId: goal.Id.ToString(),
-                metadata: JsonSerializer.Serialize(new
+            await _audit.LogAsync(new AuditLog
+            {
+                UserId = userId,
+                Action = AuditActionEnum.UpdateGoal,
+                EntityType = "GoalContribution",
+                EntityId = goal.Id.ToString(),
+                Metadata = JsonSerializer.Serialize(new
                 {
                     AmountAdded = dto.Amount,
                     PreviousAmount = previousAmount,
                     NewAmount = goal.CurrentAmount
                 })
-            );
+            });
 
-            InvalidateUserCache(userId, goalId);
+            _cacheInvalidatorService.InvalidateGoals(userId, goalId);
+            _cacheInvalidatorService.InvalidateDashboard(userId, DateTime.UtcNow);
+
             return ToDto(goal);
-        }
-
-        private void InvalidateUserCache(string userId, Guid? goalId = null)
-        {
-            _cache.Remove($"goals:{userId}");
-            if (goalId != null)
-            {
-                _cache.Remove($"goal:{userId}:{goalId}");
-            }
         }
 
         private static GoalDto ToDto(Goal g) => new GoalDto
