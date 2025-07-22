@@ -27,6 +27,10 @@
         public decimal SavingsGoalProgressPercent { get; set; }
         public string? NextGoalName { get; set; }
         public string? NextGoalDueDate { get; set; }
+        public decimal MonthlyCashflowBalance { get; set; }
+        public decimal MonthlyCashflowIncome { get; set; }
+        public decimal MonthlyCashflowExpenses { get; set; }
+
         public string LastUpdated { get; set; } = DateTime.UtcNow.ToString("o");
         public int AlertsCount { get; set; }
     }

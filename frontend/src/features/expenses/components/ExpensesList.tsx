@@ -24,7 +24,7 @@ export default function ExpensesList({ expenses }: { expenses: Expense[] }) {
 
   const minRows = 15;
 
-  const [deletePendingId, setDeletePendingId] = useState<string | null>(null);
+  const [deletePendingExpense, setDeletePendingExpense] = useState<{ id: string; date: string } | null>(null);
   const [editItem, setEditItem] = useState<Expense | null>(null);
   const [editForm, setEditForm] = useState<Partial<Expense>>({});
 
@@ -33,17 +33,17 @@ export default function ExpensesList({ expenses }: { expenses: Expense[] }) {
     setEditForm(item);
   };
 
-  const confirmDelete = (id: string) => {
-    setDeletePendingId(id);
+  const confirmDelete = (expense: Expense) => {
+    setDeletePendingExpense({ id: expense.id, date: expense.date });
   };
 
   const handleDeleteConfirmed = () => {
-    if (!deletePendingId) return;
-    deleteExpense(deletePendingId, {
+    if (!deletePendingExpense) return;
+    deleteExpense(deletePendingExpense, {
       onSuccess: () => toast.success(t('expenses.toast.deleteSuccess')),
       onError: () => toast.error(t('expenses.toast.deleteError')),
     });
-    setDeletePendingId(null);
+    setDeletePendingExpense(null);
   };
 
   const handleEditChange = (
@@ -148,18 +148,18 @@ export default function ExpensesList({ expenses }: { expenses: Expense[] }) {
         ]}
         actionHandlers={{
           onEdit: openEditModal,
-          onDelete: (row) => confirmDelete(row.id),
+          onDelete: (row) => confirmDelete(row),
         }}
       />
 
       {/* Delete confirmation dialog */}
-      <Dialog open={!!deletePendingId} onClose={() => setDeletePendingId(null)} className="fixed z-50 inset-0 flex items-center justify-center">
+      <Dialog open={!!deletePendingExpense} onClose={() => setDeletePendingExpense(null)} className="fixed z-50 inset-0 flex items-center justify-center">
         <div className="fixed inset-0 bg-black opacity-30" />
         <div className="relative bg-base-100 rounded-lg p-6 shadow-lg">
           <Dialog.Title className="text-lg font-semibold">{t('shared.confirmDelete')}</Dialog.Title>
           <Dialog.Description className="mt-2">{t('expenses.confirmDeleteText')}</Dialog.Description>
           <div className="mt-4 flex justify-end gap-2">
-            <button onClick={() => setDeletePendingId(null)} className="btn btn-ghost">{t('shared.cancel')}</button>
+            <button onClick={() => setDeletePendingExpense(null)} className="btn btn-ghost">{t('shared.cancel')}</button>
             <button onClick={handleDeleteConfirmed} className="btn btn-error">{t('shared.delete')}</button>
           </div>
         </div>

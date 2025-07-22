@@ -44,15 +44,18 @@ async function updateGoalApi({
 }: {
   id: string;
   data: UpdateGoalDto;
-}): Promise<void> {
-  await apiFetch(`${API_BASE_URL}/${id}`, {
+}): Promise<GoalDto> {
+  const result = await apiFetch<GoalDto>(`${API_BASE_URL}/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
+
+  if (!result) throw new Error('Failed to update goal');
+  return result;
 }
 
-async function deleteGoalApi(id: string): Promise<void> {
+async function deleteGoalApi({ id }: { id: string }): Promise<void> {
   await apiFetch(`${API_BASE_URL}/${id}`, {
     method: 'DELETE',
   });
@@ -64,12 +67,15 @@ async function contributeGoalApi({
 }: {
   id: string;
   data: GoalContributionDto;
-}): Promise<void> {
-  await apiFetch(`${API_BASE_URL}/${id}/contribute`, {
+}): Promise<GoalDto> {
+  const result = await apiFetch<GoalDto>(`${API_BASE_URL}/${id}/contribute`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
+
+  if (!result) throw new Error('Failed to contribute to goal');
+  return result;
 }
 
 // === REACT QUERY HOOKS ===
@@ -106,8 +112,13 @@ export function useCreateGoal() {
   return useMutation({
     mutationFn: createGoalApi,
     onSuccess: () => {
+      const date = new Date();
+      const month = date.getMonth() + 1;
+      const year = date.getFullYear();
+
       queryClient.invalidateQueries({ queryKey: ['goals'] });
       queryClient.invalidateQueries({ queryKey: ['goalsOverview'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboardSummary', month, year] });
     },
   });
 }
@@ -118,8 +129,13 @@ export function useUpdateGoal() {
   return useMutation({
     mutationFn: (payload: { id: string; data: UpdateGoalDto }) => updateGoalApi(payload),
     onSuccess: () => {
+      const date = new Date();
+      const month = date.getMonth() + 1;
+      const year = date.getFullYear();
+
       queryClient.invalidateQueries({ queryKey: ['goals'] });
       queryClient.invalidateQueries({ queryKey: ['goalsOverview'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboardSummary', month, year] });
     },
   });
 }
@@ -128,10 +144,15 @@ export function useDeleteGoal() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: deleteGoalApi,
+    mutationFn: (id: string) => deleteGoalApi({ id }),
     onSuccess: () => {
+      const deletedDate = new Date();
+      const month = deletedDate.getMonth() + 1;
+      const year = deletedDate.getFullYear();
+
       queryClient.invalidateQueries({ queryKey: ['goals'] });
       queryClient.invalidateQueries({ queryKey: ['goalsOverview'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboardSummary', month, year] });
     },
   });
 }
@@ -142,8 +163,13 @@ export function useContributeGoal() {
   return useMutation({
     mutationFn: (payload: { id: string; data: GoalContributionDto }) => contributeGoalApi(payload),
     onSuccess: () => {
+      const date = new Date();
+      const month = date.getMonth() + 1;
+      const year = date.getFullYear();
+
       queryClient.invalidateQueries({ queryKey: ['goals'] });
       queryClient.invalidateQueries({ queryKey: ['goalsOverview'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboardSummary', month, year] });
     },
   });
 }

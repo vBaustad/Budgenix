@@ -19,7 +19,7 @@ export default function IncomesList({ incomes }: { incomes: Income[] }) {
   const { mutate: deleteIncome } = useDeleteIncome();
   const { mutate: updateIncome } = useUpdateIncome();
 
-  const [deletePendingId, setDeletePendingId] = useState<string | null>(null);
+  const [deletePendingIncome, setDeletePendingIncome] = useState<{ id: string; date: string } | null>(null);
   const [editItem, setEditItem] = useState<Income | null>(null);
   const [editForm, setEditForm] = useState<Partial<Income>>({});
 
@@ -28,22 +28,23 @@ export default function IncomesList({ incomes }: { incomes: Income[] }) {
     setEditForm(item);
   };
 
-  const confirmDelete = (id: string) => {
-    setDeletePendingId(id);
+  const confirmDelete = (item: Income) => {
+    setDeletePendingIncome({ id: item.id, date: item.date });
   };
 
   const handleDeleteConfirmed = () => {
-    if (deletePendingId) {
-      deleteIncome(deletePendingId, {
-        onSuccess: () => toast.success(t('incomes.toast.deleteSuccess')),
-        onError: () => toast.error(t('incomes.toast.deleteError')),
-      });
-      setDeletePendingId(null);
-    }
+    if (!deletePendingIncome) return;
+
+    deleteIncome(deletePendingIncome, {
+      onSuccess: () => toast.success(t('incomes.toast.deleteSuccess')),
+      onError: () => toast.error(t('incomes.toast.deleteError')),
+    });
+
+    setDeletePendingIncome(null);
   };
 
   const handleDeleteCancelled = () => {
-    setDeletePendingId(null);
+    setDeletePendingIncome(null);
   };
 
   const handleEditChange = (
@@ -96,7 +97,7 @@ export default function IncomesList({ incomes }: { incomes: Income[] }) {
     );
   };
 
-    const sortedIncomes = [...incomes].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const sortedIncomes = [...incomes].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   const paddedIncomes = [...sortedIncomes];
   while (paddedIncomes.length < minRows) {
     paddedIncomes.push({
@@ -163,12 +164,12 @@ export default function IncomesList({ incomes }: { incomes: Income[] }) {
         ]}
         actionHandlers={{
           onEdit: openEditModal,
-          onDelete: (row) => confirmDelete(row.id),
+          onDelete: confirmDelete,
         }}
       />
 
       {/* Delete Dialog */}
-      <Dialog open={!!deletePendingId} onClose={handleDeleteCancelled} className="fixed z-50 inset-0 flex items-center justify-center">
+      <Dialog open={!!deletePendingIncome} onClose={handleDeleteCancelled} className="fixed z-50 inset-0 flex items-center justify-center">
         <div className="fixed inset-0 bg-black opacity-30" />
         <div className="relative bg-base-100 rounded-lg p-6 shadow-lg">
           <Dialog.Title className="text-lg font-semibold">{t('shared.confirmDelete')}</Dialog.Title>

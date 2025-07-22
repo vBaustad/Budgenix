@@ -8,6 +8,7 @@ using Budgenix.Models.Categories;
 using Budgenix.Models.Finance;
 using Budgenix.Models.Shared;
 using Budgenix.Services.Audit;
+using Budgenix.Services.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
@@ -22,19 +23,22 @@ namespace Budgenix.Services.Finance
         private readonly IMemoryCache _cache;
         private readonly IAuditService _audit;
         private readonly IMapper _mapper;
+        private readonly ICacheInvalidatorService _cacheInvalidatorService;
 
         public CashflowService(
             BudgenixDbContext context,
             ILogger<CashflowService> logger,
             IMemoryCache cache,
             IAuditService audit,
-            IMapper mapper)
+            IMapper mapper,
+            ICacheInvalidatorService cacheInvalidatorService)
         {
             _context = context;
             _logger = logger;
             _cache = cache;
             _audit = audit;
             _mapper = mapper;
+            _cacheInvalidatorService = cacheInvalidatorService;
         }
 
         public async Task<List<CashflowItemDto>> GetItemsAsync(string userId)
@@ -55,6 +59,14 @@ namespace Budgenix.Services.Finance
 
         public async Task<CashflowSummaryDto> GetSummaryAsync(string userId)
         {
+            var cacheKey = $"cashflow:{userId}";
+
+            if (_cache.TryGetValue(cacheKey, out CashflowSummaryDto cached))
+            {
+                _logger.LogInformation("Serving cached cashflow summary for user {UserId}", userId);
+                return cached;
+            }
+
             var items = await _context.CashflowItems
                 .Include(i => i.Category)
                 .Where(i => i.UserId == userId)
@@ -89,7 +101,7 @@ namespace Budgenix.Services.Finance
             var monthlySavings = Monthly(savingsItems);
             var monthlyBalance = monthlyIncome - monthlyExpenses;
 
-            return new CashflowSummaryDto
+            var summary = new CashflowSummaryDto
             {
                 MonthlyIncome = monthlyIncome,
                 MonthlyExpenses = monthlyExpenses,
@@ -104,6 +116,9 @@ namespace Budgenix.Services.Finance
                 CategoryBreakdown = categoryBreakdown
             };
 
+            _cache.Set(cacheKey, summary, TimeSpan.FromMinutes(5));
+
+            return summary;
         }
 
         public async Task<List<InsightDto>> GetInsightsAsync(string userId)
@@ -126,7 +141,8 @@ namespace Budgenix.Services.Finance
 
             foreach (var group in categoryGroups)
             {
-                if (group.Total > 500)
+                
+                if (group.Category != "Rent" && group.Total > 500)
                 {
                     insights.Add(new InsightDto
                     {
@@ -184,6 +200,10 @@ namespace Budgenix.Services.Finance
 
             var dtoResult = _mapper.Map<CashflowItemDto>(entity);
             dtoResult.Amount = NormalizeMonthly(entity.Amount, entity.Frequency);
+
+            _cacheInvalidatorService.InvalidateCashflow(userId);
+            _cacheInvalidatorService.InvalidateDashboard(userId, DateTime.UtcNow);
+
             return dtoResult;
         }
 
@@ -218,6 +238,9 @@ namespace Budgenix.Services.Finance
                 NewValues = JsonSerializer.Serialize(entity)
             });
 
+            _cacheInvalidatorService.InvalidateCashflow(userId);
+            _cacheInvalidatorService.InvalidateDashboard(userId, DateTime.UtcNow);
+
             return true;
         }
 
@@ -243,6 +266,9 @@ namespace Budgenix.Services.Finance
                 EntityId = entity.Id.ToString(),
                 OldValues = oldValues
             });
+
+            _cacheInvalidatorService.InvalidateCashflow(userId);
+            _cacheInvalidatorService.InvalidateDashboard(userId, DateTime.UtcNow);
 
             return true;
         }

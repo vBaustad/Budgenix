@@ -1,15 +1,19 @@
+'use client';
+
 import { useState } from 'react';
-import { formatCurrency, formatDate, truncateText } from '@/utils/formatting';
-import DataTable from '@/components/common/tables/DataTable';
-import { useCurrency } from '@/context/CurrencyContext';
-import { useTranslation } from 'react-i18next';
-import { GroupedExpenses, Expense } from '@/types/finance/expense';
 import { Dialog } from '@headlessui/react';
+import toast from 'react-hot-toast';
+
+import { GroupedExpenses, Expense } from '@/types/finance/expense';
 import { useDeleteExpense, useUpdateExpense } from '../services/expensesService';
+import DataTable from '@/components/common/tables/DataTable';
 import InputField from '@/components/common/forms/InputField';
 import SelectField from '@/components/common/forms/SelectField';
+
+import { formatCurrency, formatDate, truncateText } from '@/utils/formatting';
+import { useCurrency } from '@/context/CurrencyContext';
 import { useCategories } from '@/context/CategoryContext';
-import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   data: GroupedExpenses;
@@ -17,13 +21,13 @@ type Props = {
 };
 
 export default function GroupedExpensesList({ data, groupBy }: Props) {
-  const { currency } = useCurrency();
   const { t, i18n } = useTranslation();
+  const { currency } = useCurrency();
   const { categories } = useCategories();
   const { mutate: deleteExpense } = useDeleteExpense();
   const { mutate: updateExpense } = useUpdateExpense();
 
-  const [deletePendingId, setDeletePendingId] = useState<string | null>(null);
+  const [deletePendingExpense, setDeletePendingExpense] = useState<{ id: string; date: string } | null>(null);
   const [editItem, setEditItem] = useState<Expense | null>(null);
   const [editForm, setEditForm] = useState<Partial<Expense>>({});
 
@@ -32,15 +36,17 @@ export default function GroupedExpensesList({ data, groupBy }: Props) {
     setEditForm(item);
   };
 
-  const confirmDelete = (id: string) => setDeletePendingId(id);
+  const confirmDelete = (expense: Expense) => {
+    setDeletePendingExpense({ id: expense.id, date: expense.date });
+  };
 
   const handleDeleteConfirmed = () => {
-    if (!deletePendingId) return;
-    deleteExpense(deletePendingId, {
+    if (!deletePendingExpense) return;
+    deleteExpense(deletePendingExpense, {
       onSuccess: () => toast.success(t('expenses.toast.deleteSuccess')),
       onError: () => toast.error(t('expenses.toast.deleteError')),
     });
-    setDeletePendingId(null);
+    setDeletePendingExpense(null);
   };
 
   const handleEditChange = (
@@ -100,10 +106,7 @@ export default function GroupedExpensesList({ data, groupBy }: Props) {
     <>
       <div className="flex flex-col gap-6">
         {data.map(({ groupName, expenses }) => (
-          <div
-            key={groupName}
-            className="rounded-xl border border-l-4 border-primary bg-base-100 shadow-sm"
-          >
+          <div key={groupName} className="rounded-xl border border-l-4 border-primary bg-base-100 shadow-sm">
             <h3 className="text-lg font-semibold text-base-content mb-2 mt-2 ml-2">
               {formatGroupLabel(groupName)}
             </h3>
@@ -113,68 +116,76 @@ export default function GroupedExpensesList({ data, groupBy }: Props) {
               data={expenses}
               columns={[
                 {
-                  label: t('shared.date'),
+                  label: t('expenses.table.date'),
                   accessor: 'date',
                   format: formatDate,
-                  width: '100px',
+                  width: 'w-[80px]',
+                  sortable: true,
+                },
+                {
+                  label: t('expenses.table.name'),
+                  accessor: 'name',
+                  width: 'w-[120px] sm:w-[130px] lg:w-[200px]',
+                  sortable: true,
+                },
+                {
+                  label: t('expenses.table.description'),
+                  accessor: 'description',
+                  format: (val) => truncateText(val),
+                  width: 'w-[150px] sm:w-[180px] lg:w-[240px]',
                   sortable: true,
                   showOnMobile: false,
                 },
                 {
-                  label: t('shared.name'),
-                  accessor: 'name',
-                  width: '150px',
-                  sortable: true,
-                },
-                {
-                  label: t('shared.description'),
-                  accessor: 'description',
-                  format: (val) => truncateText(val),
-                  width: '400px',
-                  sortable: true,
-                },
-                {
-                  label: t('shared.amount'),
+                  label: t('expenses.table.amount'),
                   accessor: 'amount',
                   align: 'right',
                   format: (val) => formatCurrency(val, currency),
-                  width: '100px',
+                  width: 'w-[80px] sm:w-[100px]',
+                  sortable: true,
                 },
                 {
-                  label: t('shared.category'),
+                  label: t('expenses.table.category'),
                   accessor: 'categoryName',
+                  align: 'center',
                   format: (val) =>
                     val ? (
                       <span className="badge badge-sm badge-accent">{val}</span>
                     ) : (
                       <span className="text-base-content/40">–</span>
                     ),
-                  width: '150px',
+                  width: 'w-[100px] sm:w-[150px]',
+                  sortable: true,
+                  showOnMobile: false,
                 },
               ]}
               actionHandlers={{
                 onEdit: openEditModal,
-                onDelete: (row) => confirmDelete(row.id),
+                onDelete: (row) => confirmDelete(row),
               }}
             />
           </div>
         ))}
       </div>
 
-      {/* Delete confirmation dialog */}
-      <Dialog open={!!deletePendingId} onClose={() => setDeletePendingId(null)} className="fixed z-50 inset-0 flex items-center justify-center">
+      {/* Delete Confirmation */}
+      <Dialog open={!!deletePendingExpense} onClose={() => setDeletePendingExpense(null)} className="fixed z-50 inset-0 flex items-center justify-center">
         <div className="fixed inset-0 bg-black opacity-30" />
         <div className="relative bg-base-100 rounded-lg p-6 shadow-lg">
           <Dialog.Title className="text-lg font-semibold">{t('shared.confirmDelete')}</Dialog.Title>
           <Dialog.Description className="mt-2">{t('expenses.confirmDeleteText')}</Dialog.Description>
           <div className="mt-4 flex justify-end gap-2">
-            <button onClick={() => setDeletePendingId(null)} className="btn btn-ghost">{t('shared.cancel')}</button>
-            <button onClick={handleDeleteConfirmed} className="btn btn-error">{t('shared.delete')}</button>
+            <button onClick={() => setDeletePendingExpense(null)} className="btn btn-ghost">
+              {t('shared.cancel')}
+            </button>
+            <button onClick={handleDeleteConfirmed} className="btn btn-error">
+              {t('shared.delete')}
+            </button>
           </div>
         </div>
       </Dialog>
 
-      {/* Edit modal */}
+      {/* Edit Modal */}
       <Dialog open={!!editItem} onClose={() => setEditItem(null)} className="fixed z-50 inset-0 flex items-center justify-center">
         <div className="fixed inset-0 bg-black opacity-30" />
         <div className="relative bg-base-100 rounded-lg p-6 shadow-lg w-full max-w-md">

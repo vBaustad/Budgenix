@@ -25,6 +25,7 @@ using Budgenix.Services.Audit;
 using Budgenix.Services.User;
 using Budgenix.Services.System;
 using Budgenix.Services.Email;
+using Budgenix.Services.Shared;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -70,6 +71,7 @@ builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IAuditService, AuditService>();
 builder.Services.AddScoped<ISystemNotificationsService, SystemNotificationsService>();
 
+builder.Services.AddSingleton<ICacheInvalidatorService, CacheInvalidatorService>();
 
 
 builder.Services.AddInsightRules();

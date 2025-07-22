@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Budgenix.Models.Audit;
 using Budgenix.Services.Audit;
 using System.Text.Json;
+using Budgenix.Services.Shared;
 
 namespace Budgenix.Services.Finance
 {
@@ -20,19 +21,21 @@ namespace Budgenix.Services.Finance
         private readonly RecurringItemService _recurringService;
         private readonly IMemoryCache _cache;
         private readonly IAuditService _audit;
-
+        private readonly ICacheInvalidatorService _cacheInvalidatorService;
         public ExpenseService(
             BudgenixDbContext context,
             ILogger<ExpenseService> logger,
             RecurringItemService recurringService,
             IMemoryCache cache,
-            IAuditService audit)
+            IAuditService audit,
+            ICacheInvalidatorService cacheInvalidatorService)
         {
             _context = context;
             _logger = logger;
             _recurringService = recurringService;
             _cache = cache;
             _audit = audit;
+            _cacheInvalidatorService = cacheInvalidatorService;
         }
 
         public async Task<List<ExpenseDto>> GetExpensesAsync(
@@ -162,6 +165,8 @@ namespace Budgenix.Services.Finance
                 .Where(e => e.Date.Year == year && e.Date.Month == month)
                 .Sum(e => e.Amount);
 
+            _logger.LogInformation("total amount: {totalExpense}", totalExpense);
+
             var lastMonthExpense = expenses
                 .Where(e => e.Date.Year == lastMonth.Year && e.Date.Month == lastMonth.Month)
                 .Sum(e => e.Amount);
@@ -231,7 +236,8 @@ namespace Budgenix.Services.Finance
                 NewValues = JsonSerializer.Serialize(e)
             });
 
-            InvalidateExpenseOverviewCache(userId, e.Date);
+            _cacheInvalidatorService.InvalidateExpenseOverview(userId, e.Date);
+            _cacheInvalidatorService.InvalidateDashboard(userId, e.Date);
 
             return new ExpenseDto
             {
@@ -273,8 +279,9 @@ namespace Budgenix.Services.Finance
                 NewValues = JsonSerializer.Serialize(e)
             });
 
-            InvalidateExpenseOverviewCache(userId, oldDate);
-            InvalidateExpenseOverviewCache(userId, e.Date);
+            _cacheInvalidatorService.InvalidateExpenseOverview(userId, oldDate);
+            _cacheInvalidatorService.InvalidateExpenseOverview(userId, e.Date);
+            _cacheInvalidatorService.InvalidateDashboard(userId, e.Date);
 
             return true;
         }
@@ -306,21 +313,11 @@ namespace Budgenix.Services.Finance
                 OldValues = oldValues
             });
 
-            InvalidateExpenseOverviewCache(userId, e.Date);
+            _cacheInvalidatorService.InvalidateExpenseOverview(userId, e.Date);
+            _cacheInvalidatorService.InvalidateDashboard(userId, e.Date);
 
             return true;
         }
 
-        private void InvalidateExpenseOverviewCache(string userId, DateTime date)
-        {
-            var currentKey = $"expense-overview:{userId}:{date.Month}:{date.Year}";
-            var lastMonthDate = date.AddMonths(-1);
-            var lastMonthKey = $"expense-overview:{userId}:{lastMonthDate.Month}:{lastMonthDate.Year}";
-
-            _cache.Remove(currentKey);
-            _cache.Remove(lastMonthKey);
-
-            _logger.LogInformation("Invalidated cache for {0} and {1}", currentKey, lastMonthKey);
-        }
     }
 }

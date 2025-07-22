@@ -12,6 +12,7 @@ public class DashboardService : IDashboardService
     private readonly BudgenixDbContext _context;
     private readonly IExpenseService _expenseService;
     private readonly IIncomeService _incomeService;
+    private readonly ICashflowService _cashflowService;
     private readonly IMemoryCache _cache;
     private readonly ILogger<DashboardService> _logger;
 
@@ -20,13 +21,15 @@ public class DashboardService : IDashboardService
         IExpenseService expenseService,
         IIncomeService incomeService,
         IMemoryCache cache,
-        ILogger<DashboardService> logger)
+        ILogger<DashboardService> logger,
+        ICashflowService cashflowService)
     {
         _context = context;
         _expenseService = expenseService;
         _incomeService = incomeService;
         _cache = cache;
         _logger = logger;
+        _cashflowService = cashflowService;
     }
 
     public async Task<DashboardSummaryDto> GetDashboardSummaryAsync(string userId, int month, int year)
@@ -76,6 +79,9 @@ public class DashboardService : IDashboardService
             .OrderBy(g => g.TargetDate)
             .FirstOrDefault();
 
+        var cashflowSummary = await _cashflowService.GetSummaryAsync(userId);
+
+
         var summary = new DashboardSummaryDto
         {
             TotalSpentThisMonth = expenseOverview.TotalExpense,
@@ -101,6 +107,9 @@ public class DashboardService : IDashboardService
             GoalsNearCompletion = goals.Count(g => g.TargetAmount > 0 && g.CurrentAmount / g.TargetAmount >= 0.9m),
             NextGoalName = nextGoal?.Name,
             NextGoalDueDate = nextGoal?.TargetDate?.ToString("o"),
+            MonthlyCashflowBalance = cashflowSummary.MonthlyBalance,
+            MonthlyCashflowIncome = cashflowSummary.MonthlyIncome,
+            MonthlyCashflowExpenses = cashflowSummary.MonthlyExpenses,
             LastUpdated = DateTime.UtcNow.ToString("o")
         };
 
