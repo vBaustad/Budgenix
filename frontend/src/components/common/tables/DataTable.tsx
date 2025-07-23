@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { AppIcons } from '@/components/icons/AppIcons';
+import { useTranslation } from 'react-i18next';
 
 type Column<T> = {
   label: string;
@@ -34,6 +35,8 @@ export default function DataTable<T>({
 }: DataTableProps<T> & { footer?: React.ReactNode }) {
   const [sortConfig, setSortConfig] = useState<{ key: keyof T; direction: 'asc' | 'desc' } | null>(null);
   const [windowWidth, setWindowWidth] = useState<number>(typeof window !== 'undefined' ? window.innerWidth : 1024);
+  const [expandedRow, setExpandedRow] = useState<number | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
@@ -99,7 +102,7 @@ export default function DataTable<T>({
                 </th>
               ))}
               {actionHandlers && (actionHandlers.onEdit || actionHandlers.onDelete) && (
-                <th className="w-[60px] text-center hidden sm:table-cell">Actions</th>
+                <th className="w-[60px] text-center hidden sm:table-cell">{t('shared.actions')}</th>
               )}
             </tr>
           </thead>
@@ -116,47 +119,87 @@ export default function DataTable<T>({
               </tr>
             ) : (
               sortedData.map((row, idx) => (
-                <tr
-                  key={rowKey ? String(row[rowKey]) : idx}
-                  className="even:bg-base-100 odd:bg-base-200 hover:bg-primary/10 transition-colors"
-                >
-                  {visibleColumns.map((col) => (
-                    <td
-                      key={String(col.accessor)}
-                        className={`px-2 py-2 truncate whitespace-nowrap text-base-content border-b border-base-300
+                <React.Fragment key={rowKey ? String(row[rowKey]) : idx}>
+                  <tr
+                    className="even:bg-base-100 odd:bg-base-200 hover:bg-primary/10 transition-colors cursor-pointer"
+                    onClick={() => windowWidth < 640 && setExpandedRow(expandedRow === idx ? null : idx)}
+                  >
+                    {visibleColumns.map((col) => (
+                      <td
+                        key={String(col.accessor)}
+                        className={`px-2 py-2 truncate whitespace-nowrap border-b border-base-300 text-base-content
                           ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'}
                           ${col.width ?? ''}
                         `}
-                    >
+                      >
+                        {col.format ? col.format(row[col.accessor], row) : String(row[col.accessor] ?? '')}
+                      </td>
+                    ))}
+                    {actionHandlers && (
+                      <td className="p-2 hidden sm:table-cell border-b border-base-300">
+                        <div className="flex justify-start gap-1">
+                          {actionHandlers.onEdit && (
+                            <button
+                              className="btn btn-xs btn-ghost"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                actionHandlers.onEdit?.(row);
+                              }}
+                            >
+                              <AppIcons.edit className="w-4 h-4" />
+                            </button>
+                          )}
+                          {actionHandlers.onDelete && (
+                            <button
+                              className="btn btn-xs btn-ghost text-error"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                actionHandlers.onDelete?.(row);
+                              }}
+                            >
+                              <AppIcons.delete className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    )}
+                  </tr>
 
-                      {col.format
-                        ? col.format?.(row[col.accessor], row)
-                        : String(row[col.accessor] ?? '')}
-                    </td>
-                  ))}
-                  {actionHandlers && (actionHandlers.onEdit || actionHandlers.onDelete) && (
-                    <td className="p-2 hidden sm:table-cell border-b border-base-300">
-                      <div className="flex justify-start gap-1">
-                        {actionHandlers.onEdit && (
-                          <button
-                            className="btn btn-xs btn-ghost"
-                            onClick={() => actionHandlers.onEdit?.(row)}
-                          >
-                            <AppIcons.edit className="w-4 h-4" />
-                          </button>
-                        )}
-                        {actionHandlers.onDelete && (
-                          <button
-                            className="btn btn-xs btn-ghost text-error"
-                            onClick={() => actionHandlers.onDelete?.(row)}
-                          >
-                            <AppIcons.delete className="w-4 h-4 text-error hover:text-error-content" />
-                          </button>
-                        )}
-                      </div>
-                    </td>
+                  {windowWidth < 640 && expandedRow === idx && (
+                    <tr className="sm:hidden bg-base-300 border-b border-base-300">
+                      <td colSpan={visibleColumns.length} className="px-4 py-2">
+                        <div className="flex justify-center gap-4">
+                          {actionHandlers?.onEdit && (
+                            <button
+                              className="btn btn-sm btn-ghost"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                actionHandlers.onEdit?.(row);
+                                setExpandedRow(null);
+                              }}
+                            >
+                              <AppIcons.edit className="w-4 h-4" />
+                              {t('shared.edit')}
+                            </button>
+                          )}
+                          {actionHandlers?.onDelete && (
+                            <button
+                              className="btn btn-sm btn-ghost text-error"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                actionHandlers.onDelete?.(row);
+                                setExpandedRow(null);
+                              }}
+                            >
+                              <AppIcons.delete className="w-4 h-4 text-error" />
+                              {t('shared.delete')}
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
                   )}
-                </tr>
+                </React.Fragment>
               ))
             )}
           </tbody>
@@ -165,7 +208,6 @@ export default function DataTable<T>({
               {footer}
             </tfoot>
           )}
-
         </table>
       </div>
     </div>
