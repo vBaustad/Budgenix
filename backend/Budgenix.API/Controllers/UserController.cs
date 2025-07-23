@@ -51,6 +51,13 @@ public class UserController : ControllerBase
         }
     }
 
+    [HttpGet("me/tier")]
+    public async Task<IActionResult> GetMySubscriptionTier()
+    {
+        var tier = await _userService.GetEffectiveSubscriptionTierAsync();
+        return Ok(new { tier });
+    }
+
 
     [HttpGet("me/currency")]
     public async Task<IActionResult> GetCurrency()

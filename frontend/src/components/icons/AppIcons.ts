@@ -48,6 +48,8 @@ import {
   Target,
   Layers,
   CheckCircle2,
+  Check,
+  X,
 
   // Organization / Tags
   Tag,
@@ -143,6 +145,8 @@ export const AppIcons = {
   categories: Layers,
   complete: CheckCircle2,
   landmark: Landmark,
+  check: Check,
+  x: X,
 
   // Organization
   tag: Tag,
