@@ -6,6 +6,8 @@ using Budgenix.Services.Audit;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using Budgenix.Services.Email;
+using System.Security.Claims;
 
 namespace Budgenix.Services.Admin
 {
@@ -15,17 +17,20 @@ namespace Budgenix.Services.Admin
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IAuditService _auditService;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IEmailService _emailService;
 
         public AdminService(
             BudgenixDbContext context,
             UserManager<ApplicationUser> userManager,
             IAuditService auditService,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            IEmailService emailService)
         {
             _context = context;
             _userManager = userManager;
             _auditService = auditService;
             _httpContextAccessor = httpContextAccessor;
+            _emailService = emailService;
         }
         public async Task<List<AdminUserDto>> GetAllUsersAsync()
         {
@@ -60,6 +65,8 @@ namespace Budgenix.Services.Admin
             var user = await _context.Users.FindAsync(id);
             if (user == null) throw new Exception("User not found");
 
+            var manualOverrides = await GetManualSubscriptionOverridesAsync(user.Id);
+
             var roles = await _userManager.GetRolesAsync(user);
 
             var expenses = await _context.Expenses.CountAsync(e => e.UserId == id);
@@ -67,7 +74,7 @@ namespace Budgenix.Services.Admin
             var budgets = await _context.Budgets.CountAsync(b => b.UserId == id);
             var goals = await _context.Goals.CountAsync(g => g.UserId == id);
             var recentLogs = await GetRecentUserActivityAsync(id);
-
+            
             return new AdminUserDetailsDto
             {
                 Id = user.Id,
@@ -94,8 +101,135 @@ namespace Budgenix.Services.Admin
                     Budgets = budgets,
                     Goals = goals
                 },
-                RecentActivity = recentLogs
+                RecentActivity = recentLogs,
+               
+                ManualOverrides = manualOverrides
             };
+        }
+
+
+        public async Task<bool> GrantManualSubscriptionAsync(GrantSubscriptionOverrideDto dto)
+        {
+            var user = await _userManager.FindByIdAsync(dto.UserId);
+            if (user == null)
+                throw new Exception("User not found");
+
+            var now = DateTime.UtcNow;
+            var adminId = GetCurrentUserId();
+
+            // Save override entry
+            var overrideEntry = new ManualSubscriptionOverride
+            {
+                UserId = user.Id,
+                Tier = dto.Tier,
+                StartDate = now,
+                EndDate = dto.EndDate,
+                CustomMessage = dto.CustomMessage,
+                SentEmail = dto.SendEmail,
+                CreatedByAdminId = adminId,
+                CreatedAt = now
+            };
+
+            _context.ManualSubscriptionOverrides.Add(overrideEntry);
+
+            // Update user subscription fields
+            user.SubscriptionTier = dto.Tier;
+            user.SubscriptionIsActive = true;
+            user.SubscriptionStartDate = now;
+            user.SubscriptionEndDate = dto.EndDate;
+            user.SubscriptionGracePeriodEnd = null;
+            user.IsTrial = false;
+            user.TrialEndDate = null;
+            user.DiscountPercent = null;
+            user.DiscountEndDate = null;
+
+            _context.Users.Update(user);
+
+            await _context.SaveChangesAsync();
+
+            await _auditService.LogAsync(
+                userId: adminId,
+                action: AuditActionEnum.AdminGrantManualSubscription,
+                entityType: nameof(ManualSubscriptionOverride),
+                entityId: overrideEntry.Id.ToString(),
+                targetUserId: user.Id,
+                newValues: JsonConvert.SerializeObject(overrideEntry),
+                metadata: "Admin granted manual subscription override"
+            );
+
+            if (dto.SendEmail)
+            {
+                await _emailService.SendSubscriptionGrantedEmailAsync(
+                    toEmail: user.Email,
+                    firstName: user.FirstName,
+                    tier: dto.Tier,
+                    endDate: dto.EndDate
+                );
+            }
+
+            return true;
+        }
+
+
+        public async Task<List<ManualSubscriptionOverrideDto>> GetManualSubscriptionOverridesAsync(string userId)
+        {
+            return await _context.ManualSubscriptionOverrides
+                .Where(o => o.UserId == userId)
+                .OrderByDescending(o => o.CreatedAt)
+                .Select(o => new ManualSubscriptionOverrideDto
+                {
+                    Id = o.Id,
+                    UserId = o.UserId,
+                    Tier = o.Tier,
+                    StartDate = o.StartDate,
+                    EndDate = o.EndDate,
+                    CustomMessage = o.CustomMessage,
+                    SentEmail = o.SentEmail,
+                    CreatedByAdminId = o.CreatedByAdminId,
+                    CreatedAt = o.CreatedAt
+                })
+                .ToListAsync();
+        }
+
+
+        public async Task<bool> RevokeManualSubscriptionAsync(Guid overrideId,string userId, string? reason = null)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+                throw new Exception("User not found");
+
+
+            var overrideEntry = await _context.ManualSubscriptionOverrides.FindAsync(overrideId);
+            if (overrideEntry == null)
+                throw new Exception("Override not found");
+
+            if (overrideEntry.UserId != user.Id)
+                throw new Exception("Override does not belong to the specified user.");
+
+
+            _context.ManualSubscriptionOverrides.Remove(overrideEntry);
+            await _context.SaveChangesAsync();
+
+            await _auditService.LogAsync(
+                userId: GetCurrentUserId(),
+                action: AuditActionEnum.AdminRevokeManualSubscription,
+                entityType: nameof(ManualSubscriptionOverride),
+                entityId: overrideEntry.Id.ToString(),
+                targetUserId: overrideEntry.UserId,
+                oldValues: JsonConvert.SerializeObject(overrideEntry),
+                metadata: $"Revoked by {GetCurrentUserId()}: {reason ?? "No message"}"
+
+            );
+
+            await _emailService.SendSubscriptionRevokedEmailAsync(
+                toEmail: user.Email,
+                firstName: user.FirstName,
+                tier: overrideEntry.Tier,
+                endDate: overrideEntry.EndDate
+            );
+
+
+            return true;
         }
 
 
@@ -217,7 +351,9 @@ namespace Budgenix.Services.Admin
 
         private string GetCurrentUserId()
         {
-            return _httpContextAccessor.HttpContext?.User?.FindFirst("sub")?.Value ?? "unknown";
+            var user = _httpContextAccessor.HttpContext?.User;
+            return user?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "unknown";
         }
+
     }
 }

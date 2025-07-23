@@ -1,7 +1,9 @@
-﻿using Budgenix.Dtos.Users;
+﻿using Budgenix.Data;
+using Budgenix.Dtos.Users;
 using Budgenix.Models.Shared;
 using Budgenix.Models.Users;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using System.Security.Claims;
 
@@ -12,13 +14,19 @@ namespace Budgenix.Services.User
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly IStringLocalizer<SharedResource> _localizer;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly BudgenixDbContext _context;
 
-        public UserService(IHttpContextAccessor contextAccessor, IStringLocalizer<SharedResource> localizer, UserManager<ApplicationUser> userManager)
+        public UserService(IHttpContextAccessor contextAccessor, IStringLocalizer<SharedResource> localizer, UserManager<ApplicationUser> userManager, BudgenixDbContext context)
         {
             _contextAccessor = contextAccessor;
             _localizer = localizer;
             _userManager = userManager;
+            _context = context;
         }
+
+        // -------------------------
+        // Context + Claims Access
+        // -------------------------
 
         public string GetUserId()
         {
@@ -38,6 +46,10 @@ namespace Budgenix.Services.User
             return await _userManager.GetUserAsync(_contextAccessor.HttpContext?.User);
         }
 
+        // -------------------------
+        // User Info / Profile
+        // -------------------------
+
         public async Task<UserDto?> GetUserDetailsAsync()
         {
             var user = await GetCurrentUserAsync();
@@ -45,6 +57,15 @@ namespace Budgenix.Services.User
 
             var roles = await _userManager.GetRolesAsync(user);
             var isAdmin = roles.Contains("Admin");
+
+            var now = DateTime.UtcNow;
+            var activeOverride = await _context.ManualSubscriptionOverrides
+                .Where(o => o.UserId == user.Id && o.StartDate <= now && o.EndDate > now)
+                .OrderByDescending(o => o.EndDate)
+                .FirstOrDefaultAsync();
+
+            var effectiveTier = activeOverride?.Tier ?? user.SubscriptionTier;
+
 
             return new UserDto
             {
@@ -59,7 +80,8 @@ namespace Budgenix.Services.User
                 StateOrProvince = user.StateOrProvince,
                 ZipOrPostalCode = user.ZipOrPostalCode,
                 Country = user.Country,
-                SubscriptionTier = user.SubscriptionTier,
+                SubscriptionTier = effectiveTier,
+                OverrideSubscriptionEndDate = activeOverride?.EndDate,
                 SubscriptionIsActive = user.SubscriptionIsActive,
                 SubscriptionStartDate = user.SubscriptionStartDate,
                 SubscriptionEndDate = user.SubscriptionEndDate,
@@ -87,6 +109,10 @@ namespace Budgenix.Services.User
             await _userManager.UpdateAsync(user);
         }
 
+        // -------------------------
+        // Password Management
+        // -------------------------
+
         public async Task ChangePasswordAsync(UpdatePasswordDto dto)
         {
             var user = await GetCurrentUserAsync();
@@ -101,6 +127,9 @@ namespace Budgenix.Services.User
             }
         }
 
+        // -------------------------
+        // Currency Preferences
+        // -------------------------
 
         public async Task<string> GetCurrencyAsync()
         {
@@ -115,6 +144,38 @@ namespace Budgenix.Services.User
 
             user.Currency = currency;
             await _userManager.UpdateAsync(user);
+        }
+
+        // -------------------------
+        // Subscription Overrides
+        // -------------------------
+
+        public async Task<SubscriptionTypeEnum> GetEffectiveSubscriptionTierAsync()
+        {
+            var user = await GetCurrentUserAsync();
+            if (user == null) throw new UnauthorizedAccessException();
+
+            var now = DateTime.UtcNow;
+
+            var activeOverride = await _context.ManualSubscriptionOverrides
+                .Where(o => o.UserId == user.Id && o.StartDate <= now && o.EndDate > now)
+                .OrderByDescending(o => o.EndDate)
+                .FirstOrDefaultAsync();
+
+            return activeOverride?.Tier ?? user.SubscriptionTier;
+        }
+
+        public async Task<SubscriptionTypeEnum> GetEffectiveSubscriptionTierAsync(string userId)
+        {
+            var now = DateTime.UtcNow;
+
+            var activeOverride = await _context.ManualSubscriptionOverrides
+                .Where(o => o.UserId == userId && o.StartDate <= now && o.EndDate > now)
+                .OrderByDescending(o => o.EndDate)
+                .FirstOrDefaultAsync();
+
+            var user = await _userManager.FindByIdAsync(userId);
+            return activeOverride?.Tier ?? user?.SubscriptionTier ?? SubscriptionTypeEnum.Free;
         }
     }
 }

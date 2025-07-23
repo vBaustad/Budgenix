@@ -32,6 +32,32 @@ namespace Budgenix.API.Controllers
             return Ok(await _adminService.GetUserDetailsAsync(id));
         }
 
+        [HttpPost("user/{id}/grant-subscription")]
+        public async Task<IActionResult> GrantManualSubscription(string id, [FromBody] GrantSubscriptionOverrideDto dto)
+        {
+            if (id != dto.UserId)
+                return BadRequest("User ID mismatch.");
+
+            var result = await _adminService.GrantManualSubscriptionAsync(dto);
+            return result ? Ok(new { message = "Subscription override granted." }) : BadRequest("Failed to grant override.");
+        }
+
+        [HttpGet("user/{id}/overrides")]
+        public async Task<IActionResult> GetUserOverrides(string id)
+        {
+            var overrides = await _adminService.GetManualSubscriptionOverridesAsync(id);
+            return Ok(overrides);
+        }
+
+        [HttpDelete("user/{userId}/override/{overrideId}")]
+        public async Task<IActionResult> RevokeManualSubscription(string userId, Guid overrideId, [FromQuery] string? reason)
+        {
+            var success = await _adminService.RevokeManualSubscriptionAsync(overrideId, reason);
+            return success ? Ok(new { message = "Override revoked" }) : BadRequest("Failed to revoke override");
+        }
+
+
+
         [HttpDelete("user/{id}")]
         public async Task<ActionResult<AdminDeleteResultDto>> DeleteUser(string id)
         {

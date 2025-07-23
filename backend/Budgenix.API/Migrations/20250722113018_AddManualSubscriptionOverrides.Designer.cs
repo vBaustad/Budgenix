@@ -4,6 +4,7 @@ using Budgenix.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Budgenix.API.Migrations
 {
     [DbContext(typeof(BudgenixDbContext))]
-    partial class BudgenixDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250722113018_AddManualSubscriptionOverrides")]
+    partial class AddManualSubscriptionOverrides
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -381,6 +384,9 @@ namespace Budgenix.API.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("GrantedByUserId")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<Guid?>("HouseholdId")
                         .HasColumnType("uniqueidentifier");
 
@@ -502,11 +508,11 @@ namespace Budgenix.API.Migrations
                     b.Property<string>("CreatedByAdminId")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("CustomMessage")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("Reason")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("SentEmail")
                         .HasColumnType("bit");

@@ -12,8 +12,10 @@ namespace Budgenix.Services.User
         Task UpdateUserAsync(UpdateUserDto dto);
         Task<string> GetCurrencyAsync();
         Task UpdateCurrencyAsync(string currency);
-
         Task ChangePasswordAsync(UpdatePasswordDto dto);
+        Task<SubscriptionTypeEnum> GetEffectiveSubscriptionTierAsync();
+        Task<SubscriptionTypeEnum> GetEffectiveSubscriptionTierAsync(string userId);
+
 
     }
 }

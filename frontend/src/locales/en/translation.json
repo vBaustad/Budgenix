@@ -580,7 +580,19 @@
             "noLogs": "No logs found.",
             "entity": "Entity",
             "id": "ID",
-            "error": "Error"        
+            "error": "Error",
+            "grantOverride": "Grant Subscription Override",
+            "activeOverride": "Active Override Until",
+            "sendEmail":"Send Email?",
+            "messagePlaceholder": "Optional message to include in email",
+            "grant": "Grant Access",
+            "revoke": "Revoke Access",
+            "overridden": "overridden",
+            "overrideGranted": "Override granted successfully.",
+            "overrideError": "Failed to grant override.",
+            "confirmRevoke": "Are you sure you want to revoke the active override?",
+            "overrideRevoked": "Subscription override revoked.",
+            "revokedByAdmin": "Revoked manually by admin"
         }
     },
     "categories": {

@@ -26,6 +26,7 @@ namespace Budgenix.Data
 
         public DbSet<SystemNotification> SystemNotifications { get; set; }
         public DbSet<UserNotificationRead> UserNotificationReads { get; set; }
+        public DbSet<ManualSubscriptionOverride> ManualSubscriptionOverrides { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder builder)

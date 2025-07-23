@@ -19,6 +19,8 @@ namespace Budgenix.Dtos.Users
         public bool SubscriptionIsActive { get; set; }
         public DateTime? SubscriptionStartDate { get; set; }
         public DateTime? SubscriptionEndDate { get; set; }
+        public DateTime? OverrideSubscriptionEndDate { get; set; }
+
         public BillingCycleEnum BillingCycle { get; set; }
         public string? ReferralCode { get; set; }
         public string Currency { get; set; } = "USD";

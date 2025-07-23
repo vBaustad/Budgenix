@@ -39,6 +39,8 @@
         AdminResetPassword,
         AdminPromoteToAdmin,
         AdminChangeSubscription,
+        AdminGrantManualSubscription,
+        AdminRevokeManualSubscription,
 
         // Authentication
         UserLogin,

@@ -68,8 +68,6 @@ namespace Budgenix.Models.Users
         [MaxLength(50)]
         public string? ReferralCode { get; set; }  // unique referral code for this user
 
-        public string? GrantedByUserId { get; set; }  // user ID of who granted tier manually
-
         // Household/group sharing (optional)
 
         public Guid? HouseholdId { get; set; }  // Optional
