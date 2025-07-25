@@ -47,16 +47,13 @@ const UserDetailsModal = ({ user, auditLogs, loading, onClose }: Props) => {
     }
   };
 
-  useEffect(() => {
-    console.log('[UserDetailsModal] Loaded user:', user);
-    console.log('[UserDetailsModal] manualOverrides:', user?.manualOverrides);
+  // useEffect(() => {
+  //   const sorted = [...(user?.manualOverrides ?? [])]
+  //     .sort((a, b) => new Date(b.endDate).getTime() - new Date(a.endDate).getTime());
 
-    const sorted = [...(user?.manualOverrides ?? [])]
-      .sort((a, b) => new Date(b.endDate).getTime() - new Date(a.endDate).getTime());
-
-    console.log('[UserDetailsModal] Sorted overrides:', sorted);
-    console.log('[UserDetailsModal] Latest override:', sorted[0]);
-  }, [user]);
+  //   console.log('[UserDetailsModal] Sorted overrides:', sorted);
+  //   console.log('[UserDetailsModal] Latest override:', sorted[0]);
+  // }, [user]);
 
 
   useEffect(() => {

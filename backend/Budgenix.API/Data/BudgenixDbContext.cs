@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Budgenix.Models.Audit;
 using Budgenix.Models.System;
+using Budgenix.Models.Learning;
 
 namespace Budgenix.Data
 {
@@ -27,6 +28,7 @@ namespace Budgenix.Data
         public DbSet<SystemNotification> SystemNotifications { get; set; }
         public DbSet<UserNotificationRead> UserNotificationReads { get; set; }
         public DbSet<ManualSubscriptionOverride> ManualSubscriptionOverrides { get; set; }
+        public DbSet<TransactionCorrection> TransactionCorrections { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder builder)

@@ -49,7 +49,7 @@ namespace Budgenix.Services.Finance
 
             var query = _context.Expenses
                 .Include(e => e.Category)
-                .Where(e => e.UserId == userId)
+                .Where(e => e.UserId == userId && !e.IsInternalTransfer)
                 .AsQueryable();
 
             if (from.HasValue)
@@ -81,18 +81,19 @@ namespace Budgenix.Services.Finance
                 Amount = e.Amount,
                 Date = e.Date,
                 CategoryName = e.Category?.Name,
-                CategoryId = e.CategoryId
+                CategoryId = e.CategoryId,
+                IsInternalTransfer = e.IsInternalTransfer,
             }).ToList();
         }
 
         public async Task<ExpenseDto?> GetExpenseByIdAsync(string userId, Guid id)
         {
             _logger.LogInformation("Fetching expense {Id} for user {UserId}", id, userId);
-            var e = await _context.Expenses
-                .Include(x => x.Category)
-                .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+            var expense = await _context.Expenses
+                .Include(e => e.Category)
+                .FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId);
 
-            if (e == null)
+            if (expense == null)
             {
                 _logger.LogWarning("Expense {Id} not found for user {UserId}", id, userId);
                 return null;
@@ -100,12 +101,13 @@ namespace Budgenix.Services.Finance
 
             return new ExpenseDto
             {
-                Id = e.Id,
-                Name = e.Name,
-                Amount = e.Amount,
-                Date = e.Date,
-                CategoryName = e.Category?.Name,
-                CategoryId = e.CategoryId
+                Id = expense.Id,
+                Name = expense.Name,
+                Amount = expense.Amount,
+                Date = expense.Date,
+                CategoryName = expense.Category?.Name,
+                CategoryId = expense.CategoryId,
+                IsInternalTransfer = expense.IsInternalTransfer,
             };
         }
 
@@ -120,8 +122,8 @@ namespace Budgenix.Services.Finance
 
             _logger.LogInformation("Calculating total expenses for user {UserId}", userId);
             var total = await _context.Expenses
-                .Where(x => x.UserId == userId)
-                .SumAsync(x => x.Amount);
+                .Where(e => e.UserId == userId && !e.IsInternalTransfer)
+                .SumAsync(e => e.Amount);
 
             _cache.Set(cacheKey, total, TimeSpan.FromMinutes(5));
             return total;
@@ -131,10 +133,10 @@ namespace Budgenix.Services.Finance
         {
             _logger.LogInformation("Fetching used categories for user {UserId}", userId);
             return await _context.Expenses
-                .Where(x => x.UserId == userId && x.Category != null)
-                .Select(x => x.Category!.Name)
+                .Where(e => e.UserId == userId && !e.IsInternalTransfer && e.Category != null)
+                .Select(e => e.Category!.Name)
                 .Distinct()
-                .OrderBy(x => x)
+                .OrderBy(e => e)
                 .ToListAsync();
         }
 
@@ -154,7 +156,7 @@ namespace Budgenix.Services.Finance
             var daysInMonth = DateTime.DaysInMonth(year, month);
 
             var expenses = await _context.Expenses
-                .Where(e => e.UserId == userId &&
+                .Where(e => e.UserId == userId && !e.IsInternalTransfer &&
                     ((e.Date.Year == year && e.Date.Month == month) ||
                      (e.Date.Year == lastMonth.Year && e.Date.Month == lastMonth.Month)))
                 .ToListAsync();
@@ -172,7 +174,7 @@ namespace Budgenix.Services.Finance
                 .Sum(e => e.Amount);
 
             var incomeReceived = await _context.Incomes
-                .Where(i => i.UserId == userId && i.Date.Year == year && i.Date.Month == month)
+                .Where(i => i.UserId == userId && !i.IsInternalTransfer && i.Date.Year == year && i.Date.Month == month)
                 .SumAsync(i => (decimal?)i.Amount) ?? 0;
 
             var expenseByDay = expenses
@@ -213,7 +215,7 @@ namespace Budgenix.Services.Finance
             if (category == null)
                 throw new InvalidOperationException("Invalid category ID provided");
 
-            var e = new Expense
+            var expense = new Expense
             {
                 Id = Guid.NewGuid(),
                 Name = dto.Name,
@@ -221,10 +223,11 @@ namespace Budgenix.Services.Finance
                 Date = dto.Date,
                 Description = dto.Description,
                 CategoryId = category.Id,
+                IsInternalTransfer = dto.IsInternalTransfer,
                 UserId = userId
             };
 
-            _context.Expenses.Add(e);
+            _context.Expenses.Add(expense);
             await _context.SaveChangesAsync();
 
             await _audit.LogAsync(new AuditLog
@@ -232,40 +235,42 @@ namespace Budgenix.Services.Finance
                 UserId = userId,
                 Action = AuditActionEnum.CreateExpense,
                 EntityType = "Expense",
-                EntityId = e.Id.ToString(),
-                NewValues = JsonSerializer.Serialize(e)
+                EntityId = expense.Id.ToString(),
+                NewValues = JsonSerializer.Serialize(expense)
             });
 
-            _cacheInvalidatorService.InvalidateExpenseOverview(userId, e.Date);
-            _cacheInvalidatorService.InvalidateDashboard(userId, e.Date);
+            _cacheInvalidatorService.InvalidateExpenseOverview(userId, expense.Date);
+            _cacheInvalidatorService.InvalidateDashboard(userId, expense.Date);
 
             return new ExpenseDto
             {
-                Id = e.Id,
-                Name = e.Name,
-                Amount = e.Amount,
-                Date = e.Date,
-                CategoryName = category.Name
+                Id = expense.Id,
+                Name = expense.Name,
+                Amount = expense.Amount,
+                Date = expense.Date,
+                CategoryName = category.Name,
+                IsInternalTransfer = expense.IsInternalTransfer,
             };
         }
 
         public async Task<bool> UpdateExpenseAsync(string userId, Guid id, UpdateExpenseDto dto)
         {
             _logger.LogInformation("Updating expense {Id} for user {UserId}", id, userId);
-            var e = await _context.Expenses.Include(x => x.Category).FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
-            if (e == null) return false;
+            var expense = await _context.Expenses.Include(x => x.Category).FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+            if (expense == null) return false;
 
             var categoryExists = await _context.Categories.AnyAsync(c => c.Id == dto.CategoryId);
             if (!categoryExists) throw new Exception("Invalid category");
 
-            var oldDate = e.Date;
-            var oldValues = JsonSerializer.Serialize(e);
+            var oldDate = expense.Date;
+            var oldValues = JsonSerializer.Serialize(expense);
 
-            e.Name = dto.Name;
-            e.Amount = dto.Amount;
-            e.Date = dto.Date;
-            e.Description = dto.Description;
-            e.CategoryId = dto.CategoryId;
+            expense.Name = dto.Name;
+            expense.Amount = dto.Amount;
+            expense.Date = dto.Date;
+            expense.Description = dto.Description;
+            expense.IsInternalTransfer = dto.IsInternalTransfer;
+            expense.CategoryId = dto.CategoryId;
 
             await _context.SaveChangesAsync();
 
@@ -274,14 +279,14 @@ namespace Budgenix.Services.Finance
                 UserId = userId,
                 Action = AuditActionEnum.UpdateExpense,
                 EntityType = "Expense",
-                EntityId = e.Id.ToString(),
+                EntityId = expense.Id.ToString(),
                 OldValues = oldValues,
-                NewValues = JsonSerializer.Serialize(e)
+                NewValues = JsonSerializer.Serialize(expense)
             });
 
             _cacheInvalidatorService.InvalidateExpenseOverview(userId, oldDate);
-            _cacheInvalidatorService.InvalidateExpenseOverview(userId, e.Date);
-            _cacheInvalidatorService.InvalidateDashboard(userId, e.Date);
+            _cacheInvalidatorService.InvalidateExpenseOverview(userId, expense.Date);
+            _cacheInvalidatorService.InvalidateDashboard(userId, expense.Date);
 
             return true;
         }
@@ -290,18 +295,18 @@ namespace Budgenix.Services.Finance
         {
             _logger.LogInformation("Deleting expense {Id} for user {UserId}", id, userId);
 
-            var e = await _context.Expenses
+            var expense = await _context.Expenses
                 .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
 
-            if (e == null)
+            if (expense == null)
             {
                 _logger.LogWarning("Expense {Id} not found for user {UserId}", id, userId);
                 return false;
             }
 
-            var oldValues = JsonSerializer.Serialize(e);
+            var oldValues = JsonSerializer.Serialize(expense);
 
-            _context.Expenses.Remove(e);
+            _context.Expenses.Remove(expense);
             await _context.SaveChangesAsync();
 
             await _audit.LogAsync(new AuditLog
@@ -309,12 +314,12 @@ namespace Budgenix.Services.Finance
                 UserId = userId,
                 Action = AuditActionEnum.DeleteExpense,
                 EntityType = "Expense",
-                EntityId = e.Id.ToString(),
+                EntityId = expense.Id.ToString(),
                 OldValues = oldValues
             });
 
-            _cacheInvalidatorService.InvalidateExpenseOverview(userId, e.Date);
-            _cacheInvalidatorService.InvalidateDashboard(userId, e.Date);
+            _cacheInvalidatorService.InvalidateExpenseOverview(userId, expense.Date);
+            _cacheInvalidatorService.InvalidateDashboard(userId, expense.Date);
 
             return true;
         }

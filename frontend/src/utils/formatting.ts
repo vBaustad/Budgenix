@@ -80,6 +80,12 @@ export const formatCurrency = (
 export const formatDate = (val: unknown): string =>
   val ? new Date(val as string).toLocaleDateString() : '–';
 
+export const formatDateInputValue = (date: Date | string): string => {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  return d.toISOString().split('T')[0]; // yyyy-MM-dd
+};
+
+
 export const truncateText = (
   val: string | number | null | undefined,
   max = 60

@@ -4,6 +4,7 @@ using Budgenix.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Budgenix.API.Migrations
 {
     [DbContext(typeof(BudgenixDbContext))]
-    partial class BudgenixDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250723195703_AddCreatedAtToTransactionCorrections")]
+    partial class AddCreatedAtToTransactionCorrections
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -162,9 +165,6 @@ namespace Budgenix.API.Migrations
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
-                    b.Property<bool>("IsInternalTransfer")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -249,9 +249,6 @@ namespace Budgenix.API.Migrations
                     b.Property<string>("Description")
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
-
-                    b.Property<bool>("IsInternalTransfer")
-                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()

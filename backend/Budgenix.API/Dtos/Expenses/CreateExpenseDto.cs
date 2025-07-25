@@ -22,6 +22,7 @@ namespace Budgenix.Dtos.Expenses
 
         [Required(ErrorMessage = "CategoryId is required")]
         public Guid CategoryId { get; set; }
+        public bool IsInternalTransfer { get; set; } = false;
 
         [StringLength(500, ErrorMessage = "Notes can't be longer than 500 characters")]
         public string? Notes { get; set; }
