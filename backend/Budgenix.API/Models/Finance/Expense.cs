@@ -23,6 +23,8 @@ namespace Budgenix.Models.Finance
         public Guid CategoryId { get; set; }
         [Required]
         public Category? Category { get; set; }
+        public bool IsInternalTransfer { get; set; } = false;
+
         [StringLength(500)]
         public string? Notes { get; set; }
 

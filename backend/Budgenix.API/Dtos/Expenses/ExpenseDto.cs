@@ -19,6 +19,8 @@ namespace Budgenix.Dtos.Expenses
         [Required]
         public required string CategoryName { get; set; }
         public Guid CategoryId { get; set; }
+        public bool IsInternalTransfer { get; set; } = false;
+
         public string? Notes { get; set; }
     }
 }

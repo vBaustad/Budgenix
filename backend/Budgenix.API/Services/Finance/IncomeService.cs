@@ -49,7 +49,7 @@ namespace Budgenix.Services.Finance
 
             var query = _context.Incomes
                 .Include(i => i.Category)
-                .Where(i => i.UserId == userId)
+                .Where(i => i.UserId == userId && !i.IsInternalTransfer)
                 .AsQueryable();
 
             if (from.HasValue)
@@ -81,18 +81,19 @@ namespace Budgenix.Services.Finance
                 Amount = i.Amount,
                 Date = i.Date,
                 CategoryName = i.Category?.Name,
-                CategoryId = i.CategoryId
+                CategoryId = i.CategoryId,
+                IsInternalTransfer = i.IsInternalTransfer,
             }).ToList();
         }
 
         public async Task<IncomeDto?> GetIncomeByIdAsync(string userId, Guid id)
         {
             _logger.LogInformation("Fetching income {Id} for user {UserId}", id, userId);
-            var i = await _context.Incomes
+            var income = await _context.Incomes
                 .Include(x => x.Category)
-                .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+                .FirstOrDefaultAsync(i => i.Id == id && i.UserId == userId);
 
-            if (i == null)
+            if (income == null)
             {
                 _logger.LogWarning("Income {Id} not found for user {UserId}", id, userId);
                 return null;
@@ -100,12 +101,13 @@ namespace Budgenix.Services.Finance
 
             return new IncomeDto
             {
-                Id = i.Id,
-                Name = i.Name,
-                Amount = i.Amount,
-                Date = i.Date,
-                CategoryName = i.Category?.Name,
-                CategoryId = i.CategoryId
+                Id = income.Id,
+                Name = income.Name,
+                Amount = income.Amount,
+                Date = income.Date,
+                CategoryName = income.Category?.Name,
+                CategoryId = income.CategoryId,
+                IsInternalTransfer = income.IsInternalTransfer,
             };
         }
 
@@ -120,8 +122,8 @@ namespace Budgenix.Services.Finance
 
             _logger.LogInformation("Calculating total income for user {UserId}", userId);
             var total = await _context.Incomes
-                .Where(x => x.UserId == userId)
-                .SumAsync(x => x.Amount);
+                .Where(i => i.UserId == userId && !i.IsInternalTransfer)
+                .SumAsync(i => i.Amount);
 
             _cache.Set(cacheKey, total, TimeSpan.FromMinutes(5));
             return total;
@@ -131,10 +133,10 @@ namespace Budgenix.Services.Finance
         {
             _logger.LogInformation("Fetching used income categories for user {UserId}", userId);
             return await _context.Incomes
-                .Where(x => x.UserId == userId && x.Category != null)
-                .Select(x => x.Category!.Name)
+                .Where(i => i.UserId == userId && !i.IsInternalTransfer && i.Category != null)
+                .Select(i => i.Category!.Name)
                 .Distinct()
-                .OrderBy(x => x)
+                .OrderBy(i => i)
                 .ToListAsync();
         }
 
@@ -146,7 +148,7 @@ namespace Budgenix.Services.Finance
 
             var incomes = await _context.Incomes
                 .Include(i => i.Category)
-                .Where(i => i.UserId == userId && i.Date >= start && i.Category != null)
+                .Where(i => i.UserId == userId && !i.IsInternalTransfer && i.Date >= start && i.Category != null)
                 .ToListAsync();
 
             var summary = incomes
@@ -183,7 +185,7 @@ namespace Budgenix.Services.Finance
             var lastMonth = firstOfMonth.AddMonths(-1);
 
             var incomes = await _context.Incomes
-                .Where(i => i.UserId == userId &&
+                .Where(i => i.UserId == userId && !i.IsInternalTransfer &&
                     (i.Date.Year == year && i.Date.Month == month ||
                      i.Date.Year == lastMonth.Year && i.Date.Month == lastMonth.Month))
                 .ToListAsync();
@@ -247,7 +249,7 @@ namespace Budgenix.Services.Finance
             if (category == null)
                 throw new InvalidOperationException("Invalid category ID provided");
 
-            var i = new Income
+            var income = new Income
             {
                 Id = Guid.NewGuid(),
                 Name = dto.Name,
@@ -255,25 +257,27 @@ namespace Budgenix.Services.Finance
                 Date = dto.Date,
                 Description = dto.Description,
                 CategoryId = category.Id,
+                IsInternalTransfer = dto.IsInternalTransfer,
                 UserId = userId
             };
 
-            _context.Incomes.Add(i);
+            _context.Incomes.Add(income);
             await _context.SaveChangesAsync();
 
-            await _audit.LogAsync(userId, AuditActionEnum.CreateIncome, "Income", i.Id.ToString(), null, JsonSerializer.Serialize(i));
+            await _audit.LogAsync(userId, AuditActionEnum.CreateIncome, "Income", income.Id.ToString(), null, JsonSerializer.Serialize(income));
 
-            _cacheInvalidatorService.InvalidateIncomeOverview(userId, i.Date);
-            _cacheInvalidatorService.InvalidateDashboard(userId, i.Date);
+            _cacheInvalidatorService.InvalidateIncomeOverview(userId, income.Date);
+            _cacheInvalidatorService.InvalidateDashboard(userId, income.Date);
 
             return new IncomeDto
             {
-                Id = i.Id,
-                Name = i.Name,
-                Amount = i.Amount,
-                Date = i.Date,
+                Id = income.Id,
+                Name = income.Name,
+                Amount = income.Amount,
+                Date = income.Date,
                 CategoryId = category.Id,
-                CategoryName = category.Name
+                CategoryName = category.Name,
+                IsInternalTransfer = income.IsInternalTransfer,
             };
         }
 
@@ -281,27 +285,30 @@ namespace Budgenix.Services.Finance
         {
             _logger.LogInformation("Updating income {Id} for user {UserId}", id, userId);
 
-            var i = await _context.Incomes.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
-            if (i == null) return false;
+            var income = await _context.Incomes.FirstOrDefaultAsync(i => i.Id == id && i.UserId == userId);
+            if (income == null) return false;
 
             var categoryExists = await _context.Categories.AnyAsync(c => c.Id == dto.CategoryId);
             if (!categoryExists)
                 throw new InvalidOperationException("Invalid category ID provided");
 
-            var oldValues = JsonSerializer.Serialize(i);
+            var oldDate = income.Date;
+            var oldValues = JsonSerializer.Serialize(income);
 
-            i.Name = dto.Name;
-            i.Amount = dto.Amount;
-            i.Date = dto.Date;
-            i.Description = dto.Description;
-            i.CategoryId = dto.CategoryId;
+            income.Name = dto.Name;
+            income.Amount = dto.Amount;
+            income.Date = dto.Date;
+            income.Description = dto.Description;
+            income.IsInternalTransfer = dto.IsInternalTransfer;
+            income.CategoryId = dto.CategoryId;
 
             await _context.SaveChangesAsync();
 
-            await _audit.LogAsync(userId, AuditActionEnum.UpdateIncome, "Income", i.Id.ToString(), oldValues, JsonSerializer.Serialize(i));
+            await _audit.LogAsync(userId, AuditActionEnum.UpdateIncome, "Income", income.Id.ToString(), oldValues, JsonSerializer.Serialize(income));
 
-            _cacheInvalidatorService.InvalidateIncomeOverview(userId, i.Date);
-            _cacheInvalidatorService.InvalidateDashboard(userId, i.Date);
+            _cacheInvalidatorService.InvalidateExpenseOverview(userId, oldDate);
+            _cacheInvalidatorService.InvalidateIncomeOverview(userId, income.Date);
+            _cacheInvalidatorService.InvalidateDashboard(userId, income.Date);
 
             return true;
         }
@@ -310,18 +317,18 @@ namespace Budgenix.Services.Finance
         {
             _logger.LogInformation("Deleting income {Id} for user {UserId}", id, userId);
 
-            var i = await _context.Incomes.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
-            if (i == null) return false;
+            var income = await _context.Incomes.FirstOrDefaultAsync(i => i.Id == id && i.UserId == userId);
+            if (income == null) return false;
 
-            var oldValues = JsonSerializer.Serialize(i);
+            var oldValues = JsonSerializer.Serialize(income);
 
-            _context.Incomes.Remove(i);
+            _context.Incomes.Remove(income);
             await _context.SaveChangesAsync();
 
-            await _audit.LogAsync(userId, AuditActionEnum.DeleteIncome, "Income", i.Id.ToString(), oldValues, null);
+            await _audit.LogAsync(userId, AuditActionEnum.DeleteIncome, "Income", income.Id.ToString(), oldValues, null);
 
-            _cacheInvalidatorService.InvalidateIncomeOverview(userId, i.Date);
-            _cacheInvalidatorService.InvalidateDashboard(userId, i.Date);
+            _cacheInvalidatorService.InvalidateIncomeOverview(userId, income.Date);
+            _cacheInvalidatorService.InvalidateDashboard(userId, income.Date);
 
             return true;
         }
