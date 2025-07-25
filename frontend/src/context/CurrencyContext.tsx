@@ -21,9 +21,8 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   );
   
   useEffect(() => {
-    console.log('[CurrencyProvider] useEffect: user?.currency =', user?.currency);
+    
     if (user?.currency && user.currency !== currency) {
-      console.log('[CurrencyProvider] Setting localCurrency from user.currency');
       setLocalCurrency(user.currency);
     }
   }, [user?.currency]);

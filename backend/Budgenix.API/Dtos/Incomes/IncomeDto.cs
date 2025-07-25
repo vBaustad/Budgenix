@@ -16,6 +16,8 @@ namespace Budgenix.Dtos.Incomes
         [Required]
         public required string CategoryName { get; set; }
         public Guid CategoryId { get; set; }
+        public bool IsInternalTransfer { get; set; } = false;
+
         public string? Notes { get; set; }
     }
 }

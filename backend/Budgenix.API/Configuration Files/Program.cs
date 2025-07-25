@@ -26,6 +26,8 @@ using Budgenix.Services.User;
 using Budgenix.Services.System;
 using Budgenix.Services.Email;
 using Budgenix.Services.Shared;
+using Budgenix.Services.Learning;
+using Budgenix.Services.BankStatements.Banks;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -70,6 +72,10 @@ builder.Services.AddScoped<IGoalService, GoalService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IAuditService, AuditService>();
 builder.Services.AddScoped<ISystemNotificationsService, SystemNotificationsService>();
+builder.Services.AddScoped<ITransactionCorrectionService, TransactionCorrectionService>();
+builder.Services.AddScoped<IBankStatementService, BankStatementService>();
+builder.Services.AddScoped<Sparebank1BankParser>(); // since it uses constructor DI
+
 
 builder.Services.AddSingleton<ICacheInvalidatorService, CacheInvalidatorService>();
 

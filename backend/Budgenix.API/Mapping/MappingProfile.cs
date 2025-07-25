@@ -22,7 +22,9 @@ namespace Budgenix.Mapping
 
             //Income mappings
             CreateMap<Income, IncomeDto>()
-                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name));
+                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
+                .ForMember(dest => dest.IsInternalTransfer, opt => opt.MapFrom(src => src.IsInternalTransfer));
+
 
             CreateMap<CreateIncomeDto, Income>();
             CreateMap<UpdateIncomeDto, Income>();
@@ -30,7 +32,9 @@ namespace Budgenix.Mapping
 
             //Expense mappings
             CreateMap<Expense, ExpenseDto>()
-                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name));
+                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
+                .ForMember(dest => dest.IsInternalTransfer, opt => opt.MapFrom(src => src.IsInternalTransfer));
+
 
             CreateMap<CreateExpenseDto, Expense>();
             CreateMap<UpdateExpenseDto, Expense>();
