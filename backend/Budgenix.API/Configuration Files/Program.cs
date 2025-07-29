@@ -28,6 +28,8 @@ using Budgenix.Services.Email;
 using Budgenix.Services.Shared;
 using Budgenix.Services.Learning;
 using Budgenix.Services.BankStatements.Banks;
+using Budgenix.Services.BankStatements.NameSuggester;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -58,6 +60,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddHttpClient();
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<RecurringItemService>();
@@ -74,7 +77,9 @@ builder.Services.AddScoped<IAuditService, AuditService>();
 builder.Services.AddScoped<ISystemNotificationsService, SystemNotificationsService>();
 builder.Services.AddScoped<ITransactionCorrectionService, TransactionCorrectionService>();
 builder.Services.AddScoped<IBankStatementService, BankStatementService>();
-builder.Services.AddScoped<Sparebank1BankParser>(); // since it uses constructor DI
+builder.Services.AddScoped<Sparebank1BankParser>();
+builder.Services.AddScoped<INameSuggesterService, AiNameSuggesterService>();
+
 
 
 builder.Services.AddSingleton<ICacheInvalidatorService, CacheInvalidatorService>();
@@ -83,6 +88,7 @@ builder.Services.AddSingleton<ICacheInvalidatorService, CacheInvalidatorService>
 builder.Services.AddInsightRules();
 builder.Services.AddTransient<NextOccurrenceResolver>();
 builder.Services.AddAutoMapper(typeof(MappingProfile));
+
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<BudgenixDbContext>()

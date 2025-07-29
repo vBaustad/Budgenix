@@ -6,6 +6,10 @@
         "cashflowV1": {
             "title": "New Cashflow Page!",
             "message": "You can now track your income and expenses side-by-side in a single view.\n\nQuickly compare monthly and annual totals, breakdowns, and more!"
+        },
+        "bankImportV1": {
+            "title": "Bank Import Is Here!",
+            "message": "You can now upload your SpareBank 1 PDF statements and automatically extract transactions with category and AI name suggestions.\n\nReview everything before importing."
         }
     },        
     "systemNotifications": {

@@ -5,6 +5,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 import { TextItem } from 'pdfjs-dist/types/src/display/api';
 import { ParsedTransactionDto } from '../types/bankStatements';
 import ReviewParsedTransactionsModal from './ReviewParsedTransactionsModal';
+import Sparebank1Logo from '@/assets/Images/Sparebank1Logo.png';
 
 interface BankImportModalProps {
   open: boolean;
@@ -85,31 +86,40 @@ export default function BankImportModal({ open, onClose }: BankImportModalProps)
     }
   };
 
-  const handleReviewSave = (updated: ParsedTransactionDto[]) => {
-    console.log('Saving parsed transactions:', updated);
-    // TODO: Save to real backend here
-    setShowReview(false);
-    setParsedTransactions(null);
-    onClose();
-  };
-
   if (!open) return null;
 
   return (
     <>
       <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-        <div className="bg-base-100 p-6 rounded-lg shadow-xl w-full max-w-lg">
-          <h2 className="text-xl font-bold">Import Bank Statement (Sparebank1)</h2>
-          <p className="text-base-content/70 text-xs italic mb-4"> This is in a testing phase. it will not be imported just yet, but you can get a preview</p>
+        <div className="bg-base-100 p-6 rounded-lg shadow-xl w-full max-w-sm sm:max-w-md flex flex-col space-y-4">
+          {/* Title */}
+          <div className="text-center">
+            <h2 className="text-xl font-bold">Import Bank Statement</h2>
+            <p className="text-sm text-base-content/70">
+              Upload a PDF file to automatically parse your transactions.
+            </p>
+          </div>
 
+          {/* File input */}
           <input
             type="file"
             accept=".pdf"
             onChange={(e) => setFile(e.target.files?.[0] || null)}
-            className="file-input w-full mb-4"
+            className="file-input w-full"
           />
 
-          <div className="flex justify-end gap-2">
+          {/* Supported bank visual */}
+          <div className="flex items-center justify-center gap-2 border border-base-300 rounded-md p-2 bg-base-200 text-xs text-base-content/70">
+            <img
+              src={Sparebank1Logo}
+              alt="SpareBank 1 Logo"
+              className="h-5 w-auto opacity-80"
+            />
+            <span>SpareBank 1 supported</span>
+          </div>
+
+          {/* Buttons */}
+          <div className="flex justify-end gap-2 pt-2">
             <button className="btn btn-sm btn-outline" onClick={onClose} disabled={loading}>
               Cancel
             </button>
@@ -123,8 +133,11 @@ export default function BankImportModal({ open, onClose }: BankImportModalProps)
       {showReview && parsedTransactions && (
         <ReviewParsedTransactionsModal
           transactions={parsedTransactions}
-          onClose={() => setShowReview(false)}
-          onSave={handleReviewSave}
+          onClose={() => {
+            setShowReview(false);
+            setParsedTransactions(null);
+            onClose();
+          }}
         />
       )}
     </>

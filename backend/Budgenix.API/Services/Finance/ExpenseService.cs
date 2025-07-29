@@ -1,4 +1,4 @@
-﻿using Budgenix.Data;
+using Budgenix.Data;
 using Budgenix.Dtos.Expenses;
 using Budgenix.Dtos.Recurring;
 using Budgenix.Models.Finance;
@@ -11,6 +11,7 @@ using Budgenix.Models.Audit;
 using Budgenix.Services.Audit;
 using System.Text.Json;
 using Budgenix.Services.Shared;
+using Budgenix.Services.BankStatements.NameSuggester;
 
 namespace Budgenix.Services.Finance
 {
@@ -19,6 +20,7 @@ namespace Budgenix.Services.Finance
         private readonly BudgenixDbContext _context;
         private readonly ILogger<ExpenseService> _logger;
         private readonly RecurringItemService _recurringService;
+        private readonly INameSuggesterService _nameSuggesterService;
         private readonly IMemoryCache _cache;
         private readonly IAuditService _audit;
         private readonly ICacheInvalidatorService _cacheInvalidatorService;
@@ -28,7 +30,8 @@ namespace Budgenix.Services.Finance
             RecurringItemService recurringService,
             IMemoryCache cache,
             IAuditService audit,
-            ICacheInvalidatorService cacheInvalidatorService)
+            ICacheInvalidatorService cacheInvalidatorService,
+            INameSuggesterService nameSuggesterService)
         {
             _context = context;
             _logger = logger;
@@ -36,6 +39,7 @@ namespace Budgenix.Services.Finance
             _cache = cache;
             _audit = audit;
             _cacheInvalidatorService = cacheInvalidatorService;
+            _nameSuggesterService = nameSuggesterService;
         }
 
         public async Task<List<ExpenseDto>> GetExpensesAsync(
@@ -48,6 +52,7 @@ namespace Budgenix.Services.Finance
             _logger.LogInformation("Fetching expenses for user {UserId}", userId);
 
             var query = _context.Expenses
+                .AsNoTracking()
                 .Include(e => e.Category)
                 .Where(e => e.UserId == userId && !e.IsInternalTransfer)
                 .AsQueryable();
@@ -90,6 +95,7 @@ namespace Budgenix.Services.Finance
         {
             _logger.LogInformation("Fetching expense {Id} for user {UserId}", id, userId);
             var expense = await _context.Expenses
+                .AsNoTracking()
                 .Include(e => e.Category)
                 .FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId);
 
@@ -122,6 +128,7 @@ namespace Budgenix.Services.Finance
 
             _logger.LogInformation("Calculating total expenses for user {UserId}", userId);
             var total = await _context.Expenses
+                .AsNoTracking()
                 .Where(e => e.UserId == userId && !e.IsInternalTransfer)
                 .SumAsync(e => e.Amount);
 
@@ -133,6 +140,7 @@ namespace Budgenix.Services.Finance
         {
             _logger.LogInformation("Fetching used categories for user {UserId}", userId);
             return await _context.Expenses
+                .AsNoTracking()
                 .Where(e => e.UserId == userId && !e.IsInternalTransfer && e.Category != null)
                 .Select(e => e.Category!.Name)
                 .Distinct()
@@ -156,6 +164,7 @@ namespace Budgenix.Services.Finance
             var daysInMonth = DateTime.DaysInMonth(year, month);
 
             var expenses = await _context.Expenses
+                .AsNoTracking()
                 .Where(e => e.UserId == userId && !e.IsInternalTransfer &&
                     ((e.Date.Year == year && e.Date.Month == month) ||
                      (e.Date.Year == lastMonth.Year && e.Date.Month == lastMonth.Month)))
@@ -174,6 +183,7 @@ namespace Budgenix.Services.Finance
                 .Sum(e => e.Amount);
 
             var incomeReceived = await _context.Incomes
+                .AsNoTracking()
                 .Where(i => i.UserId == userId && !i.IsInternalTransfer && i.Date.Year == year && i.Date.Month == month)
                 .SumAsync(i => (decimal?)i.Amount) ?? 0;
 
@@ -213,7 +223,46 @@ namespace Budgenix.Services.Finance
                 .FirstOrDefaultAsync();
 
             if (category == null)
-                throw new InvalidOperationException("Invalid category ID provided");
+            {
+                _logger.LogWarning("Invalid category ID {CategoryId} provided. Falling back to 'Miscellaneous'.", dto.CategoryId);
+
+                category = await _context.Categories
+                    .Where(c => c.Name == "Miscellaneous")
+                    .Select(c => new { c.Id, c.Name })
+                    .FirstOrDefaultAsync();
+
+                if (category == null)
+                    throw new InvalidOperationException("Fallback category 'Miscellaneous' not found.");
+            }
+
+            var exist = await _context.Expenses.AnyAsync(e =>
+                e.Amount == dto.Amount &&
+                e.Date == dto.Date &&
+                (e.Description ?? "").ToLower().Trim() == (dto.Description ?? "").ToLower().Trim() &&
+                e.IsInternalTransfer == dto.IsInternalTransfer &&
+                e.CategoryId == category.Id &&
+                e.UserId == userId
+            );
+
+            if (exist)
+            {
+                _logger.LogWarning("Duplicate expense detected. Skipping insert for user {UserId}: {Name}, {Amount}, {Date}", userId, dto.Name, dto.Amount, dto.Date);
+                return null;
+            }
+
+            if (dto.Name?.Trim().Equals("[auto] Imported transaction", StringComparison.OrdinalIgnoreCase) == true
+                && !string.IsNullOrWhiteSpace(dto.Description))
+            {
+                try
+                {
+                    dto.Name = await _nameSuggesterService.SuggestNameAsync(dto.Description);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to generate AI name for income. Using fallback.");
+                    // Keep fallback name
+                }
+            }
 
             var expense = new Expense
             {
@@ -248,6 +297,7 @@ namespace Budgenix.Services.Finance
                 Name = expense.Name,
                 Amount = expense.Amount,
                 Date = expense.Date,
+                CategoryId = category.Id,
                 CategoryName = category.Name,
                 IsInternalTransfer = expense.IsInternalTransfer,
             };
@@ -260,7 +310,12 @@ namespace Budgenix.Services.Finance
             if (expense == null) return false;
 
             var categoryExists = await _context.Categories.AnyAsync(c => c.Id == dto.CategoryId);
-            if (!categoryExists) throw new Exception("Invalid category");
+            if (!categoryExists)
+            {
+                _logger.LogWarning("Invalid category ID {CategoryId} provided during update of expense {Id}", dto.CategoryId, id);
+                throw new InvalidOperationException("Invalid category ID provided");
+            }
+
 
             var oldDate = expense.Date;
             var oldValues = JsonSerializer.Serialize(expense);
