@@ -31,6 +31,7 @@
     "react-hot-toast": "^2.5.2",
     "react-i18next": "^15.5.1",
     "react-router-dom": "^7.5.3",
+    "react-virtuoso": "^4.13.0",
     "recharts": "^2.15.3",
     "tailwind-merge": "^3.3.1"
   },
@@ -39,6 +40,7 @@
     "@types/node": "^22.15.21",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
+    "@types/react-window": "^1.8.8",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.21",
     "daisyui": "^5.0.35",

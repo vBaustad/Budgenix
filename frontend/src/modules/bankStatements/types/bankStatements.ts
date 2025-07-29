@@ -17,3 +17,12 @@ export enum BankTransactionType {
   Purchase = 'Purchase',
   TransferOut = 'TransferOut'
 }
+
+export interface ImportSummaryDto {
+  totalReceived: number;
+  importedIncomes: number;
+  importedExpenses: number;
+  skipped: number;
+  aiNamesGenerated: number;
+  warnings: string[];
+}

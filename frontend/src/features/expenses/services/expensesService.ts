@@ -7,6 +7,7 @@ import {
 import { apiFetch } from '@/utils/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
+import { invalidateFinanceCache } from '@/utils/invalidateFinanceCache';
 
 type FetchExpenseOptions = {
   from?: string;
@@ -141,18 +142,8 @@ export function useCreateExpense() {
 
   return useMutation({
     mutationFn: createExpenseApi,
-    onSuccess: (createdExpense) => {
-      const date = new Date(createdExpense.date);
-      const month = date.getMonth() + 1;      
-      const year = date.getFullYear();
-
-      const lastMonth = month === 1 ? 12 : month - 1;
-      const lastMonthYear = month === 1 ? year - 1 : year;
-
-      queryClient.invalidateQueries({ queryKey: ['expenses'] });
-      queryClient.invalidateQueries({queryKey: ['expensesOverview', month, year]});
-      queryClient.invalidateQueries({queryKey: ['expensesOverview', lastMonth, lastMonthYear]});
-      queryClient.invalidateQueries({queryKey: ['dashboardSummary', month, year]});
+    onSuccess: () => {
+      invalidateFinanceCache(queryClient, 6);
     },
   });
 }
@@ -162,18 +153,8 @@ export function useUpdateExpense() {
 
   return useMutation({
     mutationFn: (payload: { id: string; data: UpdateExpenseDto }) => updateExpenseApi(payload),
-      onSuccess: (updatedExpense) => {
-        const date = new Date(updatedExpense.date);
-        const month = date.getMonth() + 1;
-        const year = date.getFullYear();
-
-        const lastMonth = month === 1 ? 12 : month - 1;
-        const lastMonthYear = month === 1 ? year - 1 : year;
-
-        queryClient.invalidateQueries({ queryKey: ['expenses'] });
-        queryClient.invalidateQueries({ queryKey: ['expensesOverview', month, year] });
-        queryClient.invalidateQueries({ queryKey: ['expensesOverview', lastMonth, lastMonthYear] });
-        queryClient.invalidateQueries({ queryKey: ['dashboardSummary', month, year] });
+      onSuccess: () => {
+        invalidateFinanceCache(queryClient, 6);
       },
   });
 }
@@ -183,18 +164,8 @@ export function useDeleteExpense() {
 
   return useMutation({
     mutationFn: deleteExpenseApi,
-    onSuccess: (_, { date }) => {
-      const d = new Date(date);
-      const month = d.getMonth() + 1;
-      const year = d.getFullYear();
-      const lastMonth = month === 1 ? 12 : month - 1;
-      const lastMonthYear = month === 1 ? year - 1 : year;
-
-      queryClient.invalidateQueries({ queryKey: ['expenses'] });
-      queryClient.invalidateQueries({ queryKey: ['expensesOverview', month, year] });
-      queryClient.invalidateQueries({ queryKey: ['expensesOverview', lastMonth, lastMonthYear] });
-      queryClient.invalidateQueries({ queryKey: ['dashboardSummary', month, year] });
-      queryClient.invalidateQueries({ queryKey: ['dashboardSummary', lastMonth, lastMonthYear] });
+    onSuccess: () => {
+      invalidateFinanceCache(queryClient, 6);
     },
   });
 }

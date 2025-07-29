@@ -3,6 +3,8 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { ParsedTransactionDto } from '../types/bankStatements';
 import { uploadBankStatement, fetchParsedTransactions } from '../services/bankStatementService';
+import { ImportSummaryDto } from '../types/bankStatements';
+import { importParsedTransactions } from '../services/bankStatementService';
 
 export const BankStatementsQueryKeys = {
   parsed: ['bankStatements', 'parsed'] as const,
@@ -23,3 +25,9 @@ export const useUploadBankStatement = () => {
   });
 };
 
+export const useImportParsedTransactions = () => {
+  return useMutation({
+    mutationFn: (transactions: ParsedTransactionDto[]): Promise<ImportSummaryDto> =>
+      importParsedTransactions(transactions),
+  });
+};

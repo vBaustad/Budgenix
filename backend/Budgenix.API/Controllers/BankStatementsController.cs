@@ -23,14 +23,21 @@ namespace Budgenix.API.Controllers
         [HttpPost("upload")]
         public async Task<ActionResult<List<ParsedTransactionDto>>> Upload([FromBody] UploadBankStatementDto dto)
         {
-            Console.WriteLine($"[UPLOAD] Bank: {dto.Bank}, Text: {(dto.Text?.Length ?? 0)} chars");
-
             var userId = _userService.GetUserId();
             var result = await _service.ParseAsync(dto.Text, userId, dto.Bank);
-
-            Console.WriteLine($"[UPLOAD] Parsed {result.Count} transactions");
-
             return Ok(result);
         }
+
+        [HttpPost("import")]
+        public async Task<ActionResult<ImportSummaryDto>> Import([FromBody] List<ParsedTransactionDto> transactions)
+        {
+            if (transactions == null || !transactions.Any())
+                return BadRequest("No transactions provided.");
+
+            var userId = _userService.GetUserId();
+            var summary = await _service.ImportParsedTransactionsAsync(transactions, userId);
+            return Ok(summary);
+        }
     }
+
 }

@@ -9,6 +9,8 @@ import {
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useDateFilter } from '@/context/DateFilterContext';
 import { useAuth } from '@/context/AuthContext';
+import { invalidateFinanceCache } from '@/utils/invalidateFinanceCache';
+
 
 type FetchIncomeOptions = {
   from?: string;
@@ -118,21 +120,8 @@ export function useCreateIncome() {
 
   return useMutation({
     mutationFn: createIncomeApi,
-    onSuccess: (createdIncome) => {
-
-      const date = new Date(createdIncome.date);
-      const month = date.getMonth() + 1;      
-      const year = date.getFullYear();
-
-      const lastMonth = month === 1 ? 12 : month - 1;
-      const lastMonthYear = month === 1 ? year - 1 : year;
-
-
-      queryClient.invalidateQueries({ queryKey: ['incomes'] });
-      queryClient.invalidateQueries({ queryKey: ['incomeOverview', month, year] });
-      queryClient.invalidateQueries({ queryKey: ['incomeMonthlySummary', month, year]});
-      queryClient.invalidateQueries({ queryKey: ['incomeMonthlySummary', lastMonth, lastMonthYear]});
-      queryClient.invalidateQueries({ queryKey: ['dashboardSummary', month, year]})
+    onSuccess: () => {
+      invalidateFinanceCache(queryClient, 6);
     },
   });
 }
@@ -142,19 +131,8 @@ export function useUpdateIncome() {
 
   return useMutation({
     mutationFn: (payload: { id: string; data: UpdateIncomeDto }) => updateIncomeApi(payload),
-    onSuccess: (updateIncome) => {
-        const date = new Date(updateIncome.date);
-        const month = date.getMonth() + 1;
-        const year = date.getFullYear();
-
-        const lastMonth = month === 1 ? 12 : month - 1;
-        const lastMonthYear = month === 1 ? year - 1 : year;
-
-      queryClient.invalidateQueries({ queryKey: ['incomes'] });
-      queryClient.invalidateQueries({ queryKey: ['incomeOverview', month, year] });
-      queryClient.invalidateQueries({ queryKey: ['incomeMonthlySummary', month, year]});
-      queryClient.invalidateQueries({ queryKey: ['incomeMonthlySummary', lastMonth, lastMonthYear]});
-      queryClient.invalidateQueries({ queryKey: ['dashboardSummary', month, year]})
+    onSuccess: () => {
+        invalidateFinanceCache(queryClient, 6);
     },
   });
 }
@@ -167,19 +145,8 @@ export function useDeleteIncome() {
       await deleteIncomeApi(id);
       return date;
     },
-    onSuccess: (deletedDate) => {
-      const date = new Date(deletedDate);
-      const month = date.getMonth() + 1;
-      const year = date.getFullYear();
-
-      const lastMonth = month === 1 ? 12 : month - 1;
-      const lastMonthYear = month === 1 ? year - 1 : year;
-
-      queryClient.invalidateQueries({ queryKey: ['incomes'] });
-      queryClient.invalidateQueries({ queryKey: ['incomeOverview', month, year] });
-      queryClient.invalidateQueries({ queryKey: ['incomeMonthlySummary', month, year] });
-      queryClient.invalidateQueries({ queryKey: ['incomeMonthlySummary', lastMonth, lastMonthYear] });
-      queryClient.invalidateQueries({ queryKey: ['dashboardSummary', month, year] });
+    onSuccess: () => {
+      invalidateFinanceCache(queryClient, 6);
     },
   });
 }

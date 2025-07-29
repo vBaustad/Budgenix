@@ -5,6 +5,7 @@ using Budgenix.Models.Audit;
 using Budgenix.Models.Finance;
 using Budgenix.Models.Shared;
 using Budgenix.Services.Audit;
+using Budgenix.Services.BankStatements.NameSuggester;
 using Budgenix.Services.Recurring;
 using Budgenix.Services.Shared;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +20,7 @@ namespace Budgenix.Services.Finance
         private readonly BudgenixDbContext _context;
         private readonly ILogger<IncomeService> _logger;
         private readonly RecurringItemService _recurringService;
+        private readonly INameSuggesterService _nameSuggesterService;
         private readonly IMemoryCache _cache;
         private readonly IAuditService _audit;
         private readonly ICacheInvalidatorService _cacheInvalidatorService;
@@ -28,7 +30,9 @@ namespace Budgenix.Services.Finance
             ILogger<IncomeService> logger,
             RecurringItemService recurringService,
             IMemoryCache cache,
-            IAuditService audit, ICacheInvalidatorService cacheInvalidatorService)
+            IAuditService audit, 
+            ICacheInvalidatorService cacheInvalidatorService,
+            INameSuggesterService nameSuggesterService)
         {
             _context = context;
             _logger = logger;
@@ -36,6 +40,7 @@ namespace Budgenix.Services.Finance
             _cache = cache;
             _audit = audit;
             _cacheInvalidatorService = cacheInvalidatorService;
+            _nameSuggesterService = nameSuggesterService;
         }
 
         public async Task<List<IncomeDto>> GetIncomesAsync(
@@ -48,6 +53,7 @@ namespace Budgenix.Services.Finance
             _logger.LogInformation("Fetching incomes for user {UserId}", userId);
 
             var query = _context.Incomes
+                .AsNoTracking()
                 .Include(i => i.Category)
                 .Where(i => i.UserId == userId && !i.IsInternalTransfer)
                 .AsQueryable();
@@ -90,6 +96,7 @@ namespace Budgenix.Services.Finance
         {
             _logger.LogInformation("Fetching income {Id} for user {UserId}", id, userId);
             var income = await _context.Incomes
+                .AsNoTracking()
                 .Include(x => x.Category)
                 .FirstOrDefaultAsync(i => i.Id == id && i.UserId == userId);
 
@@ -133,6 +140,7 @@ namespace Budgenix.Services.Finance
         {
             _logger.LogInformation("Fetching used income categories for user {UserId}", userId);
             return await _context.Incomes
+                .AsNoTracking()
                 .Where(i => i.UserId == userId && !i.IsInternalTransfer && i.Category != null)
                 .Select(i => i.Category!.Name)
                 .Distinct()
@@ -147,6 +155,7 @@ namespace Budgenix.Services.Finance
             var start = DateTime.UtcNow.Date.AddMonths(-months + 1);
 
             var incomes = await _context.Incomes
+                .AsNoTracking()
                 .Include(i => i.Category)
                 .Where(i => i.UserId == userId && !i.IsInternalTransfer && i.Date >= start && i.Category != null)
                 .ToListAsync();
@@ -185,6 +194,7 @@ namespace Budgenix.Services.Finance
             var lastMonth = firstOfMonth.AddMonths(-1);
 
             var incomes = await _context.Incomes
+                .AsNoTracking()
                 .Where(i => i.UserId == userId && !i.IsInternalTransfer &&
                     (i.Date.Year == year && i.Date.Month == month ||
                      i.Date.Year == lastMonth.Year && i.Date.Month == lastMonth.Month))
@@ -209,6 +219,7 @@ namespace Budgenix.Services.Finance
                 .ToList();
                
                 var monthlySums = await _context.Incomes
+                    .AsNoTracking()
                     .Where(i => i.UserId == userId && i.Date.Year == year)
                     .GroupBy(i => i.Date.Month)
                     .Select(g => new
@@ -247,7 +258,47 @@ namespace Budgenix.Services.Finance
                 .FirstOrDefaultAsync();
 
             if (category == null)
-                throw new InvalidOperationException("Invalid category ID provided");
+            {
+                _logger.LogWarning("Invalid category ID {CategoryId} provided. Falling back to 'Miscellaneous'.", dto.CategoryId);
+
+                category = await _context.Categories
+                    .Where(c => c.Name == "Miscellaneous")
+                    .Select(c => new { c.Id, c.Name })
+                    .FirstOrDefaultAsync();
+
+                if (category == null)
+                    throw new InvalidOperationException("Fallback category 'Miscellaneous' not found.");
+            }
+
+            var exist = await _context.Incomes.AnyAsync(i =>
+                i.Amount == dto.Amount &&
+                i.Date == dto.Date &&
+                (i.Description ?? "").ToLower().Trim() == (dto.Description ?? "").ToLower().Trim() &&
+                i.IsInternalTransfer == dto.IsInternalTransfer &&
+                i.CategoryId == category.Id &&
+                i.UserId == userId
+);
+
+            if (exist)
+            {
+                _logger.LogWarning("Duplicate income detected. Skipping insert for user {UserId}: {Name}, {Amount}, {Date}", userId, dto.Name, dto.Amount, dto.Date);
+                return null;
+            }
+
+            if (dto.Name?.Trim().Equals("[auto] Imported transaction", StringComparison.OrdinalIgnoreCase) == true
+                && !string.IsNullOrWhiteSpace(dto.Description))
+            {
+                try
+                {
+                    dto.Name = await _nameSuggesterService.SuggestNameAsync(dto.Description);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to generate AI name for income. Using fallback.");
+                    // Keep fallback name
+                }
+            }
+
 
             var income = new Income
             {
@@ -264,7 +315,14 @@ namespace Budgenix.Services.Finance
             _context.Incomes.Add(income);
             await _context.SaveChangesAsync();
 
-            await _audit.LogAsync(userId, AuditActionEnum.CreateIncome, "Income", income.Id.ToString(), null, JsonSerializer.Serialize(income));
+            await _audit.LogAsync(new AuditLog
+            {
+                UserId = userId,
+                Action = AuditActionEnum.CreateIncome,
+                EntityType = "Income",
+                EntityId = income.Id.ToString(),
+                NewValues = JsonSerializer.Serialize(income)
+            });
 
             _cacheInvalidatorService.InvalidateIncomeOverview(userId, income.Date);
             _cacheInvalidatorService.InvalidateDashboard(userId, income.Date);
