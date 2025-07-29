@@ -1,4 +1,4 @@
-﻿using Budgenix.Data;
+using Budgenix.Data;
 using Budgenix.Dtos.Expenses;
 using Budgenix.Dtos.Recurring;
 using Budgenix.Models.Finance;
@@ -94,7 +94,6 @@ namespace Budgenix.Services.Finance
         public async Task<ExpenseDto?> GetExpenseByIdAsync(string userId, Guid id)
         {
             _logger.LogInformation("Fetching expense {Id} for user {UserId}", id, userId);
-
             var expense = await _context.Expenses
                 .AsNoTracking()
                 .Include(e => e.Category)

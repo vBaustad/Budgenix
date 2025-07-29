@@ -7,7 +7,6 @@ import { ParsedTransactionDto } from '../types/bankStatements';
 import ReviewParsedTransactionsModal from './ReviewParsedTransactionsModal';
 import Sparebank1Logo from '@/assets/Images/Sparebank1Logo.png';
 
-
 interface BankImportModalProps {
   open: boolean;
   onClose: () => void;

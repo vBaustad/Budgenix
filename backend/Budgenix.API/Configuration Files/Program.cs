@@ -81,6 +81,7 @@ builder.Services.AddScoped<Sparebank1BankParser>();
 builder.Services.AddScoped<INameSuggesterService, AiNameSuggesterService>();
 
 
+
 builder.Services.AddSingleton<ICacheInvalidatorService, CacheInvalidatorService>();
 
 

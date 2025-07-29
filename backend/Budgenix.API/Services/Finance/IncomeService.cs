@@ -298,8 +298,7 @@ namespace Budgenix.Services.Finance
                     // Keep fallback name
                 }
             }
-
-
+            
             var income = new Income
             {
                 Id = Guid.NewGuid(),

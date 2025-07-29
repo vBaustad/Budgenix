@@ -1,4 +1,4 @@
-﻿using Budgenix.Data;
+using Budgenix.Data;
 using Budgenix.Dtos.BankStatements;
 using Budgenix.Dtos.Expenses;
 using Budgenix.Dtos.Incomes;
@@ -26,6 +26,7 @@ namespace Budgenix.Services.BankStatements.Banks
             _expenseService = expenseService;
             _incomeService = incomeService;
             _logger = logger;
+
         }
 
         public async Task<List<ParsedTransactionDto>> ParseAsync(string extractedText, string userId, string bank)
@@ -38,7 +39,6 @@ namespace Budgenix.Services.BankStatements.Banks
 
             return await parser.ParseAsync(extractedText, userId);
         }
-
         public async Task<ImportSummaryDto> ImportParsedTransactionsAsync(List<ParsedTransactionDto> transactions, string userId)
         {
             int importedIncome = 0;

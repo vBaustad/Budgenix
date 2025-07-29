@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { invalidateFinanceCache } from '@/utils/invalidateFinanceCache';
 
+
 interface Props {
   transactions: ParsedTransactionDto[];
   onClose: () => void;
@@ -89,6 +90,7 @@ export default function ReviewParsedTransactionsModal({ transactions, onClose }:
       </div>
     );
   }
+
 
   const updateField = <K extends keyof ParsedTransactionDto>(
     index: number,
@@ -370,4 +372,3 @@ export default function ReviewParsedTransactionsModal({ transactions, onClose }:
     </div>
   );
 }
-

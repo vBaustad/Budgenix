@@ -6,6 +6,7 @@ import { uploadBankStatement, fetchParsedTransactions } from '../services/bankSt
 import { ImportSummaryDto } from '../types/bankStatements';
 import { importParsedTransactions } from '../services/bankStatementService';
 
+
 export const BankStatementsQueryKeys = {
   parsed: ['bankStatements', 'parsed'] as const,
 };
@@ -31,3 +32,4 @@ export const useImportParsedTransactions = () => {
       importParsedTransactions(transactions),
   });
 };
+

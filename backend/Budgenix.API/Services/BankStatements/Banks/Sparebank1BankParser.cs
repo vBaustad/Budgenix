@@ -1,4 +1,4 @@
-﻿using Budgenix.Dtos.BankStatements;
+using Budgenix.Dtos.BankStatements;
 using Budgenix.Models.BankStatements;
 using Budgenix.Services.BankStatements.Banks;
 using Budgenix.Services.Learning;
@@ -6,6 +6,7 @@ using Budgenix.Helpers.BankStatements;
 using Budgenix.Data;
 using System.Globalization;
 using System.Text.RegularExpressions;
+
 
 public class Sparebank1BankParser : IBankStatementParser
 {
@@ -25,6 +26,7 @@ public class Sparebank1BankParser : IBankStatementParser
         var lines = extractedText
             .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .ToList();
+
 
         // 1. Trim everything before and including "Saldo fra kontoutskrift"
         int startIdx = lines.FindIndex(l => l.Contains("Saldo fra kontoutskrift"));
@@ -125,6 +127,7 @@ public class Sparebank1BankParser : IBankStatementParser
                     category = TransactionCategorizer.GuessCategory(description);
                 }
 
+
                 transactions.Add(new ParsedTransactionDto
                 {
                     Description = description,
@@ -139,6 +142,7 @@ public class Sparebank1BankParser : IBankStatementParser
             catch
             {
                 // Log if needed
+
             }
         }
 
