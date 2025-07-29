@@ -102,7 +102,7 @@ export default function ReviewParsedTransactionsModal({ transactions, onClose }:
     });
   };
 
-  const renderRow = (index: number, item: { tx: ParsedTransactionDto; index: number }) => {
+  const renderRow = (_: number, item: { tx: ParsedTransactionDto; index: number }) => {
     const { tx, index: originalIndex } = item;
 
     return (
